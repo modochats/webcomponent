@@ -1,0 +1,31 @@
+{
+  "name": "modo-web-component",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/src/app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/app.ts",
+    "static": "tsx src/app.ts",
+    "compile": "npx tsc --noCheck",
+    "minify": "node scripts/terser-minify.js",
+    "build": "yarn compile && yarn minify",
+    "render": "yarn && yarn build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ofetch": "^1.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "terser": "^5.39.0",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6"
+  },
+  "imports": {
+    "#src/*": "./dist/src/*",
+    "#root/*": "./dist/*"
+  }
+}

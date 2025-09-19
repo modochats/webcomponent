@@ -2,7 +2,7 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 
 export default {
-  input: "dist/app.js", // Use compiled TypeScript output
+  input: "dist/src/app.js", // Use compiled TypeScript output
   output: {
     file: "temp/app.dev.js",
     format: "iife", // Better for browser development

@@ -21,7 +21,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ofetch": "^1.4.1"
+    "ofetch": "^1.4.1",
+    "tldts": "^7.0.14"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",

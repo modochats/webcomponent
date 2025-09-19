@@ -1,4 +1,7 @@
-const color = {
-  primary: "#e786ff"
+const COLOR = {
+  PRIMARY: "#e786ff"
 };
-export {color};
+
+const BASE_API_URL = "https://api.modochats.com";
+
+export {COLOR, BASE_API_URL};

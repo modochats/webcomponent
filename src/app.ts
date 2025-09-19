@@ -1,55 +1,51 @@
-import {color} from "./constants/index.js";
-import {ofetch} from "ofetch";
-import {getDocumentHead} from "./utils/browser.js";
+import {loadTailwindCss} from "./services/styles.js";
+import {registerListeners} from "./services/listener.js";
+import {ModoChatOptions} from "./types/app.js";
+import {ModoPublicData} from "./models/modo-public-data.js";
+import {fetchModoPublicData} from "./utils/fetch.js";
+import {checkIfHostIsAllowed} from "./services/auth.js";
 
-class ModoChat extends HTMLElement {
-  async connectedCallback() {
-    ofetch("ssss");
-    this.textContent = "Start Chat";
-    let body = document.createElement("div");
-    this.appendChild(body);
+class ModoChat {
+  container?: HTMLDivElement;
+  publicKey: string;
+  publicData?: ModoPublicData;
 
-    this.innerHTML = `
-    <div class="chat-inner relative">
-    <div class="chat-body bg-white border w-[250px] h-[400px] bottom-[60px] right-8 hidden absolute rounded-xl" >${body.textContent}</div>
-    <span>
-    Start Chat
-    </span>
-    </div>
-    `;
-    loadTailwindCss();
-    initEvents(this);
+  constructor(publicKey: string, options?: ModoChatOptions) {
+    this.publicKey = publicKey;
+
+    // this.container = document.createElement("div");
+    // this.container.textContent = "Start Chat";
+    // document.body.appendChild(this.container);
+
+    // let conBody = document.createElement("div");
+    // this.container.appendChild(conBody);
+
+    // this.container.innerHTML = `
+    // <div class="chat-inner relative">
+    // <div class="chat-body bg-white border w-[250px] h-[400px] bottom-[60px] right-8 hidden absolute rounded-xl" >${conBody.textContent}</div>
+    // <span>
+    // Start Chat
+    // </span>
+    // </div>
+    // `;
+    // loadTailwindCss();
+    // registerListeners(this.container);
+  }
+  async init() {
+    try {
+      const publicDataRes = await fetchModoPublicData(this.publicKey);
+      this.publicData = new ModoPublicData(publicDataRes);
+      if (checkIfHostIsAllowed(this)) {
+      } else {
+        console.error("Domain not allowed");
+      }
+    } catch {
+      console.error("Failed to initialize ModoChat");
+    }
   }
 }
 
-let initEvents = (element: HTMLElement) => {
-  let chatBody = element.querySelector(".chat-body");
-  let isBodyOpen = false;
+// @ts-ignore
+window.ModoChat = ModoChat;
 
-  element.addEventListener(
-    "click",
-    () => {
-      isBodyOpen = !isBodyOpen;
-
-      chatBody?.classList.toggle("hidden");
-    },
-    {capture: false}
-  );
-  chatBody?.addEventListener(
-    "click",
-    e => {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-    },
-    {capture: true}
-  );
-};
-
-let loadTailwindCss = () => {
-  let scriptTag = document.createElement("script");
-
-  scriptTag.src = "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4";
-
-  getDocumentHead().appendChild(scriptTag);
-};
-customElements.define("modo-chat", ModoChat);
+export type {ModoChat};

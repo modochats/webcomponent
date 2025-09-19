@@ -6,10 +6,14 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/app.ts",
+    "dev:ts": "tsc --watch --noCheck",
+    "dev:rollup": "rollup --config rollup.dev.config.js --watch",
+    "dev:server": "live-server temp --port=3000 --entry-file=dev.html",
+    "dev:full": "concurrently \"yarn dev:ts\" \"yarn dev:rollup\" \"yarn dev:server\" --names \"tsc,rollup,server\" --prefix name --kill-others",
     "static": "tsx src/app.ts",
     "compile": "npx tsc --noCheck",
     "minify": "node scripts/terser-minify.js",
-    "rollup": "rollup dist/app.js --file bundle.js --format cjs",
+    "rollup": "rollup --config rollup.config.js",
     "build": "yarn compile && yarn minify && yarn rollup",
     "render": "yarn && yarn build"
   },
@@ -20,11 +24,16 @@
     "ofetch": "^1.4.1"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.4",
     "@types/node": "^22.13.10",
+    "concurrently": "^9.2.1",
+    "live-server": "^1.2.2",
     "rollup": "^4.42.0",
     "terser": "^5.39.0",
     "tsx": "^3.12.7",
-    "typescript": "^5.1.6"
+    "typescript": "^5.9.2"
   },
   "imports": {
     "#src/*": "./dist/src/*",

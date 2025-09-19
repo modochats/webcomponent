@@ -1,4 +1,4 @@
-const colors = {
+const color = {
   primary: "#e786ff"
 };
-export {colors};
+export {color};

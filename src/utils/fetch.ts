@@ -3,4 +3,30 @@ import {$fetch} from "#src/tools/fetch.js";
 const fetchModoPublicData = async (publicKey: string) => {
   return await $fetch<Record<string, any>>(`/v1/chatbot/public/${publicKey}`);
 };
-export {fetchModoPublicData};
+
+const fetchSendMessage = async (chatbotId: number, content: string, uniqueId: string, conversationUuid?: string) => {
+  return await $fetch("/v2/conversations/website/send-message/", {
+    method: "POST",
+    body: {
+      chatbot_id: chatbotId,
+      content: content,
+      message_type: 0,
+      unique_id: uniqueId,
+      conversation_id: conversationUuid ? conversationUuid : undefined
+    }
+  });
+};
+const fetchGetAccessTokenForSocket = async (chatbotId: string, conversationUuid: string, uniqueId: string) => {
+  return await $fetch<{access_token: string; conversation_uuid: string; expires_in: number}>("/v2/conversations/websocket/auth/", {
+    method: "POST",
+    body: {
+      chatbot_id: chatbotId,
+      conversation_uuid: conversationUuid,
+      unique_id: uniqueId
+    }
+  });
+};
+const fetchConversationMessages = async (conversationUuid: string, chatbotUuid: string) => {
+  return await $fetch<Record<string, any>>(`/v2/conversations/website/conversations/${conversationUuid}/chatbot/${chatbotUuid}/messages/`);
+};
+export {fetchModoPublicData, fetchSendMessage, fetchGetAccessTokenForSocket, fetchConversationMessages};

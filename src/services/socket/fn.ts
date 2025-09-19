@@ -1,0 +1,2 @@
+const initSocket = () => {};
+export {initSocket};

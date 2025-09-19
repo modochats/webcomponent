@@ -8,7 +8,7 @@ class ModoPublicData {
     createdAt: string;
     updatedAt: string;
     deletedAt: string | null;
-    uniqueId: string;
+    uuid: string;
     allowedHosts: string[];
     chatbot: number;
   };
@@ -22,7 +22,7 @@ class ModoPublicData {
       createdAt: data.setting.created_at,
       updatedAt: data.setting.updated_at,
       deletedAt: data.setting.deleted_at,
-      uniqueId: data.setting.unique_id,
+      uuid: data.setting.unique_id,
       allowedHosts: data.setting.allow_hosts?.split(","),
       chatbot: data.setting.chatbot
     };

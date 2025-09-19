@@ -12,6 +12,17 @@ class Conversation {
   }
   addMessage(init: Record<string, any>) {
     this.messages.push(new ConversationMessage(init));
+    const chatMessagesContainer = document.querySelector(".chat-messages-con");
+    if (chatMessagesContainer) {
+      const messageElement = document.createElement("div");
+      const latestMessage = this.messages[this.messages.length - 1];
+      messageElement.textContent = init.content;
+
+      messageElement.className = `p-3 mb-2 rounded-lg max-w-xs break-words ${
+        latestMessage.messageType === "USER" ? "bg-blue-500 text-white ml-auto" : "bg-gray-200 text-gray-800"
+      }`;
+      chatMessagesContainer.appendChild(messageElement);
+    }
   }
 }
 class ConversationMessage {

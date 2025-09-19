@@ -8,7 +8,6 @@ const sendMessage = async (message: string) => {
   if (message.trim().length) {
     if (checkIfUserHasUniqueId()) {
       const modoInstance = window.modoChatInstance?.();
-      console.log(modoInstance);
       try {
         const sendMsgRes = await fetchSendMessage(
           modoInstance?.publicData?.setting.chatbot as number,
@@ -16,6 +15,7 @@ const sendMessage = async (message: string) => {
           modoInstance?.userData.uniqueId as string,
           modoInstance?.conversation?.uuid
         );
+
         if (modoInstance) {
           if (modoInstance?.conversation?.uuid) {
             modoInstance.conversation.addMessage(sendMsgRes);
@@ -39,7 +39,7 @@ const sendMessage = async (message: string) => {
           console.error("ModoChat instance not found");
         }
       } catch {}
-    }
+    } else throw new Error("message not send , user uniqueId not found");
   }
 };
 

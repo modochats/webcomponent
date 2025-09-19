@@ -23,18 +23,35 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
 const registerSendMessageListener = (modoContainer: HTMLDivElement) => {
   const chatInput = modoContainer.querySelector(".chat-input") as HTMLInputElement;
   const sendMessageBtn = modoContainer.querySelector(".send-message-btn") as HTMLButtonElement;
+
+  let isDisabled = false;
+  function toggleDisabled() {
+    isDisabled = !isDisabled;
+    chatInput.disabled = isDisabled;
+    sendMessageBtn.disabled = isDisabled;
+  }
+
   chatInput.addEventListener("keydown", e => {
     if (e.key === "Enter") {
       e.preventDefault();
       const message = chatInput.value;
-      sendMessage(message);
+      toggleDisabled();
+      sendMessage(message)
+        .then(() => {
+          chatInput.value = "";
+        })
+        .finally(toggleDisabled);
     }
   });
   sendMessageBtn.addEventListener("click", e => {
     e.preventDefault();
-    console.log(e);
     const message = chatInput.value;
-    sendMessage(message);
+    toggleDisabled();
+    sendMessage(message)
+      .then(() => {
+        chatInput.value = "";
+      })
+      .finally(toggleDisabled);
   });
 };
 

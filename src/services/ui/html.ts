@@ -14,7 +14,8 @@ const createChatContainer = (modo: ModoChat) => {
   <div class="chat-body  hidden absolute  bottom-[60px] right-8" >
 
   <div class="relative rounded-xl bg-white border w-[250px] h-[400px] ">
-
+  <div class="flex flex-col h-[calc(100%-120px)] border chat-messages-con p-4 overflow-y-auto">
+  </div>
 
   <div class="w-[90%] mx-[5%] absolute bottom-4 ">
   <input type="text" placeholder="Type your message..." class="chat-input p-3 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 border ">
@@ -25,7 +26,6 @@ const createChatContainer = (modo: ModoChat) => {
 
 
 
-  // unique id form view
 <div class="form-overlay hidden absolute inset-0 bg-white rounded-xl z-10">
     <div class="p-4 h-full flex flex-col">
         <h3 class="text-lg font-medium mb-4">Contact Information</h3>

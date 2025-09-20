@@ -4,4 +4,5 @@ const COLOR = {
 
 const BASE_API_URL = "https://api.modochats.com";
 
-export {COLOR, BASE_API_URL};
+const BASE_WEBSOCKET_URL = "wss://api.modochats.com/ws";
+export {COLOR, BASE_API_URL, BASE_WEBSOCKET_URL};

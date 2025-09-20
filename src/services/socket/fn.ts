@@ -1,2 +1,0 @@
-const initSocket = () => {};
-export {initSocket};

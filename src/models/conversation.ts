@@ -1,3 +1,5 @@
+import {switchToConversationLayout, switchToStarterLayout} from "#src/services/ui/fn.js";
+
 class Conversation {
   id: number;
   uuid: string;
@@ -9,6 +11,7 @@ class Conversation {
     this.uuid = init.uuid;
     this.chatbot = init.chatbot;
     this.unreadMessageCount = init.unread_messages_count;
+    this.onInit();
   }
   addMessage(init: Record<string, any>) {
     this.messages.push(new ConversationMessage(init));
@@ -19,22 +22,36 @@ class Conversation {
       messageElement.textContent = init.content;
 
       messageElement.className = `p-3 mb-2 rounded-lg max-w-xs break-words ${
-        latestMessage.messageType === "USER" ? "bg-blue-500 text-white ml-auto" : "bg-gray-200 text-gray-800"
+        latestMessage.type === "USER" ? "bg-blue-500 text-white ml-auto" : "bg-gray-200 text-gray-800"
       }`;
       chatMessagesContainer.appendChild(messageElement);
     }
+  }
+
+  clear() {
+    this.messages = [];
+    const modoInstance = window.modoChatInstance?.();
+    localStorage.removeItem(`modo-chat:${modoInstance?.publicKey}-conversation-uuid`);
+    const chatMessagesContainer = document.querySelector(".chat-messages-con");
+    if (chatMessagesContainer) {
+      chatMessagesContainer.innerHTML = "";
+    }
+    switchToStarterLayout();
+  }
+  onInit() {
+    switchToConversationLayout();
   }
 }
 class ConversationMessage {
   id: number;
   content: string;
-  messageType: "USER" | "SUPPORTER";
+  type: "USER" | "SUPPORTER";
   createdAt: string;
   constructor(init: Record<string, any>) {
     this.id = init.id;
     this.content = init.content;
-    if (init.message_type === 0) this.messageType = "USER";
-    else this.messageType = "SUPPORTER";
+    if (init.message_type === 0) this.type = "USER";
+    else this.type = "SUPPORTER";
     this.createdAt = init.created_at;
   }
 }

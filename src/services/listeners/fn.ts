@@ -1,8 +1,7 @@
-import {ModoChat} from "#src/app.js";
 import {PhoneNumberRegex} from "#src/constants/regex.js";
-import {Conversation} from "#src/models/modo-conversation.js";
-import {fetchGetAccessTokenForSocket, fetchSendMessage} from "#src/utils/fetch.js";
-import {initSocket} from "../socket/fn.js";
+import {Conversation} from "#src/models/conversation.js";
+import {fetchSendMessage} from "#src/utils/fetch.js";
+import {initSocket} from "../socket/socket.js";
 
 const sendMessage = async (message: string) => {
   if (message.trim().length) {
@@ -21,19 +20,9 @@ const sendMessage = async (message: string) => {
             modoInstance.conversation.addMessage(sendMsgRes);
           } else {
             modoInstance.conversation = new Conversation(sendMsgRes.conversation);
-            modoInstance.conversation.addMessage(sendMsgRes);
-            localStorage.setItem(`modo-chat:${modoInstance.publicKey}-conversation-uuid`, modoInstance.conversation.uuid);
-            try {
-              const accessTokenRes = await fetchGetAccessTokenForSocket(
-                modoInstance.publicData?.setting.uuid as string,
-                modoInstance.conversation.uuid,
-                modoInstance.userData.uniqueId as string
-              );
-              localStorage.setItem(`modo-chat:${modoInstance.publicKey}-conversation-access-token`, accessTokenRes.access_token);
-              initSocket();
-            } catch (err) {
-              console.error("failed to get access token");
-            }
+            modoInstance.conversation?.addMessage(sendMsgRes);
+            localStorage.setItem(`modo-chat:${modoInstance.publicKey}-conversation-uuid`, modoInstance.conversation?.uuid as string);
+            await initSocket();
           }
         } else {
           console.error("ModoChat instance not found");
@@ -66,4 +55,18 @@ const submitUniqueIdForm = (uniqueId: string) => {
     alert("Invalid phone number format.");
   }
 };
-export {sendMessage, submitUniqueIdForm};
+
+const clearConversation = () => {
+  const modoInstance = window.modoChatInstance?.();
+  if (modoInstance) {
+    modoInstance.conversation = undefined;
+    modoInstance.socket?.close();
+    modoInstance.socket = undefined;
+
+    localStorage.removeItem(`modo-chat:${modoInstance.publicKey}-conversation-uuid`);
+  }
+};
+
+
+
+export {sendMessage, submitUniqueIdForm, clearConversation};

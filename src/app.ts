@@ -4,7 +4,9 @@ import {fetchModoPublicData} from "./utils/fetch.js";
 import {checkIfHostIsAllowed, checkIfUserHasConversation} from "./services/checker.js";
 import {createChatContainer} from "./services/ui/html.js";
 import {UserData} from "./models/user-data.js";
-import {ConversationMessage, Conversation} from "./models/modo-conversation.js";
+import {Conversation} from "./models/conversation.js";
+import {Socket} from "./services/socket/socket.js";
+import {loadStarters} from "./services/ui/fn.js";
 
 class ModoChat {
   container?: HTMLDivElement;
@@ -12,6 +14,8 @@ class ModoChat {
   publicData?: ModoPublicData;
   userData: UserData;
   conversation?: Conversation;
+  socket?: Socket;
+
   constructor(publicKey: string, options?: ModoChatOptions) {
     this.publicKey = publicKey;
     this.userData = new UserData(this);
@@ -24,6 +28,7 @@ class ModoChat {
         createChatContainer(this);
         window.modoChatInstance = () => this;
         checkIfUserHasConversation(this);
+        loadStarters();
       } else {
         console.error("Domain not allowed");
       }

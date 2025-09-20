@@ -18,6 +18,7 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
 
   registerSendMessageListener(modoContainer);
   registerUniqueIdFormListeners(modoContainer);
+  registerNewConversationListener(modoContainer);
 };
 
 const registerSendMessageListener = (modoContainer: HTMLDivElement) => {
@@ -69,4 +70,13 @@ const registerUniqueIdFormListeners = (modoContainer: HTMLDivElement) => {
   });
 };
 
-export {registerListeners};
+const registerNewConversationListener = (modoContainer: HTMLDivElement) => {
+  const newBtn = modoContainer.querySelector(".new-conversation-btn") as HTMLButtonElement;
+
+  newBtn.addEventListener("click", () => {
+    const modoInstance = window.modoChatInstance?.();
+    modoInstance?.conversation?.clear();
+  });
+};
+
+export {registerListeners, registerNewConversationListener};

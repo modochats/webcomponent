@@ -26,6 +26,7 @@ class ModoChat {
       primaryColor: options?.primaryColor || "#667eea",
       title: options?.title || "Modo"
     };
+    this.init();
   }
   async init() {
     try {

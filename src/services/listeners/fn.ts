@@ -39,7 +39,11 @@ const checkIfUserHasUniqueId = () => {
 };
 
 const switchToUniqueIdFormView = () => {
-  window.modoChatInstance?.().container?.querySelector(".form-overlay")?.classList.remove("hidden");
+  const formOverlay = window.modoChatInstance?.().container?.querySelector(".form-overlay");
+  if (formOverlay) {
+    formOverlay.classList.remove("hidden");
+    formOverlay.classList.add("active");
+  }
 };
 const submitUniqueIdForm = (uniqueId: string) => {
   if (PhoneNumberRegex.test(uniqueId)) {
@@ -47,12 +51,16 @@ const submitUniqueIdForm = (uniqueId: string) => {
     if (modoChat) {
       modoChat.userData.uniqueId = uniqueId;
       localStorage.setItem(`modo-chat:${modoChat.publicKey}-user-unique-id`, uniqueId);
-      modoChat.container?.querySelector(".form-overlay")?.classList.add("hidden");
+      const formOverlay = modoChat.container?.querySelector(".form-overlay");
+      if (formOverlay) {
+        formOverlay.classList.remove("active");
+        formOverlay.classList.add("hidden");
+      }
     } else {
       console.error("ModoChat instance not found");
     }
   } else {
-    alert("Invalid phone number format.");
+    alert("لطفا شماره تلفن خود را وارد کنید.");
   }
 };
 
@@ -66,7 +74,5 @@ const clearConversation = () => {
     localStorage.removeItem(`modo-chat:${modoInstance.publicKey}-conversation-uuid`);
   }
 };
-
-
 
 export {sendMessage, submitUniqueIdForm, clearConversation};

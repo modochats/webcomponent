@@ -6,7 +6,7 @@ import {createChatContainer} from "./services/ui/html.js";
 import {UserData} from "./models/user-data.js";
 import {Conversation} from "./models/conversation.js";
 import {Socket} from "./services/socket/socket.js";
-import {loadStarters} from "./services/ui/fn.js";
+import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions} from "./services/ui/fn.js";
 
 class ModoChat {
   container?: HTMLDivElement;
@@ -15,10 +15,17 @@ class ModoChat {
   userData: UserData;
   conversation?: Conversation;
   socket?: Socket;
-
-  constructor(publicKey: string, options?: ModoChatOptions) {
+  options: ModoChatOptions;
+  constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
     this.publicKey = publicKey;
     this.userData = new UserData(this);
+
+    this.options = {
+      position: options?.position || "right",
+      theme: options?.theme || "dark",
+      primaryColor: options?.primaryColor || "#667eea",
+      title: options?.title || "Modo"
+    };
   }
   async init() {
     try {
@@ -27,8 +34,11 @@ class ModoChat {
       if (checkIfHostIsAllowed(this)) {
         createChatContainer(this);
         window.modoChatInstance = () => this;
+        applyModoOptions();
         checkIfUserHasConversation(this);
         loadStarters();
+        updateChatToggleImage();
+        updateChatTitle();
       } else {
         console.error("Domain not allowed");
       }

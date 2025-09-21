@@ -10,12 +10,14 @@ class Socket {
     this.token = token;
     this.connect();
   }
+  private forceClosed: boolean = false;
   connect() {
     const modoInstance = window.modoChatInstance?.();
     const wsUrl = `${BASE_WEBSOCKET_URL}/conversations/${modoInstance?.conversation?.uuid}/messages/?token=${this.token}`;
     this.socket = new WebSocket(wsUrl);
     this.socket.addEventListener("open", () => {
       this.isConnected = true;
+      this.updateConnectionStatus(true);
       this.socket?.send(
         JSON.stringify({
           type: "join_messages"
@@ -26,10 +28,18 @@ class Socket {
       const message: SocketMessage = JSON.parse(event.data);
       this.onMessage(message);
     };
-    this.socket.onclose = () => {
-      this.isConnected = false;
-    };
+    this.socket.onclose = () => this.onclose();
   }
+
+  updateConnectionStatus(connected: boolean) {
+    const modoInstance = window.modoChatInstance?.();
+    const connectionIndicator = modoInstance?.container?.querySelector(".connection-status");
+
+    if (connectionIndicator) {
+      connectionIndicator.className = `connection-status ${connected ? "connected" : "disconnected"}`;
+    }
+  }
+
   onMessage(message: SocketMessage) {
     const modoInstance = window.modoChatInstance?.();
 
@@ -43,7 +53,22 @@ class Socket {
     }
   }
   close() {
+    const modoInstance = window.modoChatInstance?.();
+    this.forceClosed = true;
+    this.isConnected = false;
+    this.updateConnectionStatus(false);
     this.socket?.close();
+    localStorage.removeItem(`modo-chat:${modoInstance?.publicKey}-conversation-access-token`);
+  }
+  onclose() {
+    this.isConnected = false;
+    this.updateConnectionStatus(false);
+    if (this.forceClosed === false) {
+      // Reconnect after a delay
+      setTimeout(() => {
+        this.connect();
+      }, 3000);
+    }
   }
 }
 const initSocket = async () => {

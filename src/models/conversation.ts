@@ -21,10 +21,11 @@ class Conversation {
       const latestMessage = this.messages[this.messages.length - 1];
       messageElement.textContent = init.content;
 
-      messageElement.className = `p-3 mb-2 rounded-lg max-w-xs break-words ${
-        latestMessage.type === "USER" ? "bg-blue-500 text-white ml-auto" : "bg-gray-200 text-gray-800"
-      }`;
+      messageElement.className = `chat-message ${latestMessage.type === "USER" ? "chat-message-user" : "chat-message-supporter"}`;
       chatMessagesContainer.appendChild(messageElement);
+
+      // Scroll to bottom of the container
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
   }
 

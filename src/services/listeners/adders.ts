@@ -26,33 +26,34 @@ const registerSendMessageListener = (modoContainer: HTMLDivElement) => {
   const sendMessageBtn = modoContainer.querySelector(".send-message-btn") as HTMLButtonElement;
 
   let isDisabled = false;
-  function toggleDisabled() {
+  function toggleLoading() {
     isDisabled = !isDisabled;
     chatInput.disabled = isDisabled;
     sendMessageBtn.disabled = isDisabled;
+    sendMessageBtn.setAttribute("data-is-loading", String(isDisabled));
   }
 
   chatInput.addEventListener("keydown", e => {
     if (e.key === "Enter") {
       e.preventDefault();
       const message = chatInput.value;
-      toggleDisabled();
+      toggleLoading();
       sendMessage(message)
         .then(() => {
           chatInput.value = "";
         })
-        .finally(toggleDisabled);
+        .finally(toggleLoading);
     }
   });
   sendMessageBtn.addEventListener("click", e => {
     e.preventDefault();
     const message = chatInput.value;
-    toggleDisabled();
+    toggleLoading();
     sendMessage(message)
       .then(() => {
         chatInput.value = "";
       })
-      .finally(toggleDisabled);
+      .finally(toggleLoading);
   });
 };
 
@@ -76,7 +77,21 @@ const registerNewConversationListener = (modoContainer: HTMLDivElement) => {
   newBtn.addEventListener("click", () => {
     const modoInstance = window.modoChatInstance?.();
     modoInstance?.conversation?.clear();
+    modoInstance?.socket?.close();
   });
+};
+
+const applyTheme = (theme: string) => {
+  if (theme === "light") {
+    document.documentElement.setAttribute("data-theme", "light");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+  }
+};
+
+const updateThemeButton = (button: HTMLButtonElement, theme: string) => {
+  button.textContent = theme === "dark" ? "☀️" : "🌙";
+  button.title = theme === "dark" ? "تغییر به تم روشن" : "تغییر به تم تاریک";
 };
 
 export {registerListeners, registerNewConversationListener};

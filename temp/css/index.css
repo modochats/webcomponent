@@ -248,7 +248,7 @@
 .chat-container {
   position: relative;
   width: 320px;
-  height: 520px;
+  height: 560px;
   background: var(--bg-primary);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-xl);
@@ -390,18 +390,54 @@
   background: var(--border-color-hover);
 }
 
+/* Message wrapper for positioning */
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.message-wrapper-user {
+  align-items: flex-end;
+}
+
+.message-wrapper-supporter {
+  align-items: flex-start;
+}
+
 /* Chat message styles */
 .chat-message {
   padding: 12px 16px;
-  margin-bottom: 8px;
   border-radius: var(--border-radius);
   max-width: 75%;
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
   position: relative;
-  animation: fadeInUp 0.3s ease-out;
   z-index: 10;
+}
+
+.message-content {
+  margin: 0;
+}
+
+.message-time {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 2px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.message-wrapper-user .message-time {
+  align-self: flex-start;
+  margin-left: 8px;
+}
+
+.message-wrapper-supporter .message-time {
+  align-self: flex-end;
+  margin-right: 8px;
 }
 
 .chat-message-user {

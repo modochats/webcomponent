@@ -40,9 +40,22 @@ class Conversation {
       const messageElement = document.createElement("div");
       const latestMessage = this.messages[this.messages.length - 1];
 
-      messageElement.innerHTML = marked.parse(init.content) as string;
+      // Format time from createdAt
+      const messageTime = new Date(latestMessage.createdAt);
+      const timeString = messageTime.toLocaleTimeString("fa-IR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
 
-      messageElement.className = `chat-message ${latestMessage.type === "USER" ? "chat-message-user" : "chat-message-supporter"}`;
+      messageElement.innerHTML = `
+        <div class="chat-message ${latestMessage.type === "USER" ? "chat-message-user" : "chat-message-supporter"}">
+          <div class="message-content">${marked.parse(init.content) as string}</div>
+        </div>
+        <div class="message-time">${timeString}</div>
+      `;
+
+      messageElement.className = `message-wrapper ${latestMessage.type === "USER" ? "message-wrapper-user" : "message-wrapper-supporter"}`;
       chatMessagesContainer.appendChild(messageElement);
 
       // Scroll to bottom of the container

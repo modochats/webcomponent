@@ -77,26 +77,22 @@ jobs:
           ## Build ${{ github.run_number }}
           
           ### Files included:
-          - `modo-web-component.js` - UMD bundle
-          - `modo-web-component.min.js` - Minified UMD bundle
-          - `dist/` - Full distribution files
+          - modo-web-component.js - UMD bundle
+          - modo-web-component.min.js - Minified UMD bundle
+          - dist/ - Full distribution files
           
-        ### CDN Usage:
-        ```html
-        <!-- jsDelivr (Recommended) -->
-        <script src="https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/cdn-dist/modo-web-component.min.js"></script>
-        
-        <!-- unpkg -->
-        <script src="https://unpkg.com/gh/${{ github.repository }}@main/cdn-dist/modo-web-component.min.js"></script>
-        
-        <!-- GitHub Raw -->
-        <script src="https://raw.githubusercontent.com/${{ github.repository }}/main/cdn-dist/modo-web-component.min.js"></script>
-        ```
-        
-        ### NPM Usage:
-        ```bash
-        npm install modo-web-component
-        ```
+          ### CDN Usage:
+          jsDelivr (Recommended):
+          <script src="https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/cdn-dist/modo-web-component.min.js"></script>
+          
+          unpkg:
+          <script src="https://unpkg.com/gh/${{ github.repository }}@main/cdn-dist/modo-web-component.min.js"></script>
+          
+          GitHub Raw:
+          <script src="https://raw.githubusercontent.com/${{ github.repository }}/main/cdn-dist/modo-web-component.min.js"></script>
+          
+          ### NPM Usage:
+          npm install modo-web-component
         draft: false
         prerelease: false
         

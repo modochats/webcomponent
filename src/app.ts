@@ -6,7 +6,7 @@ import {createChatContainer} from "./services/ui/html.js";
 import {UserData} from "./models/user-data.js";
 import {Conversation} from "./models/conversation.js";
 import {Socket} from "./services/socket/socket.js";
-import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions} from "./services/ui/fn.js";
+import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, loadCss} from "./services/ui/fn.js";
 
 class ModoChat {
   container?: HTMLDivElement;
@@ -34,6 +34,7 @@ class ModoChat {
       const publicDataRes = await fetchModoPublicData(this.publicKey);
       this.publicData = new ModoPublicData(publicDataRes);
       if (checkIfHostIsAllowed(this)) {
+        await loadCss();
         createChatContainer(this);
         window.modoChatInstance = () => this;
         applyModoOptions();

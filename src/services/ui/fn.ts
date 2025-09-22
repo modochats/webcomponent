@@ -188,11 +188,22 @@ function adjustColorBrightness(hex: string, percent: number): string {
 
   return `#${((newR << 16) | (newG << 8) | newB).toString(16).padStart(6, "0")}`;
 }
-
+async function loadCss() {
+  return await new Promise(resolve => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://modochats.s3.ir-thr-at1.arvanstorage.ir/index.css";
+    document.head.appendChild(link);
+    link.addEventListener("load", () => {
+      resolve("css loaded");
+    });
+  });
+}
 export {
   switchToConversationLayout,
   switchToStarterLayout,
   loadStarters,
+  loadCss,
   updateChatToggleImage,
   updateChatTitle,
   applyModoOptions,

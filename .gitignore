@@ -2,7 +2,6 @@ node_modules
 yarn.lock
 .yarn
 dist
-cdn-dist
 app.js
 app.dev.js
 app.dev.js.map

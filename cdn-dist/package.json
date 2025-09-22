@@ -1,0 +1,27 @@
+{
+  "name": "modo-web-component",
+  "version": "1.0.0",
+  "description": "Modo Web Component - A lightweight web component library",
+  "main": "modo-web-component.js",
+  "files": [
+    "modo-web-component.js",
+    "modo-web-component.min.js",
+    "dist/"
+  ],
+  "keywords": [
+    "web-component",
+    "modo",
+    "javascript",
+    "umd"
+  ],
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/modo-web-component.git"
+  },
+  "homepage": "https://github.com/your-username/modo-web-component#readme",
+  "bugs": {
+    "url": "https://github.com/your-username/modo-web-component/issues"
+  }
+}

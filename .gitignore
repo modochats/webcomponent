@@ -2,4 +2,6 @@ node_modules
 yarn.lock
 .yarn
 dist
-/temp
+app.js
+app.dev.js
+app.dev.js.map

@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -69,7 +72,7 @@ jobs:
         
     - name: Commit CDN files to repository
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         # Copy CDN files to the repository root
         cp -r build-artifacts/cdn-dist/ ./
@@ -83,13 +86,13 @@ jobs:
         git commit -m "Add CDN distribution files for build ${{ github.run_number }}" || echo "No changes to commit"
         
         # Push to repository
-        git push https://x-access-token:${{ secrets.TOKEN }}@github.com/${{ github.repository }}.git main
+        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
         
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: v${{ github.run_number }}
         release_name: Release v${{ github.run_number }}
@@ -114,7 +117,7 @@ jobs:
     - name: Upload Release Assets
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./build-artifacts/cdn-dist/modo-web-component.js
@@ -124,7 +127,7 @@ jobs:
     - name: Upload Minified Release Asset
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./build-artifacts/cdn-dist/modo-web-component.min.js
@@ -139,7 +142,7 @@ jobs:
     - name: Upload Dist Archive
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./build-artifacts/cdn-dist/dist.tar.gz

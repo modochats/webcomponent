@@ -29,6 +29,7 @@ jobs:
       run: |
         mkdir -p build-artifacts
         cp -r dist build-artifacts/
+        cp -r temp build-artifacts/
         cp -r cdn-dist build-artifacts/
         cp package.json build-artifacts/
         cp README.md build-artifacts/
@@ -85,11 +86,9 @@ jobs:
           jsDelivr (Recommended):
           <script src="https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/cdn-dist/modo-web-component.min.js"></script>
           
-          unpkg:
-          <script src="https://unpkg.com/gh/${{ github.repository }}@main/cdn-dist/modo-web-component.min.js"></script>
-          
           GitHub Raw:
           <script src="https://raw.githubusercontent.com/${{ github.repository }}/main/cdn-dist/modo-web-component.min.js"></script>
+        
         draft: false
         prerelease: false
         

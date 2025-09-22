@@ -9,18 +9,29 @@ async function createUMDBundle() {
   const distDir = path.resolve(__dirname, '../dist');
   const outputDir = path.resolve(__dirname, '../cdn-dist');
   
+  console.log('Creating UMD bundle...');
+  console.log('Dist directory:', distDir);
+  console.log('Output directory:', outputDir);
+  
   // Ensure output directory exists
   await fs.mkdir(outputDir, { recursive: true });
   
-  // Read the main app file
-  const appPath = path.join(distDir, 'src/app.js');
+  // Read the main app file from rollup output
+  const appPath = path.join(distDir, '../temp/app.js');
   let appCode = '';
   
   try {
     appCode = await fs.readFile(appPath, 'utf8');
   } catch (error) {
-    console.error('Error reading app.js:', error);
-    return;
+    console.error('Error reading app.js from temp directory:', error);
+    // Fallback to dist/src/app.js if temp doesn't exist
+    const fallbackPath = path.join(distDir, 'src/app.js');
+    try {
+      appCode = await fs.readFile(fallbackPath, 'utf8');
+    } catch (fallbackError) {
+      console.error('Error reading app.js from dist directory:', fallbackError);
+      return;
+    }
   }
   
   // Create UMD wrapper
@@ -47,7 +58,9 @@ async function createUMDBundle() {
 });`;
 
   // Write UMD bundle
-  await fs.writeFile(path.join(outputDir, 'modo-web-component.js'), umdCode);
+  const umdPath = path.join(outputDir, 'modo-web-component.js');
+  await fs.writeFile(umdPath, umdCode);
+  console.log('Created UMD bundle:', umdPath);
   
   // Create minified version (basic minification)
   const minifiedCode = umdCode
@@ -57,7 +70,9 @@ async function createUMDBundle() {
     .replace(/\s*([{}();,=])\s*/g, '$1') // Remove spaces around operators
     .trim();
     
-  await fs.writeFile(path.join(outputDir, 'modo-web-component.min.js'), minifiedCode);
+  const minPath = path.join(outputDir, 'modo-web-component.min.js');
+  await fs.writeFile(minPath, minifiedCode);
+  console.log('Created minified bundle:', minPath);
   
   // Copy dist folder
   await copyDirectory(distDir, path.join(outputDir, 'dist'));
@@ -101,11 +116,6 @@ A lightweight web component library.
 ### jsDelivr
 \`\`\`html
 <script src="https://cdn.jsdelivr.net/gh/your-username/modo-web-component@main/cdn-dist/modo-web-component.min.js"></script>
-\`\`\`
-
-### unpkg
-\`\`\`html
-<script src="https://unpkg.com/gh/your-username/modo-web-component@main/cdn-dist/modo-web-component.min.js"></script>
 \`\`\`
 
 ### GitHub Raw

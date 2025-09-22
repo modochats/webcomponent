@@ -5,13 +5,21 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
   const toggleChatBtn = modoContainer.querySelector(".toggle-chat-btn") as HTMLButtonElement;
   let isBodyOpen = false;
 
+  // Set footer link URL with origin parameter
+  const footerLink = modoContainer.querySelector(".footer-link") as HTMLAnchorElement;
+  if (footerLink) {
+    footerLink.href = `https://modochats.com?utm_source=${encodeURIComponent(window.location.origin)}`;
+  }
+
   // toggle chat body visibility
   toggleChatBtn.addEventListener(
     "click",
     () => {
+      const modoInstance = window.modoChatInstance?.();
       isBodyOpen = !isBodyOpen;
-
+      if (isBodyOpen) modoInstance?.onOpen();
       chatBody?.classList.toggle("hidden");
+      toggleChatBtn.classList.toggle("chat-open", isBodyOpen);
     },
     {capture: false}
   );
@@ -78,6 +86,10 @@ const registerNewConversationListener = (modoContainer: HTMLDivElement) => {
     const modoInstance = window.modoChatInstance?.();
     modoInstance?.conversation?.clear();
     modoInstance?.socket?.close();
+    if (modoInstance) {
+      modoInstance.conversation = undefined;
+      modoInstance.socket = undefined;
+    }
   });
 };
 

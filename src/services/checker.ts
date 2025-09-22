@@ -18,6 +18,7 @@ const checkIfUserHasConversation = async (modo: ModoChat) => {
       const res = await fetchConversationMessages(savedConversationUuid, modo.publicKey);
       modo.conversation = new Conversation(res.results[0]?.conversation);
       for (const message of res.results) modo.conversation.addMessage(message);
+      modo.conversation.scrollToBottom();
       await initSocket();
     } catch (err) {
       console.error("Failed to fetch conversation messages", err);

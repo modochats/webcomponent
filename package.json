@@ -21,6 +21,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "marked": "^16.3.0",
     "ofetch": "^1.4.1",
     "tldts": "^7.0.14"
   },

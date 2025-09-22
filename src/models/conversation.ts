@@ -1,4 +1,7 @@
 import {switchToConversationLayout, switchToStarterLayout} from "#src/services/ui/fn.js";
+import {ConversationStatus, MessageType} from "#src/types/conversation.js";
+import {fetchConversationMessages} from "#src/utils/fetch.js";
+import {marked} from "marked";
 
 class Conversation {
   id: number;
@@ -6,11 +9,28 @@ class Conversation {
   chatbot: number;
   unreadMessageCount: number;
   messages: ConversationMessage[] = [];
+  status: keyof typeof ConversationStatus;
+  uniqueId?: string;
+
   constructor(init: Record<string, any>) {
     this.id = init.id;
     this.uuid = init.uuid;
     this.chatbot = init.chatbot;
     this.unreadMessageCount = init.unread_messages_count;
+    this.uniqueId = init.unique_id;
+    switch (init.status) {
+      case "ai_chat":
+        this.status = "AI_CHAT";
+        break;
+      case "supporter_chat":
+        this.status = "SUPPORTER_CHAT";
+        break;
+      case "resolved":
+        this.status = "RESOLVED";
+        break;
+      default:
+        this.status = "UNKNOWN";
+    }
     this.onInit();
   }
   addMessage(init: Record<string, any>) {
@@ -19,12 +39,19 @@ class Conversation {
     if (chatMessagesContainer) {
       const messageElement = document.createElement("div");
       const latestMessage = this.messages[this.messages.length - 1];
-      messageElement.textContent = init.content;
+
+      messageElement.innerHTML = marked.parse(init.content) as string;
 
       messageElement.className = `chat-message ${latestMessage.type === "USER" ? "chat-message-user" : "chat-message-supporter"}`;
       chatMessagesContainer.appendChild(messageElement);
 
       // Scroll to bottom of the container
+      this.scrollToBottom();
+    }
+  }
+  scrollToBottom() {
+    const chatMessagesContainer = document.querySelector(".chat-messages-con");
+    if (chatMessagesContainer) {
       chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
   }
@@ -42,17 +69,39 @@ class Conversation {
   onInit() {
     switchToConversationLayout();
   }
+  async loadMessages() {
+    const modoInstance = window.modoChatInstance?.();
+    const res = await fetchConversationMessages(this.uuid, modoInstance?.publicKey as string);
+    this.messages = [];
+    const chatMessagesContainer = modoInstance?.container?.querySelector(".chat-messages-con");
+    if (chatMessagesContainer) chatMessagesContainer.innerHTML = "";
+    for (const message of res.results) this.addMessage(message);
+  }
 }
 class ConversationMessage {
   id: number;
   content: string;
-  type: "USER" | "SUPPORTER";
+  type: keyof typeof MessageType;
   createdAt: string;
   constructor(init: Record<string, any>) {
     this.id = init.id;
     this.content = init.content;
-    if (init.message_type === 0) this.type = "USER";
-    else this.type = "SUPPORTER";
+    switch (init.message_type) {
+      case 0:
+        this.type = "USER";
+        break;
+      case 1:
+        this.type = "AI";
+        break;
+      case 2:
+        this.type = "SUPPORTER";
+        break;
+      case 3:
+        this.type = "SYSTEM";
+        break;
+      default:
+        this.type = "UNKNOWN";
+    }
     this.createdAt = init.created_at;
   }
 }

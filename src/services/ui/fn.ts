@@ -11,9 +11,14 @@ function switchToStarterLayout() {
 
 function loadStarters() {
   const modoInstance = window.modoChatInstance?.();
-  modoInstance?.container?.querySelector(".starters-con")?.classList.remove("hidden");
+  const startersContainer = modoInstance?.container?.querySelector(".starters-con");
+  const starterItemsContainer = modoInstance?.container?.querySelector(".starter-items");
+
+  startersContainer?.classList.remove("hidden");
+
   for (const starter of modoInstance?.publicData?.starters || []) {
     const starterElement = document.createElement("div");
+    starterElement.className = "starter-item";
     starterElement.textContent = starter;
     starterElement.addEventListener("click", async () => {
       const inputEl = modoInstance?.container?.querySelector(".chat-input") as HTMLInputElement;
@@ -24,14 +29,19 @@ function loadStarters() {
         sendMsgBtnEl.click();
       }
     });
-    modoInstance?.container?.querySelector(".starters-con")?.appendChild(starterElement);
+    starterItemsContainer?.appendChild(starterElement);
   }
 }
 
 function updateChatToggleImage() {
   const modoInstance = window.modoChatInstance?.();
   const toggleImageEl = modoInstance?.container?.querySelector(".chat-toggle-image") as HTMLImageElement;
+  const starterLogoEl = modoInstance?.container?.querySelector(".starter-logo") as HTMLImageElement;
 
+  const defaultSvg =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.1 3.9 23 5 23H11V21H5V3H13V9H21ZM23 18V16H15V18L19 22L15 26V28H23V26H19L23 22L19 18H23Z'/%3E%3C/svg%3E";
+
+  // Update toggle button image
   if (toggleImageEl) {
     if (modoInstance?.publicData?.image) {
       toggleImageEl.src = modoInstance.publicData.image;
@@ -39,16 +49,30 @@ function updateChatToggleImage() {
 
       // Add error handling for failed image loads
       toggleImageEl.onerror = () => {
-        // Use a default avatar as fallback
-        toggleImageEl.src =
-          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.1 3.9 23 5 23H11V21H5V3H13V9H21ZM23 18V16H15V18L19 22L15 26V28H23V26H19L23 22L19 18H23Z'/%3E%3C/svg%3E";
+        toggleImageEl.src = defaultSvg;
         toggleImageEl.alt = "پشتیبانی چت";
       };
     } else {
       // Use default avatar if no image is provided
-      toggleImageEl.src =
-        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.1 3.9 23 5 23H11V21H5V3H13V9H21ZM23 18V16H15V18L19 22L15 26V28H23V26H19L23 22L19 18H23Z'/%3E%3C/svg%3E";
+      toggleImageEl.src = defaultSvg;
       toggleImageEl.alt = "پشتیبانی چت";
+    }
+  }
+
+  // Update starter logo
+  if (starterLogoEl) {
+    if (modoInstance?.publicData?.image) {
+      starterLogoEl.src = modoInstance.publicData.image;
+      starterLogoEl.alt = modoInstance.publicData.name || "لوگو چت بات";
+      starterLogoEl.style.display = "block";
+
+      // Add error handling for failed image loads
+      starterLogoEl.onerror = () => {
+        starterLogoEl.style.display = "none";
+      };
+    } else {
+      // Hide logo if no image is provided
+      starterLogoEl.style.display = "none";
     }
   }
 }
@@ -56,11 +80,19 @@ function updateChatToggleImage() {
 function updateChatTitle() {
   const modoInstance = window.modoChatInstance?.();
   const chatTitleEl = modoInstance?.container?.querySelector(".chat-title") as HTMLElement;
+  const starterTitleEl = modoInstance?.container?.querySelector(".starter-title") as HTMLElement;
 
-  if (chatTitleEl) {
+  if (chatTitleEl || starterTitleEl) {
     // Use options title if no publicData name is available
-    const displayTitle = modoInstance?.publicData?.name || modoInstance?.options?.title || "Modo";
-    chatTitleEl.textContent = displayTitle;
+    const displayTitle = modoInstance?.options?.title || modoInstance?.publicData?.name || "Modo";
+
+    if (chatTitleEl) {
+      chatTitleEl.textContent = displayTitle;
+    }
+
+    if (starterTitleEl) {
+      starterTitleEl.textContent = displayTitle;
+    }
   }
 }
 

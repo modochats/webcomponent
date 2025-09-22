@@ -23,6 +23,7 @@ const sendMessage = async (message: string) => {
             modoInstance.conversation?.addMessage(sendMsgRes);
             localStorage.setItem(`modo-chat:${modoInstance.publicKey}-conversation-uuid`, modoInstance.conversation?.uuid as string);
             await initSocket();
+            if (modoInstance.conversation.status === "AI_CHAT") await modoInstance.conversation.loadMessages();
           }
         } else {
           console.error("ModoChat instance not found");
@@ -33,7 +34,11 @@ const sendMessage = async (message: string) => {
 };
 
 const checkIfUserHasUniqueId = () => {
-  if (window.modoChatInstance?.().userData.uniqueId) {
+  const modoInstance = window.modoChatInstance?.();
+  if (modoInstance?.userData.uniqueId) {
+    return true;
+  } else if (modoInstance?.conversation?.uniqueId) {
+    modoInstance.userData.uniqueId = modoInstance.conversation.uniqueId;
     return true;
   } else switchToUniqueIdFormView();
 };
@@ -56,6 +61,8 @@ const submitUniqueIdForm = (uniqueId: string) => {
         formOverlay.classList.remove("active");
         formOverlay.classList.add("hidden");
       }
+
+      (modoChat.container?.querySelector(".send-message-btn") as HTMLButtonElement)?.click();
     } else {
       console.error("ModoChat instance not found");
     }

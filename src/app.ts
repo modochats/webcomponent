@@ -16,6 +16,7 @@ class ModoChat {
   conversation?: Conversation;
   socket?: Socket;
   options: ModoChatOptions;
+  openedCount: number = 0;
   constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
     this.publicKey = publicKey;
     this.userData = new UserData(this);
@@ -24,7 +25,7 @@ class ModoChat {
       position: options?.position || "right",
       theme: options?.theme || "dark",
       primaryColor: options?.primaryColor || "#667eea",
-      title: options?.title || "Modo"
+      title: options?.title || ""
     };
     this.init();
   }
@@ -36,7 +37,6 @@ class ModoChat {
         createChatContainer(this);
         window.modoChatInstance = () => this;
         applyModoOptions();
-        checkIfUserHasConversation(this);
         loadStarters();
         updateChatToggleImage();
         updateChatTitle();
@@ -46,6 +46,10 @@ class ModoChat {
     } catch (err) {
       console.error("Failed to initialize ModoChat", err);
     }
+  }
+  async onOpen() {
+    this.openedCount++;
+    if (this.openedCount === 1) checkIfUserHasConversation(this);
   }
 }
 

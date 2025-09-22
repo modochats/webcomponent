@@ -66,6 +66,7 @@ jobs:
         echo "Using pre-built CDN files from cdn-dist/"
         
     - name: Create GitHub Release
+      id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
@@ -89,9 +90,6 @@ jobs:
           
           GitHub Raw:
           <script src="https://raw.githubusercontent.com/${{ github.repository }}/main/cdn-dist/modo-web-component.min.js"></script>
-          
-          ### NPM Usage:
-          npm install modo-web-component
         draft: false
         prerelease: false
         
@@ -130,41 +128,3 @@ jobs:
         asset_name: dist.tar.gz
         asset_content_type: application/gzip
 
-  publish-npm:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-files
-        path: build-artifacts/
-        
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        registry-url: 'https://registry.npmjs.org'
-        
-    - name: Prepare package for NPM
-      run: |
-        cd build-artifacts
-        # Update package.json for NPM publishing
-        npm pkg set main="dist/src/app.js"
-        npm pkg set files='["dist/**/*", "README.md"]'
-        npm pkg set repository.type="git"
-        npm pkg set repository.url="https://github.com/${{ github.repository }}.git"
-        npm pkg set homepage="https://github.com/${{ github.repository }}#readme"
-        npm pkg set bugs.url="https://github.com/${{ github.repository }}/issues"
-        
-    - name: Publish to NPM
-      run: |
-        cd build-artifacts
-        npm publish --access public
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

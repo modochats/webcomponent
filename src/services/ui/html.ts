@@ -9,7 +9,7 @@ const createChatContainer = (modo: ModoChat) => {
   let conBody = document.createElement("div");
   modo.container.appendChild(conBody);
   modo.container.innerHTML = `
-  <div class="chat-inner">
+  <div dir="rtl" class="chat-inner">
   <div class="chat-body hidden">
     <div class="chat-container">
       <!-- Chat Header -->

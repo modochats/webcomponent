@@ -114,7 +114,7 @@ function applyModoOptions() {
 }
 
 function applyPositionOption(container: HTMLDivElement, position: "left" | "right") {
-  const widget = container.querySelector(".modo-chat-widget") as HTMLElement;
+  const widget = window.modoChatInstance?.()?.container as HTMLElement;
   if (widget) {
     if (position === "left") {
       widget.style.right = "auto";
@@ -128,9 +128,9 @@ function applyPositionOption(container: HTMLDivElement, position: "left" | "righ
         chatBody.style.left = "0";
       }
     } else {
-      widget.style.left = "auto";
-      widget.style.right = "32px";
-      widget.style.direction = "rtl";
+      // widget.style.left = "auto";
+      // widget.style.right = "32px";
+      // widget.style.direction = "rtl";
 
       // Update chat body position for right alignment
       const chatBody = widget.querySelector(".chat-body") as HTMLElement;

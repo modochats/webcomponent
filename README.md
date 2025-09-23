@@ -81,8 +81,7 @@ Include the widget in your HTML:
 <script src="bundle.js"></script>
 <script>
   // Initialize the chat widget
-  const chat = new ModoChat({
-    publicKey: "your-public-key"
+  const chat = new ModoChat("your-public-key", {
     // other options...
   });
 </script>

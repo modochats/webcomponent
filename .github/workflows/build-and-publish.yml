@@ -2,9 +2,9 @@ name: Build and Publish to CDN
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: write
@@ -12,140 +12,139 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        
-    - name: Install dependencies
-      run: yarn install --frozen-lockfile
-      
-    - name: Build project
-      run: yarn build:cdn
-      
-    - name: Create build artifacts
-      run: |
-        mkdir -p build-artifacts
-        cp -r dist build-artifacts/
-        cp -r temp build-artifacts/
-        cp -r cdn-dist build-artifacts/
-        cp package.json build-artifacts/
-        cp README.md build-artifacts/
-        
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-files
-        path: build-artifacts/
-        retention-days: 30
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build:cdn
+
+      - name: Create build artifacts
+        run: |
+          mkdir -p build-artifacts
+          cp -r dist build-artifacts/
+          cp -r temp build-artifacts/
+          cp -r cdn-dist build-artifacts/
+          cp package.json build-artifacts/
+          cp README.md build-artifacts/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: build-artifacts/
+          retention-days: 30
 
   publish-cdn:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !contains(github.event.head_commit.message, 'Add CDN distribution files for build')
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-files
-        path: build-artifacts/
-        
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        
-    - name: Use CDN-ready files
-      run: |
-        # The CDN files are already created by the build:cdn script
-        echo "Using pre-built CDN files from cdn-dist/"
-        ls -la build-artifacts/cdn-dist/
-        
-    - name: Commit CDN files to repository
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        # Copy CDN files to the repository root
-        cp -r build-artifacts/cdn-dist/ ./
-        
-        # Configure git
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        
-        # Add and commit CDN files
-        git add cdn-dist/
-        git commit -m "Add CDN distribution files for build ${{ github.run_number }}" || echo "No changes to commit"
-        
-        # Push to repository
-        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
-        
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
-        body: |
-          ## Build ${{ github.run_number }}
-          
-          ### Files included:
-          - modo-web-component.js - UMD bundle
-          - modo-web-component.min.js - Minified UMD bundle
-          - dist/ - Full distribution files
-          
-          ### CDN Usage:
-          jsDelivr (Recommended):
-          <script src="https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/cdn-dist/modo-web-component.min.js"></script>
-          
-          GitHub Raw:
-          <script src="https://raw.githubusercontent.com/${{ github.repository }}/main/cdn-dist/modo-web-component.min.js"></script>
-        
-        draft: false
-        prerelease: false
-        
-    - name: Upload Release Assets
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./build-artifacts/cdn-dist/modo-web-component.js
-        asset_name: modo-web-component.js
-        asset_content_type: application/javascript
-        
-    - name: Upload Minified Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./build-artifacts/cdn-dist/modo-web-component.min.js
-        asset_name: modo-web-component.min.js
-        asset_content_type: application/javascript
-        
-    - name: Upload Dist Folder
-      run: |
-        cd build-artifacts/cdn-dist
-        tar -czf dist.tar.gz dist/
-        
-    - name: Upload Dist Archive
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./build-artifacts/cdn-dist/dist.tar.gz
-        asset_name: dist.tar.gz
-        asset_content_type: application/gzip
 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: build-artifacts/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Use CDN-ready files
+        run: |
+          # The CDN files are already created by the build:cdn script
+          echo "Using pre-built CDN files from cdn-dist/"
+          ls -la build-artifacts/cdn-dist/
+
+      - name: Commit CDN files to repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Copy CDN files to the repository root
+          cp -r build-artifacts/cdn-dist/ ./
+
+          # Configure git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Add and commit CDN files
+          git add cdn-dist/
+          git commit -m "Add CDN distribution files for build ${{ github.run_number }}" || echo "No changes to commit"
+
+          # Push to repository
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            ## Build ${{ github.run_number }}
+
+            ### Files included:
+            - modo-web-component.js - UMD bundle
+            - modo-web-component.min.js - Minified UMD bundle
+            - dist/ - Full distribution files
+
+            ### CDN Usage:
+            jsDelivr (Recommended):
+            <script src="https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/cdn-dist/modo-web-component.min.js"></script>
+
+            GitHub Raw:
+            <script src="https://raw.githubusercontent.com/${{ github.repository }}/main/cdn-dist/modo-web-component.min.js"></script>
+
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build-artifacts/cdn-dist/modo-web-component.js
+          asset_name: modo-web-component.js
+          asset_content_type: application/javascript
+
+      - name: Upload Minified Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build-artifacts/cdn-dist/modo-web-component.min.js
+          asset_name: modo-web-component.min.js
+          asset_content_type: application/javascript
+
+      - name: Upload Dist Folder
+        run: |
+          cd build-artifacts/cdn-dist
+          tar -czf dist.tar.gz dist/
+
+      - name: Upload Dist Archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build-artifacts/cdn-dist/dist.tar.gz
+          asset_name: dist.tar.gz
+          asset_content_type: application/gzip

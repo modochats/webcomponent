@@ -8,17 +8,21 @@ const sendMessage = async (message: string) => {
     if (checkIfUserHasUniqueId()) {
       const modoInstance = window.modoChatInstance?.();
       try {
-        const sendMsgRes = await fetchSendMessage(
-          modoInstance?.publicData?.setting.chatbot as number,
-          message,
-          modoInstance?.userData.uniqueId as string,
-          modoInstance?.conversation?.uuid
-        );
-
         if (modoInstance) {
           if (modoInstance?.conversation?.uuid) {
-            modoInstance.conversation.addMessage(sendMsgRes);
-          } else {
+            modoInstance.conversation.addMessage({id: "temp", content: message, message_type: 0, created_at: new Date().toISOString()});
+            const chatInput = modoInstance.container?.querySelector(".chat-input") as HTMLInputElement;
+            if (chatInput) chatInput.value = "";
+          }
+
+          const sendMsgRes = await fetchSendMessage(
+            modoInstance?.publicData?.setting.chatbot as number,
+            message,
+            modoInstance?.userData.uniqueId as string,
+            modoInstance?.conversation?.uuid
+          );
+
+          if (!modoInstance?.conversation?.uuid) {
             modoInstance.conversation = new Conversation(sendMsgRes.conversation);
             modoInstance.conversation?.addMessage(sendMsgRes);
             localStorage.setItem(`modo-chat:${modoInstance.publicKey}-conversation-uuid`, modoInstance.conversation?.uuid as string);

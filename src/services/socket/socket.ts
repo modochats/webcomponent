@@ -46,7 +46,8 @@ class Socket {
     switch (message.type) {
       case "new_message":
         const newMessage = new ConversationMessage(message.message);
-        if (newMessage.type !== "USER") modoInstance?.conversation?.addMessage(message.message);
+        if (newMessage.type === "USER") return
+        else modoInstance?.conversation?.addMessage(message.message);
         break;
       default:
         console.log("unknown message type :", message);

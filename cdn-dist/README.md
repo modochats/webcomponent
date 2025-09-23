@@ -17,9 +17,23 @@ A lightweight web component library.
 ## Usage
 
 ```javascript
-// Initialize the component
-ModoWebComponent.init();
+// Initialize the chat widget
+const chat = new ModoChat('your-public-key', {
+  position: 'right', // 'left' or 'right'
+  theme: 'dark', // 'dark' or 'light'
+  primaryColor: '#667eea',
+  title: 'پشتیبانی چت'
+});
 ```
+
+## Features
+
+- 🌙 Dark/Light theme support
+- 🌐 RTL (Persian/Farsi) language support
+- 📱 Mobile responsive design
+- 💬 Real-time chat functionality
+- 🔗 WebSocket connection status
+- 📝 Markdown message support
 
 ## Files
 

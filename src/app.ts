@@ -34,7 +34,7 @@ class ModoChat {
       const publicDataRes = await fetchModoPublicData(this.publicKey);
       this.publicData = new ModoPublicData(publicDataRes);
       if (checkIfHostIsAllowed(this)) {
-        await loadCss();
+        // await loadCss();
         createChatContainer(this);
         window.modoChatInstance = () => this;
         applyModoOptions();

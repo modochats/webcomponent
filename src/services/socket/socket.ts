@@ -33,10 +33,10 @@ class Socket {
 
   updateConnectionStatus(connected: boolean) {
     const modoInstance = window.modoChatInstance?.();
-    const connectionIndicator = modoInstance?.container?.querySelector(".connection-status");
+    const connectionIndicator = modoInstance?.container?.querySelector(".mc-connection-status");
 
     if (connectionIndicator) {
-      connectionIndicator.className = `connection-status ${connected ? "connected" : "disconnected"}`;
+      connectionIndicator.className = `mc-connection-status ${connected ? "mc-connected" : "mc-disconnected"}`;
     }
   }
 

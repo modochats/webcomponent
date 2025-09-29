@@ -35,7 +35,7 @@ class Conversation {
   }
   addMessage(init: Record<string, any>) {
     this.messages.push(new ConversationMessage(init));
-    const chatMessagesContainer = document.querySelector(".chat-messages-con");
+    const chatMessagesContainer = document.querySelector(".mc-chat-messages-con");
     if (chatMessagesContainer) {
       const messageElement = document.createElement("div");
       const latestMessage = this.messages[this.messages.length - 1];
@@ -49,13 +49,13 @@ class Conversation {
       });
 
       messageElement.innerHTML = `
-        <div class="chat-message ${latestMessage.type === "USER" ? "chat-message-user" : "chat-message-supporter"}">
-          <div class="message-content">${marked.parse(init.content) as string}</div>
+        <div class="mc-chat-message ${latestMessage.type === "USER" ? "mc-chat-message-user" : "mc-chat-message-supporter"}">
+          <div class="mc-message-content">${marked.parse(init.content) as string}</div>
         </div>
-        <div class="message-time">${timeString}</div>
+        <div class="mc-message-time">${timeString}</div>
       `;
 
-      messageElement.className = `message-wrapper ${latestMessage.type === "USER" ? "message-wrapper-user" : "message-wrapper-supporter"}`;
+      messageElement.className = `mc-message-wrapper ${latestMessage.type === "USER" ? "mc-message-wrapper-user" : "mc-message-wrapper-supporter"}`;
       chatMessagesContainer.appendChild(messageElement);
 
       // Scroll to bottom of the container
@@ -63,7 +63,7 @@ class Conversation {
     }
   }
   scrollToBottom() {
-    const chatMessagesContainer = document.querySelector(".chat-messages-con");
+    const chatMessagesContainer = document.querySelector(".mc-chat-messages-con");
     if (chatMessagesContainer) {
       chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
@@ -73,7 +73,7 @@ class Conversation {
     this.messages = [];
     const modoInstance = window.modoChatInstance?.();
     localStorage.removeItem(`modo-chat:${modoInstance?.publicKey}-conversation-uuid`);
-    const chatMessagesContainer = document.querySelector(".chat-messages-con");
+    const chatMessagesContainer = document.querySelector(".mc-chat-messages-con");
     if (chatMessagesContainer) {
       chatMessagesContainer.innerHTML = "";
     }
@@ -86,7 +86,7 @@ class Conversation {
     const modoInstance = window.modoChatInstance?.();
     const res = await fetchConversationMessages(this.uuid, modoInstance?.publicKey as string);
     this.messages = [];
-    const chatMessagesContainer = modoInstance?.container?.querySelector(".chat-messages-con");
+    const chatMessagesContainer = modoInstance?.container?.querySelector(".mc-chat-messages-con");
     if (chatMessagesContainer) chatMessagesContainer.innerHTML = "";
     for (const message of res.results) this.addMessage(message);
   }

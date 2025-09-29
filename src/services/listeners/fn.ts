@@ -11,7 +11,7 @@ const sendMessage = async (message: string) => {
         if (modoInstance) {
           if (modoInstance?.conversation?.uuid) {
             modoInstance.conversation.addMessage({id: "temp", content: message, message_type: 0, created_at: new Date().toISOString()});
-            const chatInput = modoInstance.container?.querySelector(".chat-input") as HTMLInputElement;
+            const chatInput = modoInstance.container?.querySelector(".mc-chat-input") as HTMLInputElement;
             if (chatInput) chatInput.value = "";
           }
 
@@ -48,10 +48,10 @@ const checkIfUserHasUniqueId = () => {
 };
 
 const switchToUniqueIdFormView = () => {
-  const formOverlay = window.modoChatInstance?.().container?.querySelector(".form-overlay");
+  const formOverlay = window.modoChatInstance?.().container?.querySelector(".mc-form-overlay");
   if (formOverlay) {
-    formOverlay.classList.remove("hidden");
-    formOverlay.classList.add("active");
+    formOverlay.classList.remove("mc-hidden");
+    formOverlay.classList.add("mc-active");
   }
 };
 const submitUniqueIdForm = (uniqueId: string) => {
@@ -60,13 +60,13 @@ const submitUniqueIdForm = (uniqueId: string) => {
     if (modoChat) {
       modoChat.userData.uniqueId = uniqueId;
       localStorage.setItem(`modo-chat:${modoChat.publicKey}-user-unique-id`, uniqueId);
-      const formOverlay = modoChat.container?.querySelector(".form-overlay");
+      const formOverlay = modoChat.container?.querySelector(".mc-form-overlay");
       if (formOverlay) {
-        formOverlay.classList.remove("active");
-        formOverlay.classList.add("hidden");
+        formOverlay.classList.remove("mc-active");
+        formOverlay.classList.add("mc-hidden");
       }
 
-      (modoChat.container?.querySelector(".send-message-btn") as HTMLButtonElement)?.click();
+      (modoChat.container?.querySelector(".mc-send-message-btn") as HTMLButtonElement)?.click();
     } else {
       console.error("ModoChat instance not found");
     }

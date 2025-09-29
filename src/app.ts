@@ -7,6 +7,7 @@ import {UserData} from "./models/user-data.js";
 import {Conversation} from "./models/conversation.js";
 import {Socket} from "./services/socket/socket.js";
 import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, loadCss} from "./services/ui/fn.js";
+import {VERSION} from "./constants/index.js";
 
 class ModoChat {
   container?: HTMLDivElement;
@@ -17,10 +18,11 @@ class ModoChat {
   socket?: Socket;
   options: ModoChatOptions;
   openedCount: number = 0;
+  version: string;
   constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
     this.publicKey = publicKey;
     this.userData = new UserData(this);
-
+    this.version = VERSION;
     this.options = {
       position: options?.position || "right",
       theme: options?.theme || "dark",

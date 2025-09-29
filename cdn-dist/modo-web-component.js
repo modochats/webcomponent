@@ -11,7 +11,7 @@
   
   class ModoPublicData{name;image;shortDescription;starters=[];setting;constructor(t){this.name=t.name,this.image=t.image,this.shortDescription=t.short_description,this.starters=t.starters,this.setting={id:t.setting.id,createdAt:t.setting.created_at,updatedAt:t.setting.updated_at,deletedAt:t.setting.deleted_at,uuid:t.setting.unique_id,allowedHosts:t.setting.allow_hosts?.split(","),chatbot:t.setting.chatbot};}}
 
-const BASE_API_URL="https://api.modochats.com",BASE_WEBSOCKET_URL="wss://api.modochats.com/ws";
+const BASE_API_URL="https://api.modochats.com",BASE_WEBSOCKET_URL="wss://api.modochats.com/ws",VERSION="0.1";
 
 const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
 const suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
@@ -1336,7 +1336,7 @@ const createChatContainer=n=>{n.container=document.createElement("div"),n.contai
 
 class UserData{uniqueId;constructor(e){const t=localStorage.getItem(`modo-chat:${e.publicKey}-user-unique-id`);t&&(this.uniqueId=t);}}
 
-class ModoChat{container;publicKey;publicData;userData;conversation;socket;options;openedCount=0;constructor(t,o){this.publicKey=t,this.userData=new UserData(this),this.options={position:o?.position||"right",theme:o?.theme||"dark",primaryColor:o?.primaryColor||"#667eea",title:o?.title||""},this.init();}async init(){try{const t=await fetchModoPublicData(this.publicKey);this.publicData=new ModoPublicData(t),checkIfHostIsAllowed(this)?(await loadCss(),createChatContainer(this),window.modoChatInstance=()=>this,applyModoOptions(),loadStarters(),updateChatToggleImage(),updateChatTitle()):console.error("Domain not allowed");}catch(t){console.error("Failed to initialize ModoChat",t);}}async onOpen(){this.openedCount++,1===this.openedCount&&checkIfUserHasConversation(this);}}window.ModoChat=ModoChat;
+class ModoChat{container;publicKey;publicData;userData;conversation;socket;options;openedCount=0;version;constructor(t,o){this.publicKey=t,this.userData=new UserData(this),this.version=VERSION,this.options={position:o?.position||"right",theme:o?.theme||"dark",primaryColor:o?.primaryColor||"#667eea",title:o?.title||""},this.init();}async init(){try{const t=await fetchModoPublicData(this.publicKey);this.publicData=new ModoPublicData(t),checkIfHostIsAllowed(this)?(await loadCss(),createChatContainer(this),window.modoChatInstance=()=>this,applyModoOptions(),loadStarters(),updateChatToggleImage(),updateChatTitle()):console.error("Domain not allowed");}catch(t){console.error("Failed to initialize ModoChat",t);}}async onOpen(){this.openedCount++,1===this.openedCount&&checkIfUserHasConversation(this);}}window.ModoChat=ModoChat;
 
   
   // Return the ModoChat class for UMD usage

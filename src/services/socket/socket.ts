@@ -11,7 +11,7 @@ class Socket {
     this.connect();
   }
   private forceClosed: boolean = false;
-  connect() {
+  connect(isReconnect: boolean = false) {
     const modoInstance = window.modoChatInstance?.();
     const wsUrl = `${BASE_WEBSOCKET_URL}/conversations/${modoInstance?.conversation?.uuid}/messages/?token=${this.token}`;
     this.socket = new WebSocket(wsUrl);
@@ -23,6 +23,7 @@ class Socket {
           type: "join_messages"
         })
       );
+      if (isReconnect) modoInstance?.conversation?.loadMessages();
     });
     this.socket.onmessage = event => {
       const message: SocketMessage = JSON.parse(event.data);
@@ -69,7 +70,7 @@ class Socket {
     if (this.forceClosed === false) {
       // Reconnect after a delay
       setTimeout(() => {
-        this.connect();
+        this.connect(true);
       }, 3000);
     }
   }

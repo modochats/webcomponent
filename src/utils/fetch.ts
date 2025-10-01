@@ -12,7 +12,11 @@ const fetchSendMessage = async (chatbotId: number, content: string, uniqueId: st
       content: content,
       message_type: 0,
       unique_id: uniqueId,
-      conversation_id: conversationUuid ? conversationUuid : undefined
+      conversation_id: conversationUuid ? conversationUuid : undefined,
+      meta_data: {
+        url: window?.location?.href,
+        title: document?.title
+      }
     }
   });
 };

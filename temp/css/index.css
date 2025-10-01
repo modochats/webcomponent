@@ -223,7 +223,9 @@
   transition: var(--transition);
   z-index: var(--z-index-widget);
 }
-
+.mc-chat-body.mc-hidden {
+  display: none !important;
+}
 .mc-chat-body.mc-active {
   opacity: 1;
   visibility: visible;

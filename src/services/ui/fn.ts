@@ -1,3 +1,5 @@
+import {ConversationStatus} from "#src/types/conversation.js";
+
 function switchToConversationLayout() {
   const modoInstance = window.modoChatInstance?.();
   modoInstance?.container?.querySelector(".mc-new-conversation-btn")?.classList.remove("mc-hidden");
@@ -7,6 +9,25 @@ function switchToStarterLayout() {
   const modoInstance = window.modoChatInstance?.();
   modoInstance?.container?.querySelector(".mc-new-conversation-btn")?.classList.add("mc-hidden");
   modoInstance?.container?.querySelector(".mc-starters-con")?.classList.remove("mc-hidden");
+  modoInstance?.container?.querySelector(".mc-conversation-status-icon")?.classList.add("mc-hidden");
+}
+
+function setConversationType(type: keyof typeof ConversationStatus) {
+  const modoInstance = window.modoChatInstance?.();
+  modoInstance?.container?.querySelector(".mc-conversation-status-icon")?.classList.remove("mc-hidden");
+  const statusIcon = modoInstance?.container?.querySelector(".mc-conversation-status-icon");
+
+  if (statusIcon) {
+    // Remove existing mode classes
+    statusIcon.classList.remove("mc-ai-mode", "mc-human-mode");
+
+    // Add appropriate mode class
+    if (type === "AI_CHAT") {
+      statusIcon.classList.add("mc-ai-mode");
+    } else {
+      statusIcon.classList.add("mc-human-mode");
+    }
+  }
 }
 
 function loadStarters() {
@@ -204,6 +225,7 @@ async function loadCss() {
 export {
   switchToConversationLayout,
   switchToStarterLayout,
+  setConversationType,
   loadStarters,
   loadCss,
   updateChatToggleImage,

@@ -16,6 +16,18 @@ const createChatContainer = (modo: ModoChat) => {
       <div class="mc-chat-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <h3 class="mc-chat-title">پشتیبانی چت</h3>
+          <div class="mc-conversation-status-icon mc-hidden">
+            <!-- Clean AI/Bot icon -->
+            <svg class="mc-ai-chat-icon" style="width: 14px; height: 14px;" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24"><!-- Icon from Material Design Icons by Pictogrammers - https://github.com/Templarian/MaterialDesign/blob/master/LICENSE --><path fill="currentColor" d="M22 14h-1c0-3.87-3.13-7-7-7h-1V5.73A2 2 0 1 0 10 4c0 .74.4 1.39 1 1.73V7h-1c-3.87 0-7 3.13-7 7H2c-.55 0-1 .45-1 1v3c0 .55.45 1 1 1h1v1a2 2 0 0 0 2 2h14c1.11 0 2-.89 2-2v-1h1c.55 0 1-.45 1-1v-3c0-.55-.45-1-1-1m-1 3h-2v3H5v-3H3v-1h2v-2c0-2.76 2.24-5 5-5h4c2.76 0 5 2.24 5 5v2h2zM8.5 13.5l2.36 2.36l-1.18 1.18l-1.18-1.18l-1.18 1.18l-1.18-1.18zm7 0l2.36 2.36l-1.18 1.18l-1.18-1.18l-1.18 1.18l-1.18-1.18z"/></svg>
+            <!-- Clean Human/Person icon -->
+            <svg class="mc-human-chat-icon" viewBox="0 0 24 24" width="18" height="18">
+              <path fill="currentColor" d="M12 4C13.66 4 15 5.34 15 7C15 8.66 13.66 10 12 10C10.34 10 9 8.66 9 7C9 5.34 10.34 4 12 4ZM12 12C15.31 12 18 13.34 18 15V18H6V15C6 13.34 8.69 12 12 12Z"/>
+            </svg>
+            <div class="mc-tooltip">
+              <span class="mc-tooltip-text-ai">چت بات هوشمند</span>
+              <span class="mc-tooltip-text-human">پشتیبان انسانی</span>
+            </div>
+          </div>
           <div class="mc-connection-status mc-disconnected"></div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">

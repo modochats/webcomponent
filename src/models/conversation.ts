@@ -1,4 +1,4 @@
-import {switchToConversationLayout, switchToStarterLayout} from "#src/services/ui/fn.js";
+import {setConversationType, switchToConversationLayout, switchToStarterLayout} from "#src/services/ui/fn.js";
 import {ConversationStatus, MessageType} from "#src/types/conversation.js";
 import {fetchConversationMessages} from "#src/utils/fetch.js";
 import {marked} from "marked";
@@ -9,7 +9,7 @@ class Conversation {
   chatbot: number;
   unreadMessageCount: number;
   messages: ConversationMessage[] = [];
-  status: keyof typeof ConversationStatus;
+  status?: keyof typeof ConversationStatus;
   uniqueId?: string;
 
   constructor(init: Record<string, any>) {
@@ -18,19 +18,7 @@ class Conversation {
     this.chatbot = init.chatbot;
     this.unreadMessageCount = init.unread_messages_count;
     this.uniqueId = init.unique_id;
-    switch (init.status) {
-      case "ai_chat":
-        this.status = "AI_CHAT";
-        break;
-      case "supporter_chat":
-        this.status = "SUPPORTER_CHAT";
-        break;
-      case "resolved":
-        this.status = "RESOLVED";
-        break;
-      default:
-        this.status = "UNKNOWN";
-    }
+    this.setStatus(init.status);
     this.onInit();
   }
   addMessage(init: Record<string, any>) {
@@ -62,6 +50,21 @@ class Conversation {
       this.scrollToBottom();
     }
   }
+
+  addSystemMessage(message: string) {
+    const chatMessagesContainer = document.querySelector(".mc-chat-messages-con");
+    if (chatMessagesContainer) {
+      const systemMessageElement = document.createElement("div");
+      systemMessageElement.className = "mc-system-message";
+      systemMessageElement.innerHTML = `
+        <div class="mc-system-message-content">
+          ${message}
+        </div>
+      `;
+      chatMessagesContainer.appendChild(systemMessageElement);
+      this.scrollToBottom();
+    }
+  }
   scrollToBottom() {
     const chatMessagesContainer = document.querySelector(".mc-chat-messages-con");
     if (chatMessagesContainer) {
@@ -81,6 +84,24 @@ class Conversation {
   }
   onInit() {
     switchToConversationLayout();
+    if (this.status) setConversationType(this.status);
+  }
+  setStatus(status: string) {
+    switch (status) {
+      case "ai_chat":
+        this.status = "AI_CHAT";
+        setConversationType("AI_CHAT");
+        break;
+      case "supporter_chat":
+        this.status = "SUPPORTER_CHAT";
+        setConversationType("SUPPORTER_CHAT");
+        break;
+      case "resolved":
+        this.status = "RESOLVED";
+        break;
+      default:
+        this.status = "UNKNOWN";
+    }
   }
   async loadMessages() {
     const modoInstance = window.modoChatInstance?.();

@@ -21,13 +21,14 @@ class ModoChat {
   version: string;
   constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
     this.publicKey = publicKey;
-    this.userData = new UserData(this);
+    this.userData = new UserData(this, options?.userData);
     this.version = VERSION;
     this.options = {
       position: options?.position || "right",
       theme: options?.theme || "dark",
       primaryColor: options?.primaryColor || "#667eea",
-      title: options?.title || ""
+      title: options?.title || "",
+      userData: options?.userData
     };
     this.init();
   }
@@ -53,6 +54,43 @@ class ModoChat {
   async onOpen() {
     this.openedCount++;
     if (this.openedCount === 1) checkIfUserHasConversation(this);
+  }
+
+  /**
+   * Update the unique ID
+   * @param newUniqueId - The new unique ID to set (optional, will generate UUID if not provided)
+   */
+  updateUniqueId(newUniqueId?: string): void {
+    this.userData.updateUniqueId(newUniqueId);
+  }
+
+  /**
+   * Get the current unique ID
+   */
+  getUniqueId(): string {
+    return this.userData.uniqueId;
+  }
+
+  /**
+   * Update the phone number
+   * @param newPhoneNumber - The new phone number to set (optional)
+   */
+  updatePhoneNumber(newPhoneNumber?: string): void {
+    this.userData.updatePhoneNumber(newPhoneNumber);
+  }
+
+  /**
+   * Check if user has submitted a phone number
+   */
+  hasPhoneNumber(): boolean {
+    return this.userData.hasPhoneNumber();
+  }
+
+  /**
+   * Check if user has submitted the phone number form (whether empty or with phone number)
+   */
+  hasSubmittedPhoneForm(): boolean {
+    return this.userData.hasSubmittedPhoneForm();
   }
 }
 

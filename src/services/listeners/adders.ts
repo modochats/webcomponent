@@ -1,4 +1,4 @@
-import {sendMessage, submitUniqueIdForm} from "./fn.js";
+import {sendMessage, submitPhoneNumberForm} from "./fn.js";
 
 const registerListeners = (modoContainer: HTMLDivElement) => {
   let chatBody = modoContainer.querySelector(".mc-chat-body");
@@ -25,7 +25,7 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
   );
 
   registerSendMessageListener(modoContainer);
-  registerUniqueIdFormListeners(modoContainer);
+  registerPhoneNumberFormListeners(modoContainer);
   registerNewConversationListener(modoContainer);
 };
 
@@ -65,14 +65,14 @@ const registerSendMessageListener = (modoContainer: HTMLDivElement) => {
   });
 };
 
-const registerUniqueIdFormListeners = (modoContainer: HTMLDivElement) => {
+const registerPhoneNumberFormListeners = (modoContainer: HTMLDivElement) => {
   const formOverlay = modoContainer.querySelector(".mc-form-overlay") as HTMLDivElement;
   const phoneInput = modoContainer.querySelector(".mc-phone-input") as HTMLInputElement;
   const formSubmitBtn = modoContainer.querySelector(".mc-form-submit-btn") as HTMLButtonElement;
   const formCancelBtn = modoContainer.querySelector(".mc-form-cancel-btn") as HTMLButtonElement;
   formSubmitBtn.addEventListener("click", () => {
-    const uniqueId = phoneInput.value;
-    submitUniqueIdForm(uniqueId);
+    const phoneNumber = phoneInput.value;
+    submitPhoneNumberForm(phoneNumber);
   });
   formCancelBtn.addEventListener("click", () => {
     formOverlay.classList.add("mc-hidden");

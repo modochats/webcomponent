@@ -5,3 +5,4 @@ dist
 app.js
 app.dev.js
 app.dev.js.map
+.env

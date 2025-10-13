@@ -19,7 +19,8 @@ const sendMessage = async (message: string) => {
           modoInstance?.publicData?.setting.chatbot as number,
           message,
           modoInstance?.customerData.uniqueId,
-          modoInstance?.conversation?.uuid
+          modoInstance?.conversation?.uuid,
+          modoInstance?.customerData.phoneNumber
         );
 
         if (!modoInstance?.conversation?.uuid) {

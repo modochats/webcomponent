@@ -4,7 +4,7 @@ const fetchModoPublicData = async (publicKey: string) => {
   return await $fetch<Record<string, any>>(`/v1/chatbot/public/${publicKey}`);
 };
 
-const fetchSendMessage = async (chatbotId: number, content: string, uniqueId: string, conversationUuid?: string) => {
+const fetchSendMessage = async (chatbotId: number, content: string, uniqueId: string, conversationUuid?: string, phoneNumber?: string) => {
   return await $fetch("/v2/conversations/website/send-message/", {
     method: "POST",
     body: {
@@ -16,7 +16,8 @@ const fetchSendMessage = async (chatbotId: number, content: string, uniqueId: st
       meta_data: {
         url: window?.location?.href,
         title: document?.title
-      }
+      },
+      phone_number: phoneNumber && phoneNumber !== "no phone number" ? phoneNumber : undefined
     }
   });
 };

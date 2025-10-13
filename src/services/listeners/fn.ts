@@ -1,6 +1,6 @@
 import {PhoneNumberRegex} from "#src/constants/regex.js";
 import {Conversation} from "#src/models/conversation.js";
-import {UserData} from "#src/models/user-data.js";
+import {CustomerData} from "#src/models/customer-data.js";
 import {fetchSendMessage} from "#src/utils/fetch.js";
 import {initSocket} from "../socket/socket.js";
 
@@ -18,7 +18,7 @@ const sendMessage = async (message: string) => {
         const sendMsgRes = await fetchSendMessage(
           modoInstance?.publicData?.setting.chatbot as number,
           message,
-          modoInstance?.getUniqueId(),
+          modoInstance?.customerData.uniqueId,
           modoInstance?.conversation?.uuid
         );
 
@@ -40,7 +40,7 @@ const sendMessage = async (message: string) => {
 
 const checkIfUserHasPhoneNumber = () => {
   const modoInstance = window.modoChatInstance?.();
-  if (modoInstance?.hasSubmittedPhoneForm()) {
+  if (modoInstance?.customerData?.hasSubmittedPhoneForm()) {
     // User has already submitted the phone number form (whether empty or with phone number)
     return true;
   } else {
@@ -63,7 +63,7 @@ const submitPhoneNumberForm = (phoneNumber: string) => {
     const modoChat = window.modoChatInstance?.();
     if (modoChat) {
       // Update the phone number
-      modoChat.userData.updatePhoneNumber(phoneNumber.trim() || undefined);
+      modoChat.customerData.savePhoneNumber(phoneNumber.trim() || undefined);
 
       const formOverlay = modoChat.container?.querySelector(".mc-form-overlay");
       if (formOverlay) {

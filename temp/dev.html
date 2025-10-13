@@ -35,6 +35,10 @@
         border-radius: 8px;
       }
     </style>
+    <script>
+      // Set development environment before loading the component
+      window.ENVIRONMENT = "DEV";
+    </script>
     <script src="app.dev.js"></script>
   </head>
   <body>
@@ -47,6 +51,7 @@
         <p>• Component is loaded and ready</p>
         <p>• Check the console for any errors or logs</p>
         <p>• The file will auto-reload when you make changes</p>
+        <p>• Environment: <span id="env-status">Loading...</span></p>
       </div>
     </div>
     <div>
@@ -72,12 +77,11 @@
     <script>
       new ModoChat("a286d389-7272-4020-b611-0d21b31e63c0", {
         primaryColor: "red",
-        theme: "light",
-        userData: {
-          key: "1234567890"
-        }
+        theme: "light"
       });
-      window.ENVIRONMENT = "DEV";
+
+      // Update environment status display
+      document.getElementById("env-status").textContent = window.ENVIRONMENT || "Unknown";
     </script>
   </body>
 </html>

@@ -89,7 +89,7 @@ const initSocket = async () => {
       const accessTokenRes = await fetchGetAccessTokenForSocket(
         modoInstance.publicData?.setting.uuid as string,
         modoInstance.conversation?.uuid as string,
-        modoInstance.getUniqueId()
+        modoInstance.customerData.uniqueId
       );
       localStorage.setItem(`modo-chat:${modoInstance.publicKey}-conversation-access-token`, accessTokenRes.access_token);
       accessToken = accessTokenRes.access_token;

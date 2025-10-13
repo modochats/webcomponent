@@ -44,4 +44,9 @@ const fetchUpdateUserData = async (chatbotUuid: string, uniqueId: string, userDa
     }
   });
 };
-export {fetchModoPublicData, fetchSendMessage, fetchGetAccessTokenForSocket, fetchConversationMessages, fetchUpdateUserData};
+const fetchReadMessage = async (id: number) => {
+  return await $fetch(`/v2/conversations/messages/${id}/`, {
+    method: "POST"
+  });
+};
+export {fetchModoPublicData, fetchSendMessage, fetchGetAccessTokenForSocket, fetchConversationMessages, fetchUpdateUserData, fetchReadMessage};

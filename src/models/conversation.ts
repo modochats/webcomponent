@@ -1,6 +1,6 @@
 import {setConversationType, switchToConversationLayout, switchToStarterLayout} from "#src/services/ui/fn.js";
 import {ConversationStatus, MessageType} from "#src/types/conversation.js";
-import {fetchConversationMessages} from "#src/utils/fetch.js";
+import {fetchConversationMessages, fetchReadMessage} from "#src/utils/fetch.js";
 import {marked} from "marked";
 
 class Conversation {
@@ -35,7 +35,14 @@ class Conversation {
         minute: "2-digit",
         hour12: false
       });
+      const observer = new IntersectionObserver(
+        entries => {
+          if (entries[0]?.isIntersecting) latestMessage.fetchRead();
+        },
+        {threshold: 0.1}
+      );
 
+      if (messageElement) observer.observe(messageElement);
       messageElement.innerHTML = `
         <div class="mc-chat-message ${latestMessage.type === "USER" ? "mc-chat-message-user" : "mc-chat-message-supporter"}">
           <div class="mc-message-content">${marked.parse(init.content) as string}</div>
@@ -117,9 +124,11 @@ class ConversationMessage {
   content: string;
   type: keyof typeof MessageType;
   createdAt: string;
+  isRead: boolean = false;
   constructor(init: Record<string, any>) {
     this.id = init.id;
     this.content = init.content;
+    this.isRead = init.is_read || false;
     switch (init.message_type) {
       case 0:
         this.type = "USER";
@@ -137,6 +146,13 @@ class ConversationMessage {
         this.type = "UNKNOWN";
     }
     this.createdAt = init.created_at;
+  }
+
+  fetchRead() {
+    if (this.isRead === false && this.type !== "USER") {
+      this.isRead = true;
+      fetchReadMessage(this.id);
+    }
   }
 }
 export {Conversation, ConversationMessage};

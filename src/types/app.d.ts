@@ -7,6 +7,8 @@ interface ModoChatOptions {
   theme: "dark" | "light";
   primaryColor: string;
   title: string;
+  foregroundColor: string;
   userData?: ModoChatUserData;
+  autoInit?: boolean;
 }
 export {ModoChatOptions, ModoChatUserData};

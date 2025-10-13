@@ -93,18 +93,4 @@ const registerNewConversationListener = (modoContainer: HTMLDivElement) => {
   });
 };
 
-const applyTheme = (theme: string) => {
-  const widget = document.querySelector(".modo-chat-widget");
-  if (theme === "light") {
-    widget?.setAttribute("data-theme", "light");
-  } else {
-    widget?.removeAttribute("data-theme");
-  }
-};
-
-const updateThemeButton = (button: HTMLButtonElement, theme: string) => {
-  button.textContent = theme === "dark" ? "☀️" : "🌙";
-  button.title = theme === "dark" ? "تغییر به تم روشن" : "تغییر به تم تاریک";
-};
-
 export {registerListeners, registerNewConversationListener};

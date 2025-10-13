@@ -19,6 +19,7 @@ class ModoChat {
   options: ModoChatOptions;
   openedCount: number = 0;
   version: string;
+  isInitialized: boolean = false;
   constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
     this.publicKey = publicKey;
     this.customerData = new CustomerData(this, options?.userData);
@@ -28,32 +29,29 @@ class ModoChat {
       theme: options?.theme || "dark",
       primaryColor: options?.primaryColor || "#667eea",
       title: options?.title || "",
-      userData: options?.userData
+      userData: options?.userData,
+      foregroundColor: options?.foregroundColor || "#fff"
     };
-    this.init();
+    if (options?.autoInit) this.init();
   }
   async init() {
-    try {
-      const publicDataRes = await fetchModoPublicData(this.publicKey);
-      this.publicData = new ModoPublicData(publicDataRes);
-      if (checkIfHostIsAllowed(this)) {
-        await loadCss();
-        createChatContainer(this);
-        window.modoChatInstance = () => this;
-        applyModoOptions();
-        loadStarters();
-        updateChatToggleImage();
-        updateChatTitle();
-      } else {
-        console.error("Domain not allowed");
-      }
-    } catch (err) {
-      console.error("Failed to initialize ModoChat", err);
-    }
+    if (this.isInitialized) throw new Error("ModoChat already initialized");
+    const publicDataRes = await fetchModoPublicData(this.publicKey);
+    this.publicData = new ModoPublicData(publicDataRes);
+    if (checkIfHostIsAllowed(this)) {
+      await loadCss();
+      createChatContainer(this);
+      window.modoChatInstance = () => this;
+      applyModoOptions();
+      loadStarters();
+      updateChatToggleImage();
+      updateChatTitle();
+      this.isInitialized = true;
+    } else throw new Error("host not allowed");
   }
   async onOpen() {
     this.openedCount++;
-    if (this.openedCount === 1)  checkIfUserHasConversation(this);
+    if (this.openedCount === 1) checkIfUserHasConversation(this);
   }
 
   /**

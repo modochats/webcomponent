@@ -132,6 +132,9 @@ function applyModoOptions() {
 
   // Apply primary color option
   applyPrimaryColorOption(container, options.primaryColor);
+
+  // Apply foreground color option
+  applyForegroundColorOption(container, options.foregroundColor);
 }
 
 function applyPositionOption(container: HTMLDivElement, position: "left" | "right") {
@@ -190,6 +193,18 @@ function applyPrimaryColorOption(container: HTMLDivElement, primaryColor: string
     // Generate gradient using the primary color
     const gradientColor = adjustColorBrightness(primaryColor, 15);
     root?.style.setProperty("--primary-gradient", `linear-gradient(135deg, ${primaryColor} 0%, ${gradientColor} 100%)`);
+  } else console.error("modo chat widget not found");
+}
+
+function applyForegroundColorOption(container: HTMLDivElement, foregroundColor: string) {
+  // Create CSS custom properties for the foreground color
+  const root = document.querySelector(".modo-chat-widget") as HTMLDivElement;
+  if (root) {
+    // Set the foreground color
+    root?.style.setProperty("--foreground-color", foregroundColor);
+
+    // Set white color to use foreground color for white text elements
+    root?.style.setProperty("--white", foregroundColor);
   } else console.error("modo chat widget not found");
 }
 

@@ -66,9 +66,9 @@ const createChatContainer = (modo: ModoChat) => {
       <div class="mc-form-overlay mc-hidden">
         <div class="mc-form-content">
           <h3 class="mc-form-title">اطلاعات تماس</h3>
-          <p class="mc-form-subtitle">لطفا برای اطلاع رسانی بهتر پیام ها شماره خود را وارد کنید</p>
+          <p class="mc-form-subtitle">لطفا برای اطلاع رسانی بهتر پیام ها شماره خود را وارد کنید (اختیاری)</p>
           <div class="mc-form-input-area">
-            <input type="tel" placeholder="شماره تلفن" class="mc-phone-input">
+            <input type="tel" placeholder="شماره تلفن (اختیاری)" class="mc-phone-input">
           </div>
           <div class="mc-form-buttons">
             <button class="mc-form-submit-btn">

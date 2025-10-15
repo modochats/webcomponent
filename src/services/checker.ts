@@ -1,6 +1,6 @@
 import {ModoChat} from "#src/app.js";
 import {Conversation} from "#src/models/conversation.js";
-import {fetchConversationMessages} from "#src/utils/fetch.js";
+import {fetchConversationMessages, fetchUpdateUserData} from "#src/utils/fetch.js";
 import {parse} from "tldts";
 import {initSocket} from "./socket/socket.js";
 import {loadStarters, switchToStarterLayout} from "./ui/fn.js";
@@ -16,6 +16,7 @@ const checkIfUserHasConversation = async (modo: ModoChat) => {
   if (savedConversationUuid) {
     try {
       const res = await fetchConversationMessages(savedConversationUuid, modo.publicKey);
+      modo.customerData.fetchUpdate();
       modo.conversation = new Conversation(res.results[0]?.conversation);
       for (const message of res.results) modo.conversation.addMessage(message);
       modo.conversation.scrollToBottom();

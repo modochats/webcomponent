@@ -4,7 +4,7 @@ const fetchModoPublicData = async (publicKey: string) => {
   return await $fetch<Record<string, any>>(`/v1/chatbot/public/${publicKey}`);
 };
 
-const fetchSendMessage = async (chatbotId: number, content: string, uniqueId: string, conversationUuid?: string) => {
+const fetchSendMessage = async (chatbotId: number, content: string, uniqueId: string, conversationUuid?: string, phoneNumber?: string) => {
   return await $fetch("/v2/conversations/website/send-message/", {
     method: "POST",
     body: {
@@ -16,7 +16,8 @@ const fetchSendMessage = async (chatbotId: number, content: string, uniqueId: st
       meta_data: {
         url: window?.location?.href,
         title: document?.title
-      }
+      },
+      phone_number: phoneNumber && phoneNumber !== "no phone number" ? phoneNumber : undefined
     }
   });
 };
@@ -33,4 +34,19 @@ const fetchGetAccessTokenForSocket = async (chatbotId: string, conversationUuid:
 const fetchConversationMessages = async (conversationUuid: string, chatbotUuid: string) => {
   return await $fetch<Record<string, any>>(`/v2/conversations/website/conversations/${conversationUuid}/chatbot/${chatbotUuid}/messages/`);
 };
-export {fetchModoPublicData, fetchSendMessage, fetchGetAccessTokenForSocket, fetchConversationMessages};
+const fetchUpdateUserData = async (chatbotUuid: string, uniqueId: string, userData: Record<string, any>) => {
+  return await $fetch("/v1/chatbot/customners/set-user-data", {
+    method: "POST",
+    body: {
+      chatbot_uuid: chatbotUuid,
+      unique_id: uniqueId,
+      user_data: userData
+    }
+  });
+};
+const fetchReadMessage = async (id: number) => {
+  return await $fetch(`/v2/conversations/messages/${id}/`, {
+    method: "POST"
+  });
+};
+export {fetchModoPublicData, fetchSendMessage, fetchGetAccessTokenForSocket, fetchConversationMessages, fetchUpdateUserData, fetchReadMessage};

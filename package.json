@@ -5,9 +5,9 @@
   "main": "dist/src/app.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/app.ts",
-    "dev:ts": "tsc --watch --noCheck",
-    "dev:rollup": "rollup --config rollup.dev.config.js --watch",
+    "dev": "NODE_ENV=development tsx watch src/app.ts",
+    "dev:ts": "NODE_ENV=development tsc --watch --noCheck",
+    "dev:rollup": "NODE_ENV=development rollup --config rollup.dev.config.js --watch",
     "dev:server": "live-server temp --port=3000 --entry-file=dev.html",
     "dev:full": "concurrently \"yarn dev:ts\" \"yarn dev:rollup\" \"yarn dev:server\" --names \"tsc,rollup,server\" --prefix name --kill-others",
     "static": "tsx src/app.ts",

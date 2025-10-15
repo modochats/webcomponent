@@ -57,7 +57,7 @@ class Socket {
         modoInstance?.conversation?.addSystemMessage(message.message as string);
         break;
       default:
-        console.log("unknown message type :", message);
+        console.info("modo chat : unknown message type :", message);
     }
   }
   close() {
@@ -89,7 +89,7 @@ const initSocket = async () => {
       const accessTokenRes = await fetchGetAccessTokenForSocket(
         modoInstance.publicData?.setting.uuid as string,
         modoInstance.conversation?.uuid as string,
-        modoInstance.userData.uniqueId as string
+        modoInstance.customerData.uniqueId
       );
       localStorage.setItem(`modo-chat:${modoInstance.publicKey}-conversation-access-token`, accessTokenRes.access_token);
       accessToken = accessTokenRes.access_token;

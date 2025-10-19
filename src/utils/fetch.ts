@@ -49,4 +49,20 @@ const fetchReadMessage = async (id: number) => {
     method: "POST"
   });
 };
-export {fetchModoPublicData, fetchSendMessage, fetchGetAccessTokenForSocket, fetchConversationMessages, fetchUpdateUserData, fetchReadMessage};
+const fetchMarkConversationAsRead = async (conversationUuid: string, uniqueId: string) => {
+  return await $fetch(`/v2/conversations/website/conversations/${conversationUuid}/messages/seen`, {
+    method: "POST",
+    body: {
+      unique_id: uniqueId
+    }
+  });
+};
+export {
+  fetchModoPublicData,
+  fetchSendMessage,
+  fetchGetAccessTokenForSocket,
+  fetchConversationMessages,
+  fetchUpdateUserData,
+  fetchReadMessage,
+  fetchMarkConversationAsRead
+};

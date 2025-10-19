@@ -5,10 +5,12 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
   const toggleChatBtn = modoContainer.querySelector(".mc-toggle-chat-btn") as HTMLButtonElement;
   let isBodyOpen = false;
 
-  // Set footer link URL with origin parameter
+  // Set footer link URL with origin parameter and version title
   const footerLink = modoContainer.querySelector(".mc-footer-link") as HTMLAnchorElement;
   if (footerLink) {
+    const modoInstance = window.modoChatInstance?.();
     footerLink.href = `https://modochats.com?utm_source=${encodeURIComponent(window.location.origin)}`;
+    footerLink.title = `مودوچت v${modoInstance?.version || "0.1"}`;
   }
 
   // toggle chat body visibility
@@ -18,6 +20,7 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
       const modoInstance = window.modoChatInstance?.();
       isBodyOpen = !isBodyOpen;
       if (isBodyOpen) modoInstance?.onOpen();
+      else modoInstance?.onClose();
       chatBody?.classList.toggle("mc-hidden");
       toggleChatBtn.classList.toggle("mc-chat-open", isBodyOpen);
     },

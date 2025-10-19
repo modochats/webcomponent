@@ -7,6 +7,7 @@ import {CustomerData} from "./models/customer-data.js";
 import {Conversation} from "./models/conversation.js";
 import {Socket} from "./services/socket/socket.js";
 import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, loadCss} from "./services/ui/fn.js";
+import {preloadAudio} from "./utils/audio.js";
 import {VERSION} from "./constants/index.js";
 
 class ModoChat {
@@ -20,6 +21,7 @@ class ModoChat {
   openedCount: number = 0;
   version: string;
   isInitialized: boolean = false;
+  isOpen: boolean = false;
   constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
     this.publicKey = publicKey;
     this.customerData = new CustomerData(this, options?.userData);
@@ -40,18 +42,31 @@ class ModoChat {
     this.publicData = new ModoPublicData(publicDataRes);
     if (checkIfHostIsAllowed(this)) {
       await loadCss();
-      createChatContainer(this);
       window.modoChatInstance = () => this;
+      createChatContainer(this);
       applyModoOptions();
       loadStarters();
       updateChatToggleImage();
       updateChatTitle();
+
       this.isInitialized = true;
     } else throw new Error("host not allowed");
   }
   async onOpen() {
+    this.isOpen = true;
     this.openedCount++;
-    if (this.openedCount === 1) checkIfUserHasConversation(this);
+
+    // Hide tooltip when chat is opened
+    this.conversation?.hideTooltip();
+    this.conversation?.markAsRead();
+    this.conversation?.scrollToBottom();
+
+    if (this.openedCount === 1) {
+      await checkIfUserHasConversation(this);
+    }
+  }
+  onClose() {
+    this.isOpen = false;
   }
 
   /**

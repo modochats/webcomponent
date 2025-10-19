@@ -57,6 +57,18 @@ const fetchMarkConversationAsRead = async (conversationUuid: string, uniqueId: s
     }
   });
 };
+
+const fetchMessageFeedback = async (id: number, uniqueId: string, conversationUuid: string, liked: boolean) => {
+  return await $fetch(`/v2/conversations/website/conversations/messages/feedback`, {
+    method: "POST",
+    body: {
+      unique_id: uniqueId,
+      feedback: liked ? 1 : 0,
+      message_id: id,
+      conversation_uuid: conversationUuid
+    }
+  });
+};
 export {
   fetchModoPublicData,
   fetchSendMessage,
@@ -64,5 +76,6 @@ export {
   fetchConversationMessages,
   fetchUpdateUserData,
   fetchReadMessage,
-  fetchMarkConversationAsRead
+  fetchMarkConversationAsRead,
+  fetchMessageFeedback
 };

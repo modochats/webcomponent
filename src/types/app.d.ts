@@ -1,14 +1,16 @@
-interface ModoChatUserData {
-  key?: string; // unique id
-}
-
 interface ModoChatOptions {
   position: "left" | "right";
   theme: "dark" | "light";
   primaryColor: string;
   title: string;
   foregroundColor: string;
-  userData?: ModoChatUserData;
+  userData?: Record<string, any>;
   autoInit?: boolean;
 }
-export {ModoChatOptions, ModoChatUserData};
+interface FetchPaginationRes<T = any> {
+  results: T[];
+  next: string | null;
+  prev: string | null;
+  count: number;
+}
+export {ModoChatOptions, FetchPaginationRes};

@@ -1,6 +1,6 @@
 import {ModoChat} from "#src/app.js";
 import {Conversation} from "#src/models/conversation.js";
-import {fetchConversationMessages, fetchUpdateUserData} from "#src/utils/fetch.js";
+import {fetchConversationMessages, fetchConversations, fetchUpdateUserData} from "#src/utils/fetch.js";
 import {parse} from "tldts";
 import {initSocket} from "./socket/socket.js";
 import {loadStarters, switchToStarterLayout} from "./ui/fn.js";
@@ -11,19 +11,19 @@ const checkIfHostIsAllowed = (modo: ModoChat) => {
   if (currentHost) return allowedHosts.includes(currentHost);
 };
 
-const checkIfUserHasConversation = async (modo: ModoChat) => {
-  const savedConversationUuid = localStorage.getItem(`modo-chat:${modo.publicKey}-conversation-uuid`);
-  if (savedConversationUuid) {
-    try {
-      const res = await fetchConversationMessages(savedConversationUuid, modo.publicKey);
-      modo.customerData.fetchUpdate();
-      modo.conversation = new Conversation(res.results[0]?.conversation);
-      for (const message of res.results) modo.conversation.addMessage(message);
-      modo.conversation.scrollToBottom();
-      await initSocket();
-    } catch (err) {
-      console.error("Failed to fetch conversation messages", err);
+
+const loadConversation = async (modo: ModoChat) => {
+  const savedUUid = localStorage.getItem(`modo-chat:${modo.publicKey}-conversation-uuid`);
+  if (savedUUid) {
+    const res = await fetchConversations(savedUUid, modo.customerData.uniqueId);
+    if (res.results.length > 0) {
+      modo.conversation = new Conversation(res.results[0]);
+      modo.conversation.addBadge();
     }
   }
+  // modo.conversation = new Conversation(res.conversation);
+  // for (const message of res.messages) modo.conversation.addMessage(message);
+  // modo.conversation.scrollToBottom();
+  // await initSocket();
 };
-export {checkIfHostIsAllowed, checkIfUserHasConversation};
+export {checkIfHostIsAllowed, loadConversation};

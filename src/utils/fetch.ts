@@ -1,4 +1,5 @@
 import {$fetch} from "#src/tools/fetch.js";
+import {FetchPaginationRes} from "#src/types/app.js";
 
 const fetchModoPublicData = async (publicKey: string) => {
   return await $fetch<Record<string, any>>(`/v1/chatbot/public/${publicKey}`);
@@ -69,6 +70,10 @@ const fetchMessageFeedback = async (id: number, uniqueId: string, conversationUu
     }
   });
 };
+
+const fetchConversations = async (conversationUuid: string, uniqueId: string) => {
+  return await $fetch<FetchPaginationRes>(`/v2/conversations/website/conversations/${conversationUuid}/customer/${uniqueId}`);
+};
 export {
   fetchModoPublicData,
   fetchSendMessage,
@@ -77,5 +82,6 @@ export {
   fetchUpdateUserData,
   fetchReadMessage,
   fetchMarkConversationAsRead,
-  fetchMessageFeedback
+  fetchMessageFeedback,
+  fetchConversations
 };

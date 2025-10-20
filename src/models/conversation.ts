@@ -17,7 +17,7 @@ class Conversation {
     this.id = init.id;
     this.uuid = init.uuid;
     this.chatbot = init.chatbot;
-    this.unreadCount = init.unread_messages_count;
+    this.unreadCount = init.unread_count;
     this.uniqueId = init.unique_id;
     this.setStatus(init.status);
     this.onInit();

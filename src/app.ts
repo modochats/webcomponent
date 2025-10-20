@@ -1,11 +1,11 @@
 import {ModoChatOptions} from "./types/app.js";
 import {ModoPublicData} from "./models/modo-public-data.js";
 import {fetchModoPublicData} from "./utils/fetch.js";
-import {checkIfHostIsAllowed, checkIfUserHasConversation} from "./services/checker.js";
+import {checkIfHostIsAllowed, loadConversation} from "./services/checker.js";
 import {createChatContainer} from "./services/ui/html.js";
 import {CustomerData} from "./models/customer-data.js";
 import {Conversation} from "./models/conversation.js";
-import {Socket} from "./services/socket/socket.js";
+import {initSocket, Socket} from "./services/socket/socket.js";
 import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, loadCss} from "./services/ui/fn.js";
 import {preloadAudio} from "./utils/audio.js";
 import {VERSION} from "./constants/index.js";
@@ -48,6 +48,7 @@ class ModoChat {
       loadStarters();
       updateChatToggleImage();
       updateChatTitle();
+      loadConversation(this);
 
       this.isInitialized = true;
     } else throw new Error("host not allowed");
@@ -62,7 +63,9 @@ class ModoChat {
     this.conversation?.scrollToBottom();
 
     if (this.openedCount === 1) {
-      await checkIfUserHasConversation(this);
+      await this.conversation?.loadMessages();
+      await initSocket();
+      await this.customerData.fetchUpdate();
     }
   }
   onClose() {
@@ -73,8 +76,8 @@ class ModoChat {
    * Update user data with new values
    * @param newUserData - Object containing new user data to merge
    */
-  updateUserData(newUserData: Record<string, any>): void {
-    this.customerData.updateUserData(newUserData);
+  async updateUserData(newUserData: Record<string, any>) {
+    await this.customerData.updateUserData(newUserData);
   }
 }
 

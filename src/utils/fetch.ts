@@ -1,4 +1,5 @@
 import {$fetch} from "#src/tools/fetch.js";
+import {FetchPaginationRes} from "#src/types/app.js";
 
 const fetchModoPublicData = async (publicKey: string) => {
   return await $fetch<Record<string, any>>(`/v1/chatbot/public/${publicKey}`);
@@ -49,4 +50,38 @@ const fetchReadMessage = async (id: number) => {
     method: "POST"
   });
 };
-export {fetchModoPublicData, fetchSendMessage, fetchGetAccessTokenForSocket, fetchConversationMessages, fetchUpdateUserData, fetchReadMessage};
+const fetchMarkConversationAsRead = async (conversationUuid: string, uniqueId: string) => {
+  return await $fetch(`/v2/conversations/website/conversations/${conversationUuid}/messages/seen`, {
+    method: "POST",
+    body: {
+      unique_id: uniqueId
+    }
+  });
+};
+
+const fetchMessageFeedback = async (id: number, uniqueId: string, conversationUuid: string, liked: boolean) => {
+  return await $fetch(`/v2/conversations/website/conversations/messages/feedback`, {
+    method: "POST",
+    body: {
+      unique_id: uniqueId,
+      feedback: liked ? 1 : 0,
+      message_id: id,
+      conversation_uuid: conversationUuid
+    }
+  });
+};
+
+const fetchConversations = async (conversationUuid: string, uniqueId: string) => {
+  return await $fetch<FetchPaginationRes>(`/v2/conversations/website/conversations/${conversationUuid}/customer/${uniqueId}`);
+};
+export {
+  fetchModoPublicData,
+  fetchSendMessage,
+  fetchGetAccessTokenForSocket,
+  fetchConversationMessages,
+  fetchUpdateUserData,
+  fetchReadMessage,
+  fetchMarkConversationAsRead,
+  fetchMessageFeedback,
+  fetchConversations
+};

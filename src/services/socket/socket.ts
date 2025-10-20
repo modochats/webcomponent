@@ -45,16 +45,18 @@ class Socket {
     const modoInstance = window.modoChatInstance?.();
     switch (message.type) {
       case "new_message":
-        const newMessage = new ConversationMessage(message.message as Record<string, any>);
+        const newMessage = new ConversationMessage(message.message);
         if (newMessage.type === "USER") return;
-        else modoInstance?.conversation?.addMessage(message.message as Record<string, any>);
+        else {
+          modoInstance?.conversation?.addMessage(message.message, {incoming: true});
+        }
         break;
       case "ai_response":
-        modoInstance?.conversation?.addMessage(message.message as Record<string, any>);
+        modoInstance?.conversation?.addMessage(message.message, {incoming: true});
         break;
       case "conversation_status_change":
         modoInstance?.conversation?.setStatus(message.status);
-        modoInstance?.conversation?.addSystemMessage(message.message as string);
+        modoInstance?.conversation?.addSystemMessage(message.message);
         break;
       default:
         console.info("modo chat : unknown message type :", message);

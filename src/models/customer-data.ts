@@ -1,5 +1,4 @@
 import {ModoChat} from "#src/app.js";
-import {ModoChatUserData} from "#src/types/app.js";
 import {fetchUpdateUserData} from "#src/utils/fetch.js";
 
 class CustomerData {
@@ -8,10 +7,10 @@ class CustomerData {
   private modo: ModoChat;
   phoneNumber?: string;
 
-  constructor(modo: ModoChat, userData?: ModoChatUserData) {
+  constructor(modo: ModoChat, userData?: Record<string, any>) {
     this.modo = modo;
     this.initializeUniqueId();
-    this.initializeUserData(userData);
+    this.updateUserData(userData);
     this.initializePhoneNumber();
   }
 
@@ -34,16 +33,7 @@ class CustomerData {
     } else {
       // Generate a new UUID if no saved unique ID exists
       this._uniqueId = crypto.randomUUID();
-      this.saveUniqueIdToLocalStorage();
-    }
-  }
-
-  /**
-   * Initialize user data from localStorage and provided options
-   */
-  private initializeUserData(userDataOptions?: ModoChatUserData): void {
-    if (userDataOptions) {
-      this._userData = userDataOptions;
+      this.savePhoneNumber();
     }
   }
 
@@ -62,32 +52,15 @@ class CustomerData {
   }
 
   /**
-   * Update the unique ID with a new value
-   * @param newUniqueId - The new unique ID to set (optional, will generate UUID if not provided)
-   */
-  updateUniqueId(newUniqueId?: string): void {
-    if (newUniqueId && newUniqueId.trim() !== "") {
-      this._uniqueId = newUniqueId.trim();
-    } else {
-      this._uniqueId = crypto.randomUUID();
-    }
-    this.saveUniqueIdToLocalStorage();
-  }
-
-  /**
    * Update user data with new values
    * @param newUserData - Object containing new user data to merge
    */
-  updateUserData(newUserData: Record<string, any>): void {
-    this._userData = newUserData;
-    this.fetchUpdate();
-  }
-
-  /**
-   * Save the current unique ID to localStorage
-   */
-  private saveUniqueIdToLocalStorage(): void {
-    localStorage.setItem(`modo-chat:${this.modo.publicKey}-user-unique-id`, this._uniqueId!);
+  async updateUserData(newUserData?: Record<string, any>): Promise<void> {
+    console.log("newUserData", newUserData);
+    if (newUserData && typeof newUserData === "object") {
+      this._userData = newUserData;
+      await this.fetchUpdate();
+    } else console.warn("Invalid user data");
   }
 
   hasSubmittedPhoneForm(): boolean {
@@ -99,9 +72,8 @@ class CustomerData {
     localStorage.setItem(`modo-chat:${this.modo.publicKey}-user-phone-number`, phoneNumber || "no phone number");
   }
 
-  fetchUpdate() {
-    if (typeof this._userData === "object") fetchUpdateUserData(this.modo.publicData?.setting.uuid as string, this.uniqueId, this.modo.customerData.userData);
-    else console.warn("no user data to update");
+  async fetchUpdate() {
+    await fetchUpdateUserData(this.modo.publicData?.setting.uuid as string, this.uniqueId, this.userData);
   }
 }
 export {CustomerData};

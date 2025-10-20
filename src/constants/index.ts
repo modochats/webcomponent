@@ -16,5 +16,5 @@ const isProd = getEnvironment() === "PROD";
 const BASE_API_URL = isDev ? "https://dev-api.modochats.com" : "https://api.modochats.com";
 const BASE_WEBSOCKET_URL = isDev ? "wss://dev-api.modochats.com/ws" : "wss://api.modochats.com/ws";
 const VERSION = "0.2";
-
-export {BASE_API_URL, BASE_WEBSOCKET_URL, VERSION, isDev, isProd, getEnvironment};
+const NEW_MESSAGE_AUDIO_URL = "https://cdn.modochats.com/audio/new-message.mp3";
+export {BASE_API_URL, BASE_WEBSOCKET_URL, VERSION, isDev, isProd, getEnvironment, NEW_MESSAGE_AUDIO_URL};

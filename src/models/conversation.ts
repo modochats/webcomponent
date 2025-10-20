@@ -1,3 +1,4 @@
+import { NEW_MESSAGE_AUDIO_URL } from "#src/constants/index.js";
 import {setConversationType, switchToConversationLayout, switchToStarterLayout} from "#src/services/ui/fn.js";
 import {ConversationStatus, MessageType} from "#src/types/conversation.js";
 import {playAudio, preloadAudio} from "#src/utils/audio.js";
@@ -32,7 +33,7 @@ class Conversation {
       else {
         this.addBadge();
         message.showTooltip();
-        playAudio("./audio/new-message.mp3").catch(console.warn);
+        playAudio(NEW_MESSAGE_AUDIO_URL).catch(console.warn);
       }
     }
     this.scrollToBottom();

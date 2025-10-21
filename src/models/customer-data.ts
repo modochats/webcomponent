@@ -33,7 +33,6 @@ class CustomerData {
     } else {
       // Generate a new UUID if no saved unique ID exists
       this._uniqueId = crypto.randomUUID();
-      this.savePhoneNumber();
     }
   }
 
@@ -56,11 +55,10 @@ class CustomerData {
    * @param newUserData - Object containing new user data to merge
    */
   async updateUserData(newUserData?: Record<string, any>): Promise<void> {
-    console.log("newUserData", newUserData);
     if (newUserData && typeof newUserData === "object") {
       this._userData = newUserData;
       await this.fetchUpdate();
-    } else console.warn("Invalid user data");
+    } else if (newUserData) console.warn("Invalid user data");
   }
 
   hasSubmittedPhoneForm(): boolean {

@@ -63,8 +63,10 @@ class ModoChat {
     this.conversation?.scrollToBottom();
 
     if (this.openedCount === 1) {
-      await this.conversation?.loadMessages();
-      await initSocket();
+      if (this.conversation) {
+        await this.conversation?.loadMessages();
+        await initSocket();
+      }
       await this.customerData.fetchUpdate();
     }
   }

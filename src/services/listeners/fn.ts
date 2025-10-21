@@ -14,7 +14,6 @@ const sendMessage = async (message: string) => {
           const chatInput = modoInstance.container?.querySelector(".mc-chat-input") as HTMLInputElement;
           if (chatInput) chatInput.value = "";
         }
-
         const sendMsgRes = await fetchSendMessage(
           modoInstance?.publicData?.setting.chatbot as number,
           message,
@@ -22,6 +21,7 @@ const sendMessage = async (message: string) => {
           modoInstance?.conversation?.uuid,
           modoInstance?.customerData.phoneNumber
         );
+
 
         if (!modoInstance?.conversation?.uuid) {
           modoInstance.conversation = new Conversation(sendMsgRes.conversation);

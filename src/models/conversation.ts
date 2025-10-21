@@ -1,4 +1,4 @@
-import { NEW_MESSAGE_AUDIO_URL } from "#src/constants/index.js";
+import {NEW_MESSAGE_AUDIO_URL} from "#src/constants/index.js";
 import {setConversationType, switchToConversationLayout, switchToStarterLayout} from "#src/services/ui/fn.js";
 import {ConversationStatus, MessageType} from "#src/types/conversation.js";
 import {playAudio, preloadAudio} from "#src/utils/audio.js";
@@ -236,7 +236,6 @@ class ConversationMessage {
     const modoInstance = window.modoChatInstance?.();
     const tooltip = modoInstance?.container?.querySelector(".mc-toggle-tooltip");
     const tooltipText = modoInstance?.container?.querySelector(".mc-toggle-tooltip-text");
-    console.log(tooltip, tooltipText);
     if (tooltip && tooltipText) {
       // Show the tooltip
       tooltip.classList.remove("mc-hidden");

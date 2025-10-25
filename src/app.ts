@@ -32,7 +32,8 @@ class ModoChat {
       primaryColor: options?.primaryColor || "#667eea",
       title: options?.title || "",
       userData: options?.userData,
-      foregroundColor: options?.foregroundColor || "#fff"
+      foregroundColor: options?.foregroundColor || "#fff",
+      fullScreen: typeof options?.fullScreen === "boolean" ? options?.fullScreen : false
     };
     if (options?.autoInit) this.init();
   }
@@ -51,6 +52,17 @@ class ModoChat {
       loadConversation(this);
 
       this.isInitialized = true;
+
+      // In fullscreen mode, automatically open the chat
+      if (this.options.fullScreen) {
+        // Ensure chat body is visible in fullscreen mode
+        const chatBody = this.container?.querySelector(".mc-chat-body");
+        if (chatBody) {
+          chatBody.classList.remove("mc-hidden");
+          chatBody.classList.add("mc-active");
+        }
+        this.onOpen();
+      }
     } else throw new Error("host not allowed");
   }
   async onOpen() {
@@ -61,6 +73,15 @@ class ModoChat {
     this.conversation?.hideTooltip();
     this.conversation?.markAsRead();
     this.conversation?.scrollToBottom();
+
+    // In fullscreen mode, automatically show the chat body
+    if (this.options.fullScreen) {
+      const chatBody = this.container?.querySelector(".mc-chat-body");
+      if (chatBody) {
+        chatBody.classList.remove("mc-hidden");
+        chatBody.classList.add("mc-active");
+      }
+    }
 
     if (this.openedCount === 1) {
       if (this.conversation) {

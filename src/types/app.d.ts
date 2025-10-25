@@ -6,6 +6,7 @@ interface ModoChatOptions {
   foregroundColor: string;
   userData?: Record<string, any>;
   autoInit?: boolean;
+  fullScreen: boolean;
 }
 interface FetchPaginationRes<T = any> {
   results: T[];

@@ -5,12 +5,18 @@ const createChatContainer = (modo: ModoChat) => {
   modo.container = document.createElement("div");
   modo.container.textContent = "Start Chat";
   modo.container.classList.add("modo-chat-widget");
+
+  // Add fullscreen class if fullscreen mode is enabled
+  if (modo.options.fullScreen) {
+    modo.container.classList.add("mc-fullscreen");
+  }
+
   document.body.appendChild(modo.container);
   let conBody = document.createElement("div");
   modo.container.appendChild(conBody);
   modo.container.innerHTML = `
   <div dir="rtl" class="mc-chat-inner">
-  <div class="mc-chat-body mc-hidden">
+  <div class="mc-chat-body ${modo.options.fullScreen ? "mc-active" : "mc-hidden"}">
     <div class="mc-chat-container">
       <!-- Chat Header -->
       <div class="mc-chat-header">
@@ -88,6 +94,9 @@ const createChatContainer = (modo: ModoChat) => {
       </div>
     </div> 
   </div>
+  ${
+    !modo.options.fullScreen
+      ? `
   <button class="mc-toggle-chat-btn">
     <img class="mc-chat-toggle-image" src="" alt="شروع گفتگو" />
     <svg class="mc-chat-toggle-close" viewBox="0 0 24 24" width="24" height="24">
@@ -102,6 +111,9 @@ const createChatContainer = (modo: ModoChat) => {
       <span class="mc-toggle-tooltip-text">شروع گفتگو</span>
     </div>
   </button>
+  `
+      : ""
+  }
   </div>
   `;
   registerListeners(modo.container);

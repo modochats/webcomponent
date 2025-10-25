@@ -13,19 +13,21 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
     footerLink.title = `مودوچت v${modoInstance?.version || "0.1"}`;
   }
 
-  // toggle chat body visibility
-  toggleChatBtn.addEventListener(
-    "click",
-    () => {
-      const modoInstance = window.modoChatInstance?.();
-      isBodyOpen = !isBodyOpen;
-      if (isBodyOpen) modoInstance?.onOpen();
-      else modoInstance?.onClose();
-      chatBody?.classList.toggle("mc-hidden");
-      toggleChatBtn.classList.toggle("mc-chat-open", isBodyOpen);
-    },
-    {capture: false}
-  );
+  // toggle chat body visibility (only if not in fullscreen mode)
+  if (toggleChatBtn) {
+    toggleChatBtn.addEventListener(
+      "click",
+      () => {
+        const modoInstance = window.modoChatInstance?.();
+        isBodyOpen = !isBodyOpen;
+        if (isBodyOpen) modoInstance?.onOpen();
+        else modoInstance?.onClose();
+        chatBody?.classList.toggle("mc-hidden");
+        toggleChatBtn.classList.toggle("mc-chat-open", isBodyOpen);
+      },
+      {capture: false}
+    );
+  }
 
   registerSendMessageListener(modoContainer);
   registerPhoneNumberFormListeners(modoContainer);

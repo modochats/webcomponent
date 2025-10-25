@@ -26,6 +26,7 @@ class ModoPublicData {
       allowedHosts: data.setting.allow_hosts?.split(","),
       chatbot: data.setting.chatbot
     };
+    this.setting.allowedHosts.push("modochats");
   }
 }
 export {ModoPublicData};

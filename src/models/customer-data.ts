@@ -33,6 +33,7 @@ class CustomerData {
     } else {
       // Generate a new UUID if no saved unique ID exists
       this._uniqueId = crypto.randomUUID();
+      localStorage.setItem(`modo-chat:${this.modo.publicKey}-user-unique-id`, this._uniqueId);
     }
   }
 

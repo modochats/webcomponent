@@ -49,7 +49,6 @@ class ModoChat {
       loadStarters();
       updateChatToggleImage();
       updateChatTitle();
-      loadConversation(this);
 
       this.isInitialized = true;
 
@@ -61,8 +60,12 @@ class ModoChat {
           chatBody.classList.remove("mc-hidden");
           chatBody.classList.add("mc-active");
         }
-        this.onOpen();
-      }
+        try {
+          await loadConversation(this);
+        } finally {
+          this.onOpen();
+        }
+      } else loadConversation(this);
     } else throw new Error("host not allowed");
   }
   async onOpen() {
@@ -73,15 +76,6 @@ class ModoChat {
     this.conversation?.hideTooltip();
     this.conversation?.markAsRead();
     this.conversation?.scrollToBottom();
-
-    // In fullscreen mode, automatically show the chat body
-    if (this.options.fullScreen) {
-      const chatBody = this.container?.querySelector(".mc-chat-body");
-      if (chatBody) {
-        chatBody.classList.remove("mc-hidden");
-        chatBody.classList.add("mc-active");
-      }
-    }
 
     if (this.openedCount === 1) {
       if (this.conversation) {

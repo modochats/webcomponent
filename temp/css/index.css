@@ -828,7 +828,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
   box-shadow: var(--shadow-lg);
   border: 3px solid rgba(255, 255, 255, 0.1);
 }
@@ -1232,10 +1232,10 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  object-fit: cover;
   border: 2px solid rgba(255, 255, 255, 0.3);
   transition: var(--transition);
   background: rgba(255, 255, 255, 0.1);
+  object-fit: contain;
 }
 
 .mc-chat-toggle-image:hover {

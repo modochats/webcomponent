@@ -65,4 +65,56 @@ function initVoiceAgentLayout() {
   });
 }
 
-export {toggleVoiceAgentLayout, initVoiceAgentLayout};
+function updateVoiceAgentStatus(status: string, color?: string) {
+  const modoInstance = window.modoChatInstance?.();
+  const statusEl = modoInstance?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
+
+  if (statusEl) {
+    statusEl.textContent = status;
+    if (color) {
+      statusEl.style.color = color;
+    }
+  }
+}
+
+function handleVoiceConnected() {
+  const modoInstance = window.modoChatInstance?.();
+  const logoEl = modoInstance?.container?.querySelector(".mc-voice-agent-logo") as HTMLElement;
+  const statusEl = modoInstance?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
+
+  // Add animation classes when connected
+  if (logoEl) {
+    logoEl.style.animation = "mc-voice-pulse 2s ease-in-out infinite";
+  }
+  if (statusEl) {
+    statusEl.style.animation = "mc-pulse 1.5s ease-in-out infinite";
+  }
+
+  updateVoiceAgentStatus("متصل ✓", "#68d391"); // Green
+}
+
+function handleVoiceDisconnected(reason?: string) {
+  const modoInstance = window.modoChatInstance?.();
+  const logoEl = modoInstance?.container?.querySelector(".mc-voice-agent-logo") as HTMLElement;
+  const statusEl = modoInstance?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
+
+  // Remove animations when disconnected
+  if (logoEl) {
+    logoEl.style.animation = "none";
+  }
+  if (statusEl) {
+    statusEl.style.animation = "none";
+  }
+
+  const statusText = reason ? `قطع شد: ${reason}` : "قطع شد";
+  updateVoiceAgentStatus(statusText, "#fc8181"); // Red
+}
+
+function handleVoiceConnectionError(message: string) {
+  updateVoiceAgentStatus(`خطا: ${message}`, "#fbb040"); // Warning/Orange
+
+  // Also show error in console with better visibility
+  console.error("🔴 Voice Connection Error:", message);
+}
+
+export {toggleVoiceAgentLayout, initVoiceAgentLayout, updateVoiceAgentStatus, handleVoiceConnected, handleVoiceDisconnected, handleVoiceConnectionError};

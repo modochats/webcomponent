@@ -37,12 +37,9 @@ export class AudioService {
 
       this.mediaStream = stream;
 
-      // Get actual sample rate from the stream's audio track settings
-      const audioTrack = stream.getAudioTracks()[0];
-      const actualSampleRate = (audioTrack?.getSettings?.() as any)?.sampleRate || this.config.constraints.sampleRate || 48000;
-
-      // Create AudioContext with the actual sample rate from the device
-      this.audioContext = new AudioContext({sampleRate: actualSampleRate});
+      // Create AudioContext WITHOUT specifying sample rate - let it use device's native rate
+      // This ensures AudioContext sample rate matches the media stream
+      this.audioContext = new AudioContext();
 
       await this.audioContext.audioWorklet.addModule(this.config.processorPath);
 

@@ -1,6 +1,6 @@
 import {EventType, LogLevel} from "#src/lib/client-sdk/src/index.js";
 import {ModoVoiceClient} from "#src/lib/client-sdk/src/ModoVoiceClient.js";
-import {initVoiceAgentLayout} from "./utils.js";
+import {initVoiceAgentLayout, handleVoiceConnected, handleVoiceDisconnected, handleVoiceConnectionError} from "./utils.js";
 
 class VoiceAgent {
   instance?: ModoVoiceClient;
@@ -22,6 +22,7 @@ class VoiceAgent {
       console.log("✅ Connected to Modo Voice Agent");
       console.log(`   Chatbot: ${event.chatbotUuid}`);
       console.log(`   User: ${event.userUniqueId}`);
+      handleVoiceConnected();
     });
 
     this.instance.on(EventType.DISCONNECTED, event => {
@@ -29,10 +30,12 @@ class VoiceAgent {
       if (event.reason) {
         console.log(`   Reason: ${event.reason}`);
       }
+      handleVoiceDisconnected(event.reason);
     });
 
     this.instance.on(EventType.CONNECTION_ERROR, event => {
       console.error("🔴 Connection Error:", event.message);
+      handleVoiceConnectionError(event.message);
     });
 
     this.instance.on(EventType.AI_PLAYBACK_STARTED, () => {

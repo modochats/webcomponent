@@ -1694,3 +1694,175 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Voice Agent Styles */
+.mc-voice-call-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: var(--white);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  z-index: 1;
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+}
+
+.mc-voice-call-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.mc-voice-call-btn:active {
+  transform: scale(0.95);
+}
+
+.mc-voice-agent-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  z-index: var(--z-index-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-lg);
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+}
+
+.mc-voice-agent-overlay.mc-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mc-voice-agent-overlay.mc-hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none;
+}
+
+.mc-voice-agent-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.mc-voice-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  z-index: 10;
+}
+
+.mc-voice-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.mc-voice-agent-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+  justify-content: center;
+  animation: mc-fadeInUp 0.6s ease-out;
+}
+
+.mc-voice-agent-logo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  animation: mc-voice-pulse 2s ease-in-out infinite;
+}
+
+@keyframes mc-voice-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 50px rgba(102, 126, 234, 0.5);
+  }
+}
+
+.mc-voice-agent-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--white);
+  margin: 0;
+  text-align: center;
+}
+
+.mc-voice-agent-status {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0;
+  text-align: center;
+  animation: mc-pulse 1.5s ease-in-out infinite;
+}
+
+.mc-voice-agent-controls {
+  position: absolute;
+  bottom: 40px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.mc-voice-disconnect-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+  border: none;
+  color: var(--white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  box-shadow: var(--shadow-lg);
+}
+
+.mc-voice-disconnect-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(252, 129, 129, 0.4);
+}
+
+.mc-voice-disconnect-btn:active {
+  transform: scale(0.95);
+}

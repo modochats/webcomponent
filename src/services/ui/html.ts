@@ -40,6 +40,9 @@ const createChatContainer = (modo: ModoChat) => {
           <button class="mc-new-conversation-btn mc-hidden">
             +
           </button>
+          <button class="mc-voice-call-btn mc-hidden" title="تماس صوتی">
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Google Material Icons by Material Design Authors - https://github.com/material-icons/material-icons/blob/master/LICENSE --><path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02z"/></svg>
+          </button>
         </div>
       </div>
 
@@ -91,6 +94,31 @@ const createChatContainer = (modo: ModoChat) => {
       <div class="mc-chat-footer">
         <span class="mc-footer-text">ساخته شده با </span>
         <a href="" class="mc-footer-link" target="_blank" rel="noopener noreferrer" title="">مودوچت</a>
+      </div>
+
+      <!-- Voice Agent Overlay -->
+      <div class="mc-voice-agent-overlay mc-hidden">
+        <div class="mc-voice-agent-content">
+          <button class="mc-voice-close-btn">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>
+            </svg>
+          </button>
+          
+          <div class="mc-voice-agent-center">
+            <img class="mc-voice-agent-logo" src="" alt="چت بات" />
+            <h2 class="mc-voice-agent-title">تماس صوتی</h2>
+            <p class="mc-voice-agent-status">درحال اتصال...</p>
+          </div>
+
+          <div class="mc-voice-agent-controls">
+            <button class="mc-voice-disconnect-btn" title="قطع تماس">
+              <svg viewBox="0 0 24 24" width="32" height="32">
+                <path fill="currentColor" d="M17 10.5V7c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" transform="rotate(135 12 12)"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div> 
   </div>

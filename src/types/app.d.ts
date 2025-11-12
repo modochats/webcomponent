@@ -7,7 +7,6 @@ interface ModoChatOptions {
   userData?: Record<string, any>;
   autoInit?: boolean;
   fullScreen: boolean;
-  voiceAgent: boolean;
 }
 interface FetchPaginationRes<T = any> {
   results: T[];

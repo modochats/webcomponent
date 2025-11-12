@@ -18,7 +18,7 @@ class ModoChat {
   customerData: CustomerData;
   conversation?: Conversation;
   socket?: Socket;
-  options: ModoChatOptions;
+  options: Partial<ModoChatOptions> = {};
   openedCount: number = 0;
   version: string;
   isInitialized: boolean = false;
@@ -30,13 +30,12 @@ class ModoChat {
     this.version = VERSION;
     this.options = {
       position: options?.position || "right",
-      theme: options?.theme || "dark",
-      primaryColor: options?.primaryColor || "#667eea",
+      theme: options?.theme,
+      primaryColor: options?.primaryColor,
       title: options?.title || "",
       userData: options?.userData,
-      foregroundColor: options?.foregroundColor || "#fff",
-      fullScreen: typeof options?.fullScreen === "boolean" ? options?.fullScreen : false,
-      voiceAgent: options?.voiceAgent ?? false
+      foregroundColor: options?.foregroundColor,
+      fullScreen: typeof options?.fullScreen === "boolean" ? options?.fullScreen : false
     };
     if (options?.autoInit) this.init();
   }
@@ -44,6 +43,11 @@ class ModoChat {
     if (this.isInitialized) throw new Error("ModoChat already initialized");
     const publicDataRes = await fetchModoPublicData(this.publicKey);
     this.publicData = new ModoPublicData(publicDataRes);
+    this.options = {
+      theme: this.options?.theme || this.publicData?.uiConfig?.theme || "dark",
+      primaryColor: this.options?.primaryColor || this.publicData?.uiConfig?.primaryColor || "#667eea",
+      foregroundColor: this.options?.foregroundColor || this.publicData?.uiConfig?.foregroundColor || "#fff"
+    };
     if (checkIfHostIsAllowed(this)) {
       await loadCss();
       window.modoChatInstance = () => this;
@@ -83,7 +87,7 @@ class ModoChat {
       if (this.conversation) {
         await this.conversation?.loadMessages();
         await initSocket();
-        if (this.options.voiceAgent) this.voiceAgent = new VoiceAgent();
+        if (this.publicData?.voiceAgent) this.voiceAgent = new VoiceAgent();
       }
       await this.customerData.fetchUpdate();
     }

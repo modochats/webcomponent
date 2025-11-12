@@ -6,7 +6,6 @@ import {fetchConversationMessages, fetchMarkConversationAsRead, fetchMessageFeed
 import {marked} from "marked";
 
 class Conversation {
-  id: number;
   uuid: string;
   chatbot: number;
   unreadCount: number;
@@ -14,7 +13,6 @@ class Conversation {
   status?: keyof typeof ConversationStatus;
   uniqueId?: string;
   constructor(init: Record<string, any>) {
-    this.id = init.id;
     this.uuid = init.uuid;
     this.chatbot = init.chatbot;
     this.unreadCount = init.unread_count;

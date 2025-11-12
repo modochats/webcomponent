@@ -22,7 +22,6 @@ const sendMessage = async (message: string) => {
           modoInstance?.customerData.phoneNumber
         );
 
-
         if (!modoInstance?.conversation?.uuid) {
           modoInstance.conversation = new Conversation(sendMsgRes.conversation);
           modoInstance.conversation?.addMessage(sendMsgRes);
@@ -60,7 +59,15 @@ const switchToPhoneNumberFormView = () => {
 };
 const submitPhoneNumberForm = (phoneNumber: string) => {
   // Allow empty phone number or valid phone number
-  if (phoneNumber.trim() === "" || PhoneNumberRegex.test(phoneNumber)) {
+  const parsedPhoneNumber = phoneNumber.replace(/[۰-۹٠-٩]/g, ch => {
+    const fa = "۰۱۲۳۴۵۶۷۸۹".indexOf(ch);
+    if (fa > -1) return String(fa);
+    const ar = "٠١٢٣٤٥٦٧٨٩".indexOf(ch);
+    if (ar > -1) return String(ar);
+    return ch;
+  });
+
+  if (parsedPhoneNumber.trim() === "" || PhoneNumberRegex.test(parsedPhoneNumber)) {
     const modoChat = window.modoChatInstance?.();
     if (modoChat) {
       // Update the phone number

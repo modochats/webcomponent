@@ -117,4 +117,21 @@ function handleVoiceConnectionError(message: string) {
   console.error("🔴 Voice Connection Error:", message);
 }
 
-export {toggleVoiceAgentLayout, initVoiceAgentLayout, updateVoiceAgentStatus, handleVoiceConnected, handleVoiceDisconnected, handleVoiceConnectionError};
+function handleMicrophonePaused() {
+  updateVoiceAgentStatus("⏸ میکروفن متوقف شد", "#fbb040"); // Orange
+}
+
+function handleMicrophoneResumed() {
+  updateVoiceAgentStatus("🎤 میکروفن فعال", "#68d391"); // Green
+}
+
+export {
+  toggleVoiceAgentLayout,
+  initVoiceAgentLayout,
+  updateVoiceAgentStatus,
+  handleVoiceConnected,
+  handleVoiceDisconnected,
+  handleVoiceConnectionError,
+  handleMicrophonePaused,
+  handleMicrophoneResumed
+};

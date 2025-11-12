@@ -1,6 +1,13 @@
 import {EventType, LogLevel} from "#src/lib/client-sdk/src/index.js";
 import {ModoVoiceClient} from "#src/lib/client-sdk/src/ModoVoiceClient.js";
-import {initVoiceAgentLayout, handleVoiceConnected, handleVoiceDisconnected, handleVoiceConnectionError} from "./utils.js";
+import {
+  initVoiceAgentLayout,
+  handleVoiceConnected,
+  handleVoiceDisconnected,
+  handleVoiceConnectionError,
+  handleMicrophonePaused,
+  handleMicrophoneResumed
+} from "./utils.js";
 
 class VoiceAgent {
   instance?: ModoVoiceClient;
@@ -49,7 +56,9 @@ class VoiceAgent {
     this.instance.on(EventType.VOICE_DETECTED, event => {
       console.log(`🎤 Voice detected: RMS=${event.rms.toFixed(4)}, dB=${event.db.toFixed(1)}`);
     });
-
+    this.instance.on(EventType.VOICE_METRICS, event => {
+      console.log(`📊 Voice metrics: RMS=${event.rms.toFixed(4)}, dB=${event.db.toFixed(1)}  `, event.isActive);
+    });
     this.instance.on(EventType.VOICE_ENDED, event => {
       console.log(`⏹ Voice ended: Duration=${event.duration}ms`);
     });
@@ -60,6 +69,15 @@ class VoiceAgent {
 
     this.instance.on(EventType.AI_RESPONSE_RECEIVED, event => {
       console.log(`💬 AI responded: "${event.text}"`);
+    });
+    this.instance.on(EventType.MICROPHONE_PAUSED, () => {
+      console.log("⏸ Microphone paused");
+      handleMicrophonePaused();
+    });
+
+    this.instance.on(EventType.MICROPHONE_RESUMED, () => {
+      console.log("▶ Microphone resumed");
+      handleMicrophoneResumed();
     });
 
     // Initialize the voice agent UI

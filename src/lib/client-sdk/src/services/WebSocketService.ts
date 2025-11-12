@@ -1,28 +1,19 @@
-import { EventEmitter } from './EventEmitter';
-import { ConnectionState as ConnState } from '../models/ConnectionState';
-import { 
-  WebSocketConfig, 
-  IncomingMessage, 
-  WebSocketMessageType,
-  ConnectionState as State
-} from '../types/websocket';
-import { EventType } from '../types/events';
+import {EventEmitter} from "./EventEmitter";
+import {ConnectionState as ConnState} from "../models/ConnectionState";
+import {WebSocketConfig, IncomingMessage, WebSocketMessageType, ConnectionState as State} from "../types/websocket";
+import {EventType} from "../types/events";
 
 export class WebSocketService {
   private ws: WebSocket | null = null;
   private config: WebSocketConfig;
   private eventEmitter: EventEmitter;
   private connectionState: ConnState;
-  
+
   private pingInterval: NodeJS.Timeout | null = null;
   private reconnectAttempt: number = 0;
   private intentionalDisconnect: boolean = false;
 
-  constructor(
-    config: WebSocketConfig,
-    eventEmitter: EventEmitter,
-    connectionState: ConnState
-  ) {
+  constructor(config: WebSocketConfig, eventEmitter: EventEmitter, connectionState: ConnState) {
     this.config = config;
     this.eventEmitter = eventEmitter;
     this.connectionState = connectionState;
@@ -41,7 +32,7 @@ export class WebSocketService {
     try {
       const url = this.buildWebSocketURL();
       this.ws = new WebSocket(url);
-      this.ws.binaryType = 'arraybuffer';
+      this.ws.binaryType = "arraybuffer";
 
       await this.setupWebSocket();
     } catch (error) {
@@ -57,8 +48,8 @@ export class WebSocketService {
   }
 
   private buildWebSocketURL(): string {
-    const protocol = this.config.url.startsWith('https') ? 'wss' : 'ws';
-    const host = this.config.url.replace(/^https?:\/\//, '');
+    const protocol = this.config.url.startsWith("https") ? "wss" : "ws";
+    const host = this.config.url.replace(/^https?:\/\//, "");
     const params = new URLSearchParams({
       chatbot_uuid: this.config.chatbotUuid,
       user_unique_id: this.config.userUniqueId
@@ -69,12 +60,12 @@ export class WebSocketService {
   private setupWebSocket(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.ws) {
-        reject(new Error('WebSocket not initialized'));
+        reject(new Error("WebSocket not initialized"));
         return;
       }
 
       const connectionTimeout = setTimeout(() => {
-        reject(new Error('Connection timeout'));
+        reject(new Error("Connection timeout"));
         this.disconnect();
       }, this.config.connectionTimeout || 10000);
 
@@ -83,7 +74,7 @@ export class WebSocketService {
         this.connectionState.setState(State.CONNECTED);
         this.connectionState.resetReconnectAttempts();
         this.startPingInterval();
-        
+
         this.eventEmitter.emit({
           type: EventType.CONNECTED,
           timestamp: Date.now(),
@@ -94,22 +85,22 @@ export class WebSocketService {
         resolve();
       };
 
-      this.ws.onerror = (event) => {
+      this.ws.onerror = event => {
         clearTimeout(connectionTimeout);
         this.eventEmitter.emit({
           type: EventType.ERROR,
           timestamp: Date.now(),
-          error: new Error('WebSocket error'),
-          message: 'WebSocket connection error'
+          error: new Error("WebSocket error"),
+          message: "WebSocket connection error"
         });
-        reject(new Error('WebSocket connection error'));
+        reject(new Error("WebSocket connection error"));
       };
 
-      this.ws.onmessage = (event) => {
+      this.ws.onmessage = event => {
         this.handleMessage(event);
       };
 
-      this.ws.onclose = (event) => {
+      this.ws.onclose = event => {
         clearTimeout(connectionTimeout);
         this.handleClose(event);
       };
@@ -122,12 +113,12 @@ export class WebSocketService {
     if (event.data instanceof ArrayBuffer) {
       this.connectionState.addBytesReceived(event.data.byteLength);
       await this.handleBinaryMessage(event.data);
-    } else if (typeof event.data === 'string') {
+    } else if (typeof event.data === "string") {
       try {
         const message: IncomingMessage = JSON.parse(event.data);
         await this.handleTextMessage(message);
       } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
+        console.error("Failed to parse WebSocket message:", error);
       }
     }
   }
@@ -169,12 +160,20 @@ export class WebSocketService {
 
       case WebSocketMessageType.START_ON_HOLD:
         await this.eventEmitter.emit({
+          type: EventType.MICROPHONE_PAUSED,
+          timestamp: Date.now()
+        });
+        await this.eventEmitter.emit({
           type: EventType.ON_HOLD_STARTED,
           timestamp: Date.now()
         });
         break;
 
       case WebSocketMessageType.STOP_ON_HOLD:
+        await this.eventEmitter.emit({
+          type: EventType.MICROPHONE_RESUMED,
+          timestamp: Date.now()
+        });
         await this.eventEmitter.emit({
           type: EventType.ON_HOLD_STOPPED,
           timestamp: Date.now()
@@ -192,23 +191,23 @@ export class WebSocketService {
         await this.eventEmitter.emit({
           type: EventType.INFO,
           timestamp: Date.now(),
-          message: (message as any).message || 'Status update',
-          context: 'WebSocket'
+          message: (message as any).message || "Status update",
+          context: "WebSocket"
         });
         break;
 
       case WebSocketMessageType.CLOSE:
-        const closeMessage = (message as any).message || 'Server closing connection';
-        console.log('👋 Server sent goodbye:', closeMessage);
-        
+        const closeMessage = (message as any).message || "Server closing connection";
+        console.log("👋 Server sent goodbye:", closeMessage);
+
         // Emit info about the goodbye message
         await this.eventEmitter.emit({
           type: EventType.INFO,
           timestamp: Date.now(),
           message: closeMessage,
-          context: 'WebSocket'
+          context: "WebSocket"
         });
-        
+
         // Disconnect gracefully after showing goodbye message
         setTimeout(() => {
           if (this.ws) {
@@ -220,23 +219,23 @@ export class WebSocketService {
         break;
 
       case WebSocketMessageType.TRANSCRIPT:
-        if (message.data && typeof message.data === 'object' && 'text' in message.data) {
+        if (message.data && typeof message.data === "object" && "text" in message.data) {
           await this.eventEmitter.emit({
             type: EventType.TRANSCRIPT_RECEIVED,
             timestamp: Date.now(),
-            text: (message.data as { text: string }).text,
-            language: (message.data as { language?: string }).language
+            text: (message.data as {text: string}).text,
+            language: (message.data as {language?: string}).language
           });
         }
         break;
 
       case WebSocketMessageType.ERROR:
-        if (message.data && typeof message.data === 'object' && 'message' in message.data) {
+        if (message.data && typeof message.data === "object" && "message" in message.data) {
           await this.eventEmitter.emit({
             type: EventType.ERROR,
             timestamp: Date.now(),
-            error: new Error((message.data as { message: string }).message),
-            message: (message.data as { message: string }).message
+            error: new Error((message.data as {message: string}).message),
+            message: (message.data as {message: string}).message
           });
         }
         break;
@@ -245,7 +244,7 @@ export class WebSocketService {
 
   private handleClose(event: CloseEvent): void {
     this.stopPingInterval();
-    
+
     this.connectionState.setLastError({
       code: event.code,
       reason: event.reason,
@@ -261,9 +260,7 @@ export class WebSocketService {
     });
 
     // Don't reconnect if this was an intentional disconnect
-    if (!this.intentionalDisconnect && 
-        this.config.reconnect && 
-        this.reconnectAttempt < (this.config.maxReconnectAttempts || 5)) {
+    if (!this.intentionalDisconnect && this.config.reconnect && this.reconnectAttempt < (this.config.maxReconnectAttempts || 5)) {
       this.scheduleReconnect();
     } else {
       this.connectionState.setState(State.DISCONNECTED);
@@ -273,26 +270,26 @@ export class WebSocketService {
   private scheduleReconnect(): void {
     this.reconnectAttempt++;
     this.connectionState.incrementReconnectAttempts();
-    
+
     const delay = this.config.reconnectDelay || 1000;
-    
+
     const timer = setTimeout(() => {
       this.connect().catch(error => {
-        console.error('Reconnection failed:', error);
+        console.error("Reconnection failed:", error);
       });
     }, delay);
-    
+
     this.connectionState.setReconnectTimer(timer);
   }
 
   send(data: ArrayBuffer | string): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      throw new Error('WebSocket is not connected');
+      throw new Error("WebSocket is not connected");
     }
 
     this.ws.send(data);
     this.connectionState.incrementMessagesSent();
-    
+
     if (data instanceof ArrayBuffer) {
       this.connectionState.addBytesSent(data.byteLength);
     } else {
@@ -309,12 +306,11 @@ export class WebSocketService {
     this.connectionState.setState(State.DISCONNECTING);
     this.stopPingInterval();
     this.connectionState.clearReconnectTimer();
-    
-    if (this.ws.readyState === WebSocket.OPEN || 
-        this.ws.readyState === WebSocket.CONNECTING) {
-      this.ws.close(1000, 'Client disconnect');
+
+    if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
+      this.ws.close(1000, "Client disconnect");
     }
-    
+
     this.ws = null;
     this.connectionState.setState(State.DISCONNECTED);
     this.reconnectAttempt = 0;
@@ -342,4 +338,3 @@ export class WebSocketService {
     return this.ws?.readyState ?? WebSocket.CLOSED;
   }
 }
-

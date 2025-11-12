@@ -86,19 +86,19 @@ export const DEFAULT_CONFIG: Required<Omit<ModoVoiceConfig, "chatbotUuid" | "use
       autoGainControl: true
     },
     processor: {
-      voiceThreshold: 0.25,
-      silenceThreshold: 0.15,
+      voiceThreshold: 0.08,
+      silenceThreshold: 0.05,
       minSilenceFrames: 8,
       maxPreRollBuffers: 5,
       sampleRate: 16000
     },
     processorPath: "/audio-processor.js",
-    minBufferSize: 40000,
-    targetChunks: 20,
+    minBufferSize: 32000,
+    targetChunks: 16,
     chunkSize: 1024,
     playbackRetryInterval: 10,
     playbackRetryMaxAttempts: 50,
-    resumeDelay: 200,
+    resumeDelay: 150,
     failsafeResumeTimeout: 10000
   },
 

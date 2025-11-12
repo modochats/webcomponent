@@ -27,6 +27,10 @@ export class AudioService {
 
   async initialize(deviceId?: string): Promise<void> {
     try {
+      console.log("🔧 Initializing AudioService...");
+      console.log(`   Processor Path: ${this.config.processorPath}`);
+      console.log(`   Voice Threshold: ${this.config.processor.voiceThreshold}`);
+      
       // Get the stream FIRST to determine actual sample rate
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -34,14 +38,18 @@ export class AudioService {
           ...this.config.constraints
         }
       });
+      console.log("✅ Microphone stream obtained");
 
       this.mediaStream = stream;
 
       // Create AudioContext WITHOUT specifying sample rate - let it use device's native rate
       // This ensures AudioContext sample rate matches the media stream
       this.audioContext = new AudioContext();
+      console.log(`   AudioContext created: ${this.audioContext.sampleRate}Hz`);
 
+      console.log("📦 Loading audio-processor.js...");
       await this.audioContext.audioWorklet.addModule(this.config.processorPath);
+      console.log("✅ Audio processor loaded successfully!");
 
       await this.setupAudioWorklet();
 
@@ -69,14 +77,19 @@ export class AudioService {
       throw new Error("Audio context or media stream not initialized");
     }
 
+    console.log("🔌 Setting up audio worklet...");
     const source = this.audioContext.createMediaStreamSource(this.mediaStream);
     this.audioWorkletNode = new AudioWorkletNode(this.audioContext, "audio-processor", {
       processorOptions: this.config.processor
     });
+    console.log("✅ AudioWorkletNode created");
+    console.log("   Processor options:", this.config.processor);
 
     this.audioWorkletNode.port.onmessage = event => {
+      console.log("📨 Message from audio processor:", event.data instanceof ArrayBuffer ? `ArrayBuffer ${event.data.byteLength} bytes` : event.data.type);
       // Handle raw ArrayBuffer (audio data) or structured messages (metrics)
       if (event.data instanceof ArrayBuffer) {
+        console.log(`🎵 Raw audio buffer: ${event.data.byteLength} bytes`);
         this.handleAudioData(event.data);
       } else {
         this.handleWorkletMessage(event.data);
@@ -85,6 +98,7 @@ export class AudioService {
 
     source.connect(this.audioWorkletNode);
     this.audioWorkletNode.connect(this.audioContext.destination);
+    console.log("🔗 Audio nodes connected successfully");
   }
 
   private handleWorkletMessage(data: {
@@ -99,6 +113,7 @@ export class AudioService {
     switch (data.type) {
       case "audioData":
         if (data.audioData) {
+          console.log(`🎵 Audio data received from worklet: ${data.audioData.byteLength} bytes`);
           this.handleAudioData(data.audioData);
         }
         break;
@@ -139,10 +154,20 @@ export class AudioService {
           }
         }
         break;
+      
+      case "voice-ended":
+        console.log("🎬 Voice ended signal received from audio processor");
+        this.eventEmitter.emit({
+          type: EventType.VOICE_ENDED,
+          timestamp: Date.now(),
+          duration: this.voiceMetrics.getVoiceDuration()
+        });
+        break;
     }
   }
 
   private handleAudioData(audioData: ArrayBuffer): void {
+    console.log(`📤 Sending audio data: ${audioData.byteLength} bytes`);
     this.eventEmitter.emit({
       type: EventType.USER_RECORDING_DATA,
       timestamp: Date.now(),

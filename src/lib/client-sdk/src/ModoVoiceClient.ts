@@ -78,6 +78,11 @@ export class ModoVoiceClient {
       }
     });
 
+    this.eventEmitter.on(EventType.AI_PLAYBACK_STARTED, async () => {
+      await this.audioService.pauseMicrophone();
+      this.logger.debug('Microphone paused during AI playback', 'ModoVoiceClient');
+    });
+
     // Route user audio from microphone to WebSocket
     this.eventEmitter.on(EventType.USER_RECORDING_DATA, async (event) => {
       if ('data' in event && this.webSocketService.isConnected()) {

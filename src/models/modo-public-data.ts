@@ -3,8 +3,9 @@ class ModoPublicData {
   image: string;
   shortDescription: string;
   starters: string[] = [];
+  voiceAgent: boolean;
+
   setting: {
-    id: number;
     createdAt: string;
     updatedAt: string;
     deletedAt: string | null;
@@ -12,13 +13,18 @@ class ModoPublicData {
     allowedHosts: string[];
     chatbot: number;
   };
+  uiConfig: {
+    primaryColor: string;
+    foregroundColor: string;
+    theme: "dark" | "light";
+  };
   constructor(data: Record<string, any>) {
     this.name = data.name;
     this.image = data.image;
     this.shortDescription = data.short_description;
     this.starters = data.starters;
+    this.voiceAgent = data.voice_agent;
     this.setting = {
-      id: data.setting.id,
       createdAt: data.setting.created_at,
       updatedAt: data.setting.updated_at,
       deletedAt: data.setting.deleted_at,
@@ -27,6 +33,11 @@ class ModoPublicData {
       chatbot: data.setting.chatbot
     };
     this.setting.allowedHosts.push("modochats");
+    this.uiConfig = {
+      primaryColor: data.primary_color,
+      foregroundColor: data.foreground_color,
+      theme: data.theme
+    };
   }
 }
 export {ModoPublicData};

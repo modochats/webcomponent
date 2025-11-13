@@ -58,7 +58,6 @@ class CustomerData {
   async updateUserData(newUserData?: Record<string, any>): Promise<void> {
     if (newUserData && typeof newUserData === "object") {
       this._userData = newUserData;
-      await this.fetchUpdate();
     } else if (newUserData) console.warn("Invalid user data");
   }
 

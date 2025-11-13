@@ -9,6 +9,7 @@ import {initSocket, Socket} from "./services/socket/socket.js";
 import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, loadCss} from "./services/ui/fn.js";
 import {preloadAudio} from "./utils/audio.js";
 import {VERSION} from "./constants/index.js";
+import {VoiceAgent} from "./services/voice-agent/model.js";
 
 class ModoChat {
   container?: HTMLDivElement;
@@ -17,22 +18,23 @@ class ModoChat {
   customerData: CustomerData;
   conversation?: Conversation;
   socket?: Socket;
-  options: ModoChatOptions;
+  options: Partial<ModoChatOptions> = {};
   openedCount: number = 0;
   version: string;
   isInitialized: boolean = false;
   isOpen: boolean = false;
+  voiceAgent?: VoiceAgent;
   constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
     this.publicKey = publicKey;
     this.customerData = new CustomerData(this, options?.userData);
     this.version = VERSION;
     this.options = {
       position: options?.position || "right",
-      theme: options?.theme || "dark",
-      primaryColor: options?.primaryColor || "#667eea",
+      theme: options?.theme,
+      primaryColor: options?.primaryColor,
       title: options?.title || "",
       userData: options?.userData,
-      foregroundColor: options?.foregroundColor || "#fff",
+      foregroundColor: options?.foregroundColor,
       fullScreen: typeof options?.fullScreen === "boolean" ? options?.fullScreen : false
     };
     if (options?.autoInit) this.init();
@@ -41,6 +43,11 @@ class ModoChat {
     if (this.isInitialized) throw new Error("ModoChat already initialized");
     const publicDataRes = await fetchModoPublicData(this.publicKey);
     this.publicData = new ModoPublicData(publicDataRes);
+    this.options = {
+      theme: this.options?.theme || this.publicData?.uiConfig?.theme || "dark",
+      primaryColor: this.options?.primaryColor || this.publicData?.uiConfig?.primaryColor || "#667eea",
+      foregroundColor: this.options?.foregroundColor || this.publicData?.uiConfig?.foregroundColor || "#fff"
+    };
     if (checkIfHostIsAllowed(this)) {
       await loadCss();
       window.modoChatInstance = () => this;
@@ -76,11 +83,11 @@ class ModoChat {
     this.conversation?.hideTooltip();
     this.conversation?.markAsRead();
     this.conversation?.scrollToBottom();
-
     if (this.openedCount === 1) {
       if (this.conversation) {
         await this.conversation?.loadMessages();
         await initSocket();
+        if (this.publicData?.voiceAgent) this.voiceAgent = new VoiceAgent();
       }
       await this.customerData.fetchUpdate();
     }

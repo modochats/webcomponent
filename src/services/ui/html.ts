@@ -40,6 +40,9 @@ const createChatContainer = (modo: ModoChat) => {
           <button class="mc-new-conversation-btn mc-hidden">
             +
           </button>
+          <button class="mc-voice-call-btn mc-hidden" title="تماس صوتی">
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Google Material Icons by Material Design Authors - https://github.com/material-icons/material-icons/blob/master/LICENSE --><path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02z"/></svg>
+          </button>
         </div>
       </div>
 
@@ -91,6 +94,29 @@ const createChatContainer = (modo: ModoChat) => {
       <div class="mc-chat-footer">
         <span class="mc-footer-text">ساخته شده با </span>
         <a href="" class="mc-footer-link" target="_blank" rel="noopener noreferrer" title="">مودوچت</a>
+      </div>
+
+      <!-- Voice Agent Overlay -->
+      <div class="mc-voice-agent-overlay mc-hidden">
+        <div class="mc-voice-agent-content">
+          <button class="mc-voice-close-btn">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>
+            </svg>
+          </button>
+          
+          <div class="mc-voice-agent-center">
+            <img class="mc-voice-agent-logo" src="" alt="چت بات" />
+            <h2 class="mc-voice-agent-title">تماس صوتی</h2>
+            <p class="mc-voice-agent-status">درحال اتصال...</p>
+          </div>
+
+          <div class="mc-voice-agent-controls">
+            <button class="mc-voice-disconnect-btn" title="قطع تماس">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256"><!-- Icon from Phosphor by Phosphor Icons - https://github.com/phosphor-icons/core/blob/main/LICENSE --><path fill="currentColor" d="M231.59 90.13C175.44 34 80.56 34 24.41 90.13c-20 20-21.92 49.49-4.69 71.71A16 16 0 0 0 32.35 168a15.8 15.8 0 0 0 5.75-1.08l49-17.37l.29-.11a16 16 0 0 0 9.75-11.73l5.9-29.52a76.52 76.52 0 0 1 49.68-.11l6.21 29.75a16 16 0 0 0 9.72 11.59l.29.11l49 17.39a16 16 0 0 0 18.38-5.06c17.19-22.24 15.26-51.73-4.73-71.73M223.67 152l-.3-.12l-48.82-17.33l-6.21-29.74A16 16 0 0 0 158 93a92.56 92.56 0 0 0-60.34.13a16 16 0 0 0-10.32 12l-5.9 29.51l-48.81 17.22c-.1 0-.17.13-.27.17c-12.33-15.91-11-36.23 3.36-50.58c25-25 58.65-37.53 92.28-37.53s67.27 12.51 92.28 37.53c14.33 14.35 15.72 34.67 3.39 50.55m.32 48a8 8 0 0 1-8 8H40a8 8 0 0 1 0-16h176a8 8 0 0 1 8 8Z"/></svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div> 
   </div>

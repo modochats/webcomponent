@@ -8,7 +8,7 @@
     "dev": "tsx watch src/app.ts",
     "dev:ts": "tsc --watch --noCheck",
     "dev:rollup": "rollup --config rollup.dev.config.js --watch",
-    "dev:server": "live-server temp --port=3000 --entry-file=dev.html",
+    "dev:server": "live-server temp --port=3000 --host=localhost --open=/dev.html",
     "dev:full": "concurrently \"yarn dev:ts\" \"yarn dev:rollup\" \"yarn dev:server\" --names \"tsc,rollup,server\" --prefix name ",
     "static": "tsx src/app.ts",
     "compile": "npx tsc --noCheck",

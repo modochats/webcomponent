@@ -1,5 +1,5 @@
-import {EventType, LogLevel} from "#src/lib/client-sdk/src/index.js";
-import {ModoVoiceClient} from "#src/lib/client-sdk/src/ModoVoiceClient.js";
+import {EventType, LogLevel} from "@modochats/voice-client";
+import {ModoVoiceClient} from "@modochats/voice-client";
 import {
   initVoiceAgentLayout,
   handleVoiceConnected,
@@ -14,11 +14,11 @@ class VoiceAgent {
   holdMusicAudio?: HTMLAudioElement;
   constructor() {
     const modoInstance = window.modoChatInstance?.();
-    this.holdMusicAudio = new Audio('/audio/1.mp3');
+    this.holdMusicAudio = new Audio("https://modochats.s3.ir-thr-at1.arvanstorage.ir/on-hold.mp3");
     this.holdMusicAudio.loop = true;
     this.instance = new ModoVoiceClient({
-      // apiBase: "https://live.modochats.com",
-      apiBase: "http://localhost:8000",
+      apiBase: "https://live.modochats.com",
+      // apiBase: "http://localhost:8000",
       chatbotUuid: modoInstance?.publicData?.setting.uuid as string,
       userUniqueId: modoInstance?.customerData.uniqueId as string,
       logging: {
@@ -43,20 +43,20 @@ class VoiceAgent {
           maxPreRollBuffers: 5,
           sampleRate: 16000
         },
-        processorPath: '/audio-processor.js',
+        processorPath: "https://modochats.s3.ir-thr-at1.arvanstorage.ir/audio-processor.js",
         minBufferSize: 32000,
         targetChunks: 16,
         resumeDelay: 150
-      },
+      }
     });
-    this.instance.on(EventType.CONNECTED, event => {
+    this.instance.on(EventType.CONNECTED, (event: any) => {
       console.log("✅ Connected to Modo Voice Agent");
       console.log(`   Chatbot: ${event.chatbotUuid}`);
       console.log(`   User: ${event.userUniqueId}`);
       handleVoiceConnected();
     });
 
-    this.instance.on(EventType.DISCONNECTED, event => {
+    this.instance.on(EventType.DISCONNECTED, (event: any) => {
       console.log("❌ Disconnected from Modo Voice Agent");
       if (event.reason) {
         console.log(`   Reason: ${event.reason}`);
@@ -64,7 +64,7 @@ class VoiceAgent {
       handleVoiceDisconnected(event.reason);
     });
 
-    this.instance.on(EventType.CONNECTION_ERROR, event => {
+    this.instance.on(EventType.CONNECTION_ERROR, (event: any) => {
       console.error("🔴 Connection Error:", event.message);
       handleVoiceConnectionError(event.message);
     });
@@ -79,21 +79,21 @@ class VoiceAgent {
       handleMicrophoneResumed();
     });
 
-    this.instance.on(EventType.VOICE_DETECTED, event => {
+    this.instance.on(EventType.VOICE_DETECTED, (event: any) => {
       console.log(`🎤 Voice detected: RMS=${event.rms.toFixed(4)}, dB=${event.db.toFixed(1)}`);
     });
-    this.instance.on(EventType.VOICE_METRICS, event => {
+    this.instance.on(EventType.VOICE_METRICS, (event: any) => {
       console.log(`📊 Voice metrics: RMS=${event.rms.toFixed(4)}, dB=${event.db.toFixed(1)}  `, event.isActive);
     });
-    this.instance.on(EventType.VOICE_ENDED, event => {
+    this.instance.on(EventType.VOICE_ENDED, (event: any) => {
       console.log(`⏹ Voice ended: Duration=${event.duration}ms`);
     });
 
-    this.instance.on(EventType.TRANSCRIPT_RECEIVED, event => {
+    this.instance.on(EventType.TRANSCRIPT_RECEIVED, (event: any) => {
       console.log(`📝 User said: "${event.text}"`);
     });
 
-    this.instance.on(EventType.AI_RESPONSE_RECEIVED, event => {
+    this.instance.on(EventType.AI_RESPONSE_RECEIVED, (event: any) => {
       console.log(`💬 AI responded: "${event.text}"`);
     });
     this.instance.on(EventType.MICROPHONE_PAUSED, () => {

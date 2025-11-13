@@ -3,14 +3,16 @@
 ## All Changes Made
 
 ### 1. ✅ On-Hold Music Feature
+
 **File:** `src/services/voice-agent/model.ts`
 
-Added automatic playback of hold music (`/audio/1.mp3`) when user is put on hold:
+Added automatic playback of hold music (`/audio/on-hold.mp3`) when user is put on hold:
+
 - Plays and loops when `ON_HOLD_STARTED` event fires
 - Stops when `ON_HOLD_STOPPED` event fires
 
 ```typescript
-this.holdMusicAudio = new Audio('/audio/1.mp3');
+this.holdMusicAudio = new Audio("/audio/on-hold.mp3");
 this.holdMusicAudio.loop = true;
 
 this.instance.on(EventType.ON_HOLD_STARTED, () => {
@@ -24,29 +26,32 @@ this.instance.on(EventType.ON_HOLD_STOPPED, () => {
 ```
 
 ### 2. ✅ Quiet Voice Detection After AI Speaks
+
 **File:** `temp/audio-processor.js`
 
 **Problem:** After AI finished speaking, very quiet voices (RMS ≈ 0.0001, dB ≈ -83) were not detected.
 
 **Solution:**
+
 - **5x more sensitive** after resume: Threshold starts at 20% instead of 40%
 - **Longer boost duration:** 150 frames (~2 seconds) instead of 80 frames (~1 second)
 - **Reduced noise gate:** Gate threshold reduced to 30% during boost period
 
 ```javascript
 // More aggressive sensitivity boost
-const boostMultiplier = 0.2 + (0.8 * boostProgress);  // Was: 0.4 + (0.6 * boostProgress)
+const boostMultiplier = 0.2 + 0.8 * boostProgress; // Was: 0.4 + (0.6 * boostProgress)
 
 // Longer boost duration
-this.resumedFrameThreshold = 150;  // Was: 80
+this.resumedFrameThreshold = 150; // Was: 80
 
 // Relaxed noise gate during resume
 if (this.justResumed) {
-    adaptiveThreshold = adaptiveThreshold * 0.3;
+  adaptiveThreshold = adaptiveThreshold * 0.3;
 }
 ```
 
 ### 3. ✅ Automatic Microphone Control During AI Playback
+
 **File:** `src/lib/client-sdk/src/ModoVoiceClient.ts`
 
 **Problem:** User could speak while AI was speaking, causing interference.
@@ -67,6 +72,7 @@ this.eventEmitter.on(EventType.AI_PLAYBACK_COMPLETED, async () => {
 **Note:** Removed duplicate `resumeMicrophone()` call that was conflicting with the one in `AudioService.completePlayback()`.
 
 ### 4. ✅ UI Status Updates
+
 **File:** `src/services/voice-agent/model.ts`
 
 **Problem:** UI showed "میکروفن متوقف شد" (Microphone stopped) even after AI finished and microphone resumed.
@@ -75,17 +81,18 @@ this.eventEmitter.on(EventType.AI_PLAYBACK_COMPLETED, async () => {
 
 ```typescript
 this.instance.on(EventType.AI_PLAYBACK_STARTED, () => {
-  handleMicrophonePaused();  // Shows "⏸ میکروفن متوقف شد" (orange)
+  handleMicrophonePaused(); // Shows "⏸ میکروفن متوقف شد" (orange)
 });
 
 this.instance.on(EventType.AI_PLAYBACK_COMPLETED, () => {
-  handleMicrophoneResumed();  // Shows "🎤 میکروفن فعال" (green)
+  handleMicrophoneResumed(); // Shows "🎤 میکروفن فعال" (green)
 });
 ```
 
 ## How It Works Now
 
 ### Voice Flow:
+
 1. **User connects** → UI shows "متصل ✓" (Connected ✓) - Green
 2. **User speaks** → Voice detected, audio sent to AI
 3. **AI starts responding** → Microphone paused automatically, UI shows "⏸ میکروفن متوقف شد" (orange)
@@ -94,19 +101,14 @@ this.instance.on(EventType.AI_PLAYBACK_COMPLETED, () => {
 6. **On-hold triggered** → Hold music plays automatically
 
 ### Sensitivity Timeline After AI Speaks:
+
 - **0-1 second:** Threshold at 20% (0.016) - Very sensitive
 - **1-2 seconds:** Gradually increases to 100% (0.08)
 - **After 2 seconds:** Normal adaptive threshold
 
 ## Testing Checklist
 
-✅ Speak normally, verify AI responds
-✅ When AI speaks, verify UI shows "میکروفن متوقف شد"
-✅ After AI finishes, verify UI shows "میکروفن فعال"
-✅ Speak quietly right after AI finishes, verify voice detected
-✅ Check console for boost messages: `AudioProcessor: Boosted threshold: X.XXXX (XX% of normal)`
-✅ If put on hold, verify music plays
-✅ When taken off hold, verify music stops
+✅ Speak normally, verify AI responds ✅ When AI speaks, verify UI shows "میکروفن متوقف شد" ✅ After AI finishes, verify UI shows "میکروفن فعال" ✅ Speak quietly right after AI finishes, verify voice detected ✅ Check console for boost messages: `AudioProcessor: Boosted threshold: X.XXXX (XX% of normal)` ✅ If put on hold, verify music plays ✅ When taken off hold, verify music stops
 
 ## Files Modified
 
@@ -135,4 +137,3 @@ yarn dev:rollup  # Already running in watch mode
 - `AudioProcessor: Voice detected with boost!`
 
 All changes are now live in watch mode - just refresh your browser to test! 🚀
-

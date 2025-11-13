@@ -50,71 +50,71 @@ class VoiceAgent {
       }
     });
     this.instance.on(EventType.CONNECTED, (event: any) => {
-      console.log("✅ Connected to Modo Voice Agent");
-      console.log(`   Chatbot: ${event.chatbotUuid}`);
-      console.log(`   User: ${event.userUniqueId}`);
+      // console.log("✅ Connected to Modo Voice Agent");
+      // console.log(`   Chatbot: ${event.chatbotUuid}`);
+      // console.log(`   User: ${event.userUniqueId}`);
       handleVoiceConnected();
     });
 
     this.instance.on(EventType.DISCONNECTED, (event: any) => {
-      console.log("❌ Disconnected from Modo Voice Agent");
+      // console.log("❌ Disconnected from Modo Voice Agent");
       if (event.reason) {
-        console.log(`   Reason: ${event.reason}`);
+        // console.log(`   Reason: ${event.reason}`);
       }
       handleVoiceDisconnected(event.reason);
     });
 
     this.instance.on(EventType.CONNECTION_ERROR, (event: any) => {
-      console.error("🔴 Connection Error:", event.message);
+      // console.error("🔴 Connection Error:", event.message);
       handleVoiceConnectionError(event.message);
     });
 
     this.instance.on(EventType.AI_PLAYBACK_STARTED, () => {
-      console.log("🤖 AI started speaking...");
+      // console.log("🤖 AI started speaking...");
       handleMicrophonePaused();
     });
 
     this.instance.on(EventType.AI_PLAYBACK_COMPLETED, () => {
-      console.log("✅ AI finished speaking");
+      // console.log("✅ AI finished speaking");
       handleMicrophoneResumed();
     });
 
     this.instance.on(EventType.VOICE_DETECTED, (event: any) => {
-      console.log(`🎤 Voice detected: RMS=${event.rms.toFixed(4)}, dB=${event.db.toFixed(1)}`);
+      // console.log(`🎤 Voice detected: RMS=${event.rms.toFixed(4)}, dB=${event.db.toFixed(1)}`);
     });
     this.instance.on(EventType.VOICE_METRICS, (event: any) => {
-      console.log(`📊 Voice metrics: RMS=${event.rms.toFixed(4)}, dB=${event.db.toFixed(1)}  `, event.isActive);
+      // console.log(`📊 Voice metrics: RMS=${event.rms.toFixed(4)}, dB=${event.db.toFixed(1)}  `, event.isActive);
     });
     this.instance.on(EventType.VOICE_ENDED, (event: any) => {
-      console.log(`⏹ Voice ended: Duration=${event.duration}ms`);
+      // console.log(`⏹ Voice ended: Duration=${event.duration}ms`);
     });
 
     this.instance.on(EventType.TRANSCRIPT_RECEIVED, (event: any) => {
-      console.log(`📝 User said: "${event.text}"`);
+      // console.log(`📝 User said: "${event.text}"`);
     });
 
     this.instance.on(EventType.AI_RESPONSE_RECEIVED, (event: any) => {
-      console.log(`💬 AI responded: "${event.text}"`);
+      // console.log(`💬 AI responded: "${event.text}"`);
     });
     this.instance.on(EventType.MICROPHONE_PAUSED, () => {
-      console.log("⏸ Microphone paused");
+      // console.log("⏸ Microphone paused");
       handleMicrophonePaused();
     });
 
     this.instance.on(EventType.MICROPHONE_RESUMED, () => {
-      console.log("▶ Microphone resumed");
+      // console.log("▶ Microphone resumed");
       handleMicrophoneResumed();
     });
 
     this.instance.on(EventType.ON_HOLD_STARTED, () => {
-      console.log("🎵 On-hold started - Playing hold music");
+      // console.log("🎵 On-hold started - Playing hold music");
       this.holdMusicAudio?.play().catch(err => {
-        console.error("Failed to play hold music:", err);
+        // console.error("Failed to play hold music:", err);
       });
     });
 
     this.instance.on(EventType.ON_HOLD_STOPPED, () => {
-      console.log("⏹ On-hold stopped - Stopping hold music");
+      // console.log("⏹ On-hold stopped - Stopping hold music");
       if (this.holdMusicAudio) {
         this.holdMusicAudio.pause();
         this.holdMusicAudio.currentTime = 0;
@@ -126,11 +126,11 @@ class VoiceAgent {
   }
   async connect() {
     try {
-      console.log("🔌 Connecting to Modo Voice Agent...");
+      // console.log("🔌 Connecting to Modo Voice Agent...");
       await this.instance?.connect();
-      console.log("\n✨ Connected! Start speaking...\n");
+      // console.log("\n✨ Connected! Start speaking...\n");
     } catch (error) {
-      console.error("Failed to connect:", error);
+      // console.error("Failed to connect:", error);
     }
   }
   async disconnect() {

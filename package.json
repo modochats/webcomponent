@@ -5,11 +5,11 @@
   "main": "dist/src/app.js",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development tsx watch src/app.ts",
-    "dev:ts": "NODE_ENV=development tsc --watch --noCheck",
-    "dev:rollup": "NODE_ENV=development rollup --config rollup.dev.config.js --watch",
+    "dev": "tsx watch src/app.ts",
+    "dev:ts": "tsc --watch --noCheck",
+    "dev:rollup": "rollup --config rollup.dev.config.js --watch",
     "dev:server": "live-server temp --port=3000 --entry-file=dev.html",
-    "dev:full": "concurrently \"yarn dev:ts\" \"yarn dev:rollup\" \"yarn dev:server\" --names \"tsc,rollup,server\" --prefix name --kill-others",
+    "dev:full": "concurrently \"yarn dev:ts\" \"yarn dev:rollup\" \"yarn dev:server\" --names \"tsc,rollup,server\" --prefix name ",
     "static": "tsx src/app.ts",
     "compile": "npx tsc --noCheck",
     "minify": "node scripts/terser-minify.js",
@@ -24,20 +24,20 @@
   "dependencies": {
     "@modochats/voice-client": "^0.1.0",
     "marked": "^16.3.0",
-    "ofetch": "^1.4.1",
-    "tldts": "^7.0.14"
+    "ofetch": "^1.5.1",
+    "tldts": "^7.0.17"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.6",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "^12.1.4",
-    "@types/node": "^22.13.10",
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/node": "^24.10.1",
     "concurrently": "^9.2.1",
     "live-server": "^1.2.2",
-    "rollup": "^4.42.0",
-    "terser": "^5.39.0",
-    "tsx": "^3.12.7",
-    "typescript": "^5.9.2"
+    "rollup": "^4.53.2",
+    "terser": "^5.44.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
   },
   "imports": {
     "#src/*": "./dist/src/*",

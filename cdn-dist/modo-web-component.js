@@ -1355,236 +1355,1519 @@ const createChatContainer=n=>{n.container=document.createElement("div"),n.contai
 
 class CustomerData{_uniqueId;_userData;modo;phoneNumber;constructor(e,t){this.modo=e,this.initializeUniqueId(),this.updateUserData(t),this.initializePhoneNumber();}initializePhoneNumber(){const e=localStorage.getItem(`modo-chat:${this.modo.publicKey}-user-phone-number`);e&&(this.phoneNumber=e);}initializeUniqueId(){const e=localStorage.getItem(`modo-chat:${this.modo.publicKey}-user-unique-id`);e?this._uniqueId=e:(this._uniqueId=crypto.randomUUID(),localStorage.setItem(`modo-chat:${this.modo.publicKey}-user-unique-id`,this._uniqueId));}get uniqueId(){return this._uniqueId}get userData(){return this._userData||{}}async updateUserData(e){e&&"object"==typeof e?this._userData=e:e&&console.warn("Invalid user data");}hasSubmittedPhoneForm(){return Boolean(this.phoneNumber)}savePhoneNumber(e){this.phoneNumber=e||"no phone number",localStorage.setItem(`modo-chat:${this.modo.publicKey}-user-phone-number`,e||"no phone number");}async fetchUpdate(){await fetchUpdateUserData(this.modo.publicData?.setting.uuid,this.uniqueId,this.userData);}}
 
-var src = {};
+// src/services/EventEmitter.ts
+var EventEmitter = class {
+  constructor() {
+    this.listeners = {};
+    this.onceListeners = {};
+    this.wildcardListeners = /* @__PURE__ */ new Set();
+  }
+  on(eventType, listener) {
+    if (!this.listeners[eventType]) {
+      this.listeners[eventType] = /* @__PURE__ */ new Set();
+    }
+    this.listeners[eventType].add(listener);
+    return () => this.off(eventType, listener);
+  }
+  once(eventType, listener) {
+    if (!this.onceListeners[eventType]) {
+      this.onceListeners[eventType] = /* @__PURE__ */ new Set();
+    }
+    this.onceListeners[eventType].add(listener);
+    return () => this.offOnce(eventType, listener);
+  }
+  off(eventType, listener) {
+    const listeners = this.listeners[eventType];
+    if (listeners) {
+      listeners.delete(listener);
+    }
+  }
+  offOnce(eventType, listener) {
+    const listeners = this.onceListeners[eventType];
+    if (listeners) {
+      listeners.delete(listener);
+    }
+  }
+  onAny(listener) {
+    this.wildcardListeners.add(listener);
+    return () => this.offAny(listener);
+  }
+  offAny(listener) {
+    this.wildcardListeners.delete(listener);
+  }
+  async emit(event) {
+    const regularListeners = this.listeners[event.type];
+    if (regularListeners) {
+      const promises = Array.from(regularListeners).map(
+        (listener) => this.safeInvoke(listener, event)
+      );
+      await Promise.all(promises);
+    }
+    const onceListeners = this.onceListeners[event.type];
+    if (onceListeners) {
+      const listeners = Array.from(onceListeners);
+      onceListeners.clear();
+      const promises = listeners.map(
+        (listener) => this.safeInvoke(listener, event)
+      );
+      await Promise.all(promises);
+    }
+    if (this.wildcardListeners.size > 0) {
+      const promises = Array.from(this.wildcardListeners).map(
+        (listener) => this.safeInvoke(listener, event)
+      );
+      await Promise.all(promises);
+    }
+  }
+  async safeInvoke(listener, event) {
+    try {
+      await listener(event);
+    } catch (error) {
+      console.error(`Error in event listener for ${event.type}:`, error);
+    }
+  }
+  removeAllListeners(eventType) {
+    if (eventType) {
+      delete this.listeners[eventType];
+      delete this.onceListeners[eventType];
+    } else {
+      this.listeners = {};
+      this.onceListeners = {};
+      this.wildcardListeners.clear();
+    }
+  }
+  listenerCount(eventType) {
+    const regular = this.listeners[eventType]?.size || 0;
+    const once = this.onceListeners[eventType]?.size || 0;
+    return regular + once;
+  }
+  hasListeners(eventType) {
+    if (eventType) {
+      return this.listenerCount(eventType) > 0;
+    }
+    return Object.keys(this.listeners).length > 0 || Object.keys(this.onceListeners).length > 0 || this.wildcardListeners.size > 0;
+  }
+  getEventTypes() {
+    const types = /* @__PURE__ */ new Set();
+    Object.keys(this.listeners).forEach((key) => types.add(key));
+    Object.keys(this.onceListeners).forEach((key) => types.add(key));
+    return Array.from(types);
+  }
+};
 
-var ModoVoiceClient = {};
+// src/types/events.ts
+var EventType = /* @__PURE__ */ ((EventType2) => {
+  EventType2["CONNECTED"] = "connected";
+  EventType2["DISCONNECTED"] = "disconnected";
+  EventType2["CONNECTION_ERROR"] = "connection_error";
+  EventType2["AI_PLAYBACK_STARTED"] = "ai_playback_started";
+  EventType2["AI_PLAYBACK_CHUNK"] = "ai_playback_chunk";
+  EventType2["AI_PLAYBACK_COMPLETED"] = "ai_playback_completed";
+  EventType2["AI_PLAYBACK_ERROR"] = "ai_playback_error";
+  EventType2["USER_RECORDING_STARTED"] = "user_recording_started";
+  EventType2["USER_RECORDING_STOPPED"] = "user_recording_stopped";
+  EventType2["USER_RECORDING_DATA"] = "user_recording_data";
+  EventType2["VOICE_DETECTED"] = "voice_detected";
+  EventType2["VOICE_ENDED"] = "voice_ended";
+  EventType2["VOICE_METRICS"] = "voice_metrics";
+  EventType2["MICROPHONE_PAUSED"] = "microphone_paused";
+  EventType2["MICROPHONE_RESUMED"] = "microphone_resumed";
+  EventType2["TRANSCRIPT_RECEIVED"] = "transcript_received";
+  EventType2["AI_RESPONSE_RECEIVED"] = "ai_response_received";
+  EventType2["ON_HOLD_STARTED"] = "on_hold_started";
+  EventType2["ON_HOLD_STOPPED"] = "on_hold_stopped";
+  EventType2["CLEAR_BUFFER"] = "clear_buffer";
+  EventType2["ERROR"] = "error";
+  EventType2["WARNING"] = "warning";
+  EventType2["INFO"] = "info";
+  EventType2["DEBUG"] = "debug";
+  return EventType2;
+})(EventType || {});
 
-var EventEmitter = {};
+// src/services/WebSocketService.ts
+var WebSocketService = class {
+  constructor(config, eventEmitter, connectionState) {
+    this.ws = null;
+    this.pingInterval = null;
+    this.reconnectAttempt = 0;
+    this.intentionalDisconnect = false;
+    this.config = config;
+    this.eventEmitter = eventEmitter;
+    this.connectionState = connectionState;
+  }
+  async connect() {
+    if (this.connectionState.isConnected() || this.connectionState.isConnecting()) {
+      return;
+    }
+    this.intentionalDisconnect = false;
+    this.connectionState.setState("connecting" /* CONNECTING */);
+    try {
+      const url = this.buildWebSocketURL();
+      this.ws = new WebSocket(url);
+      this.ws.binaryType = "arraybuffer";
+      await this.setupWebSocket();
+    } catch (error) {
+      this.connectionState.setState("error" /* ERROR */);
+      await this.eventEmitter.emit({
+        type: "connection_error" /* CONNECTION_ERROR */,
+        timestamp: Date.now(),
+        error,
+        message: error.message
+      });
+      throw error;
+    }
+  }
+  buildWebSocketURL() {
+    const protocol = this.config.url.startsWith("https") ? "wss" : "ws";
+    const host = this.config.url.replace(/^https?:\/\//, "");
+    const params = new URLSearchParams({
+      chatbot_uuid: this.config.chatbotUuid,
+      user_unique_id: this.config.userUniqueId
+    });
+    return `${protocol}://${host}/ws/modo-live?${params.toString()}`;
+  }
+  setupWebSocket() {
+    return new Promise((resolve, reject) => {
+      if (!this.ws) {
+        reject(new Error("WebSocket not initialized"));
+        return;
+      }
+      const connectionTimeout = setTimeout(() => {
+        reject(new Error("Connection timeout"));
+        this.disconnect();
+      }, this.config.connectionTimeout || 1e4);
+      this.ws.onopen = () => {
+        clearTimeout(connectionTimeout);
+        this.connectionState.setState("connected" /* CONNECTED */);
+        this.connectionState.resetReconnectAttempts();
+        this.startPingInterval();
+        this.eventEmitter.emit({
+          type: "connected" /* CONNECTED */,
+          timestamp: Date.now(),
+          chatbotUuid: this.config.chatbotUuid,
+          userUniqueId: this.config.userUniqueId
+        });
+        resolve();
+      };
+      this.ws.onerror = (event) => {
+        clearTimeout(connectionTimeout);
+        this.eventEmitter.emit({
+          type: "error" /* ERROR */,
+          timestamp: Date.now(),
+          error: new Error("WebSocket error"),
+          message: "WebSocket connection error"
+        });
+        reject(new Error("WebSocket connection error"));
+      };
+      this.ws.onmessage = (event) => {
+        this.handleMessage(event);
+      };
+      this.ws.onclose = (event) => {
+        clearTimeout(connectionTimeout);
+        this.handleClose(event);
+      };
+    });
+  }
+  async handleMessage(event) {
+    this.connectionState.incrementMessagesReceived();
+    if (event.data instanceof ArrayBuffer) {
+      this.connectionState.addBytesReceived(event.data.byteLength);
+      await this.handleBinaryMessage(event.data);
+    } else if (typeof event.data === "string") {
+      try {
+        const message = JSON.parse(event.data);
+        await this.handleTextMessage(message);
+      } catch (error) {
+        console.error("Failed to parse WebSocket message:", error);
+      }
+    }
+  }
+  async handleBinaryMessage(data) {
+    await this.eventEmitter.emit({
+      type: "ai_playback_chunk" /* AI_PLAYBACK_CHUNK */,
+      timestamp: Date.now(),
+      data: new Uint8Array(data),
+      size: data.byteLength,
+      totalReceived: this.connectionState.getMetrics().bytesReceived
+    });
+  }
+  async handleTextMessage(message) {
+    switch (message.type) {
+      case "audio_complete" /* AUDIO_COMPLETE */:
+        await this.eventEmitter.emit({
+          type: "ai_playback_completed" /* AI_PLAYBACK_COMPLETED */,
+          timestamp: Date.now(),
+          totalBytes: this.connectionState.getMetrics().bytesReceived,
+          duration: 0
+        });
+        break;
+      case "pause_input" /* PAUSE_INPUT */:
+        await this.eventEmitter.emit({
+          type: "microphone_paused" /* MICROPHONE_PAUSED */,
+          timestamp: Date.now()
+        });
+        break;
+      case "resume_input" /* RESUME_INPUT */:
+        await this.eventEmitter.emit({
+          type: "microphone_resumed" /* MICROPHONE_RESUMED */,
+          timestamp: Date.now()
+        });
+        break;
+      case "start_on_hold" /* START_ON_HOLD */:
+        await this.eventEmitter.emit({
+          type: "microphone_paused" /* MICROPHONE_PAUSED */,
+          timestamp: Date.now()
+        });
+        await this.eventEmitter.emit({
+          type: "on_hold_started" /* ON_HOLD_STARTED */,
+          timestamp: Date.now()
+        });
+        break;
+      case "stop_on_hold" /* STOP_ON_HOLD */:
+        await this.eventEmitter.emit({
+          type: "microphone_resumed" /* MICROPHONE_RESUMED */,
+          timestamp: Date.now()
+        });
+        await this.eventEmitter.emit({
+          type: "on_hold_stopped" /* ON_HOLD_STOPPED */,
+          timestamp: Date.now()
+        });
+        break;
+      case "clear_buffer" /* CLEAR_BUFFER */:
+        await this.eventEmitter.emit({
+          type: "clear_buffer" /* CLEAR_BUFFER */,
+          timestamp: Date.now()
+        });
+        break;
+      case "status" /* STATUS */:
+        await this.eventEmitter.emit({
+          type: "info" /* INFO */,
+          timestamp: Date.now(),
+          message: message.message || "Status update",
+          context: "WebSocket"
+        });
+        break;
+      case "close" /* CLOSE */:
+        const closeMessage = message.message || "Server closing connection";
+        console.log("\u{1F44B} Server sent goodbye:", closeMessage);
+        await this.eventEmitter.emit({
+          type: "info" /* INFO */,
+          timestamp: Date.now(),
+          message: closeMessage,
+          context: "WebSocket"
+        });
+        setTimeout(() => {
+          if (this.ws) {
+            this.intentionalDisconnect = true;
+            this.ws.close(1e3, closeMessage);
+          }
+        }, 3e3);
+        break;
+      case "transcript" /* TRANSCRIPT */:
+        if (message.data && typeof message.data === "object" && "text" in message.data) {
+          await this.eventEmitter.emit({
+            type: "transcript_received" /* TRANSCRIPT_RECEIVED */,
+            timestamp: Date.now(),
+            text: message.data.text,
+            language: message.data.language
+          });
+        }
+        break;
+      case "error" /* ERROR */:
+        if (message.data && typeof message.data === "object" && "message" in message.data) {
+          await this.eventEmitter.emit({
+            type: "error" /* ERROR */,
+            timestamp: Date.now(),
+            error: new Error(message.data.message),
+            message: message.data.message
+          });
+        }
+        break;
+    }
+  }
+  handleClose(event) {
+    this.stopPingInterval();
+    this.connectionState.setLastError({
+      code: event.code,
+      reason: event.reason,
+      timestamp: Date.now(),
+      wasClean: event.wasClean
+    });
+    this.eventEmitter.emit({
+      type: "disconnected" /* DISCONNECTED */,
+      timestamp: Date.now(),
+      reason: event.reason,
+      code: event.code
+    });
+    if (!this.intentionalDisconnect && this.config.reconnect && this.reconnectAttempt < (this.config.maxReconnectAttempts || 5)) {
+      this.scheduleReconnect();
+    } else {
+      this.connectionState.setState("disconnected" /* DISCONNECTED */);
+    }
+  }
+  scheduleReconnect() {
+    this.reconnectAttempt++;
+    this.connectionState.incrementReconnectAttempts();
+    const delay = this.config.reconnectDelay || 1e3;
+    const timer = setTimeout(() => {
+      this.connect().catch((error) => {
+        console.error("Reconnection failed:", error);
+      });
+    }, delay);
+    this.connectionState.setReconnectTimer(timer);
+  }
+  send(data) {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      throw new Error("WebSocket is not connected");
+    }
+    this.ws.send(data);
+    this.connectionState.incrementMessagesSent();
+    if (data instanceof ArrayBuffer) {
+      this.connectionState.addBytesSent(data.byteLength);
+    } else {
+      this.connectionState.addBytesSent(new TextEncoder().encode(data).byteLength);
+    }
+  }
+  disconnect() {
+    if (!this.ws) return;
+    this.intentionalDisconnect = true;
+    this.connectionState.setState("disconnecting" /* DISCONNECTING */);
+    this.stopPingInterval();
+    this.connectionState.clearReconnectTimer();
+    if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
+      this.ws.close(1e3, "Client disconnect");
+    }
+    this.ws = null;
+    this.connectionState.setState("disconnected" /* DISCONNECTED */);
+    this.reconnectAttempt = 0;
+  }
+  startPingInterval() {
+    return;
+  }
+  stopPingInterval() {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
+  }
+  isConnected() {
+    return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+  }
+  getReadyState() {
+    return this.ws?.readyState ?? WebSocket.CLOSED;
+  }
+};
 
-var hasRequiredEventEmitter;
+// src/services/AudioService.ts
+var AudioService = class {
+  constructor(eventEmitter, audioState, voiceMetrics, config) {
+    this.audioContext = null;
+    this.mediaStream = null;
+    this.audioWorkletNode = null;
+    this.playbackRetryTimer = null;
+    this.micResumeTimeout = null;
+    this.eventEmitter = eventEmitter;
+    this.audioState = audioState;
+    this.voiceMetrics = voiceMetrics;
+    this.config = config;
+  }
+  async initialize(deviceId) {
+    try {
+      console.log("\u{1F527} Initializing AudioService...");
+      console.log(`   Processor Path: ${this.config.processorPath}`);
+      console.log(`   Voice Threshold: ${this.config.processor.voiceThreshold}`);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          deviceId: deviceId ? { exact: deviceId } : void 0,
+          ...this.config.constraints
+        }
+      });
+      console.log("\u2705 Microphone stream obtained");
+      this.mediaStream = stream;
+      this.audioContext = new AudioContext();
+      console.log(`   AudioContext created: ${this.audioContext.sampleRate}Hz`);
+      console.log("\u{1F4E6} Loading audio-processor.js...");
+      await this.audioContext.audioWorklet.addModule(this.config.processorPath);
+      console.log("\u2705 Audio processor loaded successfully!");
+      await this.setupAudioWorklet();
+      await this.eventEmitter.emit({
+        type: "user_recording_started" /* USER_RECORDING_STARTED */,
+        timestamp: Date.now(),
+        deviceId: deviceId || "default",
+        deviceLabel: stream.getAudioTracks()[0]?.label || "Unknown"
+      });
+      this.audioState.setRecordingState("recording" /* RECORDING */);
+    } catch (error) {
+      await this.eventEmitter.emit({
+        type: "error" /* ERROR */,
+        timestamp: Date.now(),
+        error,
+        message: `Failed to initialize audio: ${error.message}`
+      });
+      throw error;
+    }
+  }
+  async setupAudioWorklet() {
+    if (!this.audioContext || !this.mediaStream) {
+      throw new Error("Audio context or media stream not initialized");
+    }
+    console.log("\u{1F50C} Setting up audio worklet...");
+    const source = this.audioContext.createMediaStreamSource(this.mediaStream);
+    this.audioWorkletNode = new AudioWorkletNode(this.audioContext, "audio-processor", {
+      processorOptions: this.config.processor
+    });
+    console.log("\u2705 AudioWorkletNode created");
+    console.log("   Processor options:", this.config.processor);
+    this.audioWorkletNode.port.onmessage = (event) => {
+      console.log("\u{1F4E8} Message from audio processor:", event.data instanceof ArrayBuffer ? `ArrayBuffer ${event.data.byteLength} bytes` : event.data.type);
+      if (event.data instanceof ArrayBuffer) {
+        console.log(`\u{1F3B5} Raw audio buffer: ${event.data.byteLength} bytes`);
+        this.handleAudioData(event.data);
+      } else {
+        this.handleWorkletMessage(event.data);
+      }
+    };
+    source.connect(this.audioWorkletNode);
+    this.audioWorkletNode.connect(this.audioContext.destination);
+    console.log("\u{1F517} Audio nodes connected successfully");
+  }
+  handleWorkletMessage(data) {
+    switch (data.type) {
+      case "audioData":
+        if (data.audioData) {
+          console.log(`\u{1F3B5} Audio data received from worklet: ${data.audioData.byteLength} bytes`);
+          this.handleAudioData(data.audioData);
+        }
+        break;
+      case "voice-level":
+      // Match audio-processor.js format
+      case "voiceLevel":
+        if (data.rms !== void 0 && data.db !== void 0) {
+          const metrics = {
+            rms: data.rms,
+            db: data.db,
+            isActive: data.isActive ?? false,
+            isPaused: data.isPaused ?? false,
+            noiseFloor: data.noiseFloor ?? 0,
+            threshold: this.config.processor.voiceThreshold
+          };
+          this.voiceMetrics.update(metrics);
+          this.eventEmitter.emit({
+            type: "voice_metrics" /* VOICE_METRICS */,
+            timestamp: Date.now(),
+            ...metrics
+          });
+          if (data.isActive && !this.voiceMetrics.isVoiceActive()) {
+            this.eventEmitter.emit({
+              type: "voice_detected" /* VOICE_DETECTED */,
+              timestamp: Date.now(),
+              rms: data.rms,
+              db: data.db
+            });
+          } else if (!data.isActive && this.voiceMetrics.isVoiceActive()) {
+            this.eventEmitter.emit({
+              type: "voice_ended" /* VOICE_ENDED */,
+              timestamp: Date.now(),
+              duration: this.voiceMetrics.getVoiceDuration()
+            });
+          }
+        }
+        break;
+      case "voice-ended":
+        console.log("\u{1F3AC} Voice ended signal received from audio processor");
+        this.eventEmitter.emit({
+          type: "voice_ended" /* VOICE_ENDED */,
+          timestamp: Date.now(),
+          duration: this.voiceMetrics.getVoiceDuration()
+        });
+        break;
+    }
+  }
+  handleAudioData(audioData) {
+    console.log(`\u{1F4E4} Sending audio data: ${audioData.byteLength} bytes`);
+    this.eventEmitter.emit({
+      type: "user_recording_data" /* USER_RECORDING_DATA */,
+      timestamp: Date.now(),
+      data: audioData,
+      byteLength: audioData.byteLength
+    });
+    this.audioState.addBytesSent(audioData.byteLength);
+  }
+  async handleIncomingAudioChunk(chunk) {
+    const uint8Array = new Uint8Array(chunk);
+    this.audioState.addToBuffer(uint8Array);
+    if (!this.audioState.isPlaying()) {
+      await this.attemptPlayback();
+    }
+  }
+  async attemptPlayback() {
+    const bufferInfo = this.audioState.getBufferInfo();
+    const minSize = this.audioState.isPlaying() ? this.config.minBufferSize * 0.75 : this.config.minBufferSize;
+    const minChunks = this.audioState.isPlaying() ? this.config.targetChunks * 0.75 : this.config.targetChunks;
+    const shouldStart = bufferInfo.totalBytes >= minSize || bufferInfo.chunks >= minChunks || this.audioState.isStreamComplete() && bufferInfo.totalBytes > 0;
+    if (shouldStart) {
+      await this.playNextSegment();
+    } else if (!this.playbackRetryTimer) {
+      this.playbackRetryTimer = setTimeout(() => {
+        this.playbackRetryTimer = null;
+        this.attemptPlayback();
+      }, this.config.playbackRetryInterval);
+    }
+  }
+  async playNextSegment() {
+    if (this.playbackRetryTimer) {
+      clearTimeout(this.playbackRetryTimer);
+      this.playbackRetryTimer = null;
+    }
+    const buffer = this.audioState.getBuffer();
+    if (buffer.length === 0) {
+      if (this.audioState.isStreamComplete()) {
+        await this.completePlayback();
+      }
+      return;
+    }
+    const combined = this.combineBuffers(buffer);
+    this.audioState.clearBuffer();
+    const blob = new Blob([combined.buffer], { type: "audio/mpeg" });
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    this.audioState.setCurrentAudioElement(audio);
+    this.audioState.setPlaybackState("playing" /* PLAYING */);
+    audio.onended = () => {
+      URL.revokeObjectURL(url);
+      Promise.resolve().then(() => this.playNextSegment());
+    };
+    audio.onerror = (error) => {
+      URL.revokeObjectURL(url);
+      this.eventEmitter.emit({
+        type: "ai_playback_error" /* AI_PLAYBACK_ERROR */,
+        timestamp: Date.now(),
+        error: new Error("Audio playback error"),
+        message: "Failed to play audio segment"
+      });
+    };
+    try {
+      await audio.play();
+      if (this.audioState.getPlaybackState() === "playing" /* PLAYING */) {
+        await this.eventEmitter.emit({
+          type: "ai_playback_started" /* AI_PLAYBACK_STARTED */,
+          timestamp: Date.now()
+        });
+      }
+    } catch (error) {
+      await this.eventEmitter.emit({
+        type: "ai_playback_error" /* AI_PLAYBACK_ERROR */,
+        timestamp: Date.now(),
+        error,
+        message: "Failed to start audio playback"
+      });
+    }
+  }
+  combineBuffers(buffers) {
+    const totalLength = buffers.reduce((sum, buf) => sum + buf.byteLength, 0);
+    const result = new Uint8Array(totalLength);
+    let offset = 0;
+    for (const buffer of buffers) {
+      result.set(buffer, offset);
+      offset += buffer.byteLength;
+    }
+    return result;
+  }
+  async setStreamComplete() {
+    this.audioState.setStreamingComplete(true);
+    if (this.audioState.getBufferSize() > 0 && !this.audioState.isPlaying()) {
+      await this.playNextSegment();
+    }
+  }
+  async completePlayback() {
+    this.audioState.setPlaybackState("completed" /* COMPLETED */);
+    await this.eventEmitter.emit({
+      type: "ai_playback_completed" /* AI_PLAYBACK_COMPLETED */,
+      timestamp: Date.now(),
+      totalBytes: this.audioState.getTotalBytesReceived(),
+      duration: 0
+    });
+    await this.resumeMicrophone();
+  }
+  async pauseMicrophone() {
+    if (this.audioWorkletNode) {
+      this.audioWorkletNode.port.postMessage({ type: "pause" });
+      await this.eventEmitter.emit({
+        type: "microphone_paused" /* MICROPHONE_PAUSED */,
+        timestamp: Date.now(),
+        internal: true
+        // Prevent infinite loop
+      });
+    }
+  }
+  async resumeMicrophone() {
+    if (this.micResumeTimeout) {
+      clearTimeout(this.micResumeTimeout);
+    }
+    this.micResumeTimeout = setTimeout(async () => {
+      if (this.audioWorkletNode) {
+        this.audioWorkletNode.port.postMessage({ type: "resume" });
+        await this.eventEmitter.emit({
+          type: "microphone_resumed" /* MICROPHONE_RESUMED */,
+          timestamp: Date.now(),
+          internal: true
+          // Prevent infinite loop
+        });
+      }
+      this.micResumeTimeout = null;
+    }, this.config.resumeDelay);
+    const failsafeTimeout = setTimeout(() => {
+      if (this.audioWorkletNode) {
+        this.audioWorkletNode.port.postMessage({ type: "resume" });
+      }
+    }, this.config.failsafeResumeTimeout);
+    if (this.micResumeTimeout) {
+      this.micResumeTimeout;
+      this.micResumeTimeout = setTimeout(() => {
+        clearTimeout(failsafeTimeout);
+      }, this.config.resumeDelay);
+    }
+  }
+  async getAvailableDevices() {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    return devices.filter((device) => device.kind === "audioinput").map((device) => ({
+      deviceId: device.deviceId,
+      label: device.label || `Microphone ${device.deviceId.slice(0, 8)}`,
+      kind: device.kind,
+      groupId: device.groupId
+    }));
+  }
+  async cleanup() {
+    if (this.playbackRetryTimer) {
+      clearTimeout(this.playbackRetryTimer);
+    }
+    if (this.micResumeTimeout) {
+      clearTimeout(this.micResumeTimeout);
+    }
+    const currentElement = this.audioState.getCurrentAudioElement();
+    if (currentElement) {
+      currentElement.pause();
+      currentElement.src = "";
+    }
+    if (this.audioWorkletNode) {
+      this.audioWorkletNode.disconnect();
+      this.audioWorkletNode = null;
+    }
+    if (this.mediaStream) {
+      this.mediaStream.getTracks().forEach((track) => track.stop());
+      this.mediaStream = null;
+    }
+    if (this.audioContext && this.audioContext.state !== "closed") {
+      await this.audioContext.close();
+      this.audioContext = null;
+    }
+    this.audioState.reset();
+    this.voiceMetrics.reset();
+    await this.eventEmitter.emit({
+      type: "user_recording_stopped" /* USER_RECORDING_STOPPED */,
+      timestamp: Date.now(),
+      duration: 0,
+      totalBytes: this.audioState.getTotalBytesSent()
+    });
+  }
+};
 
-function requireEventEmitter () {
-	if (hasRequiredEventEmitter) return EventEmitter;
-	hasRequiredEventEmitter = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.EventEmitter=void 0;class EventEmitter{listeners={};onceListeners={};wildcardListeners=new Set;on(e,s){return this.listeners[e]||(this.listeners[e]=new Set),this.listeners[e].add(s),()=>this.off(e,s)}once(e,s){return this.onceListeners[e]||(this.onceListeners[e]=new Set),this.onceListeners[e].add(s),()=>this.offOnce(e,s)}off(e,s){const t=this.listeners[e];t&&t.delete(s);}offOnce(e,s){const t=this.onceListeners[e];t&&t.delete(s);}onAny(e){return this.wildcardListeners.add(e),()=>this.offAny(e)}offAny(e){this.wildcardListeners.delete(e);}async emit(e){const s=this.listeners[e.type];if(s){const t=Array.from(s).map(s=>this.safeInvoke(s,e));await Promise.all(t);}const t=this.onceListeners[e.type];if(t){const s=Array.from(t);t.clear();const i=s.map(s=>this.safeInvoke(s,e));await Promise.all(i);}if(this.wildcardListeners.size>0){const s=Array.from(this.wildcardListeners).map(s=>this.safeInvoke(s,e));await Promise.all(s);}}async safeInvoke(e,s){try{await e(s);}catch(e){console.error(`Error in event listener for ${s.type}:`,e);}}removeAllListeners(e){e?(delete this.listeners[e],delete this.onceListeners[e]):(this.listeners={},this.onceListeners={},this.wildcardListeners.clear());}listenerCount(e){return (this.listeners[e]?.size||0)+(this.onceListeners[e]?.size||0)}hasListeners(e){return e?this.listenerCount(e)>0:Object.keys(this.listeners).length>0||Object.keys(this.onceListeners).length>0||this.wildcardListeners.size>0}getEventTypes(){const e=new Set;return Object.keys(this.listeners).forEach(s=>e.add(s)),Object.keys(this.onceListeners).forEach(s=>e.add(s)),Array.from(e)}}exports$1.EventEmitter=EventEmitter; 
-	} (EventEmitter));
-	return EventEmitter;
+// src/models/AudioState.ts
+var AudioState = class {
+  constructor() {
+    this.playbackState = "idle" /* IDLE */;
+    this.recordingState = "idle" /* IDLE */;
+    this.audioQueue = [];
+    this.audioBuffer = [];
+    this.audioBufferSize = 0;
+    this.isStreamingComplete = false;
+    this.currentAudioElement = null;
+    this.recordingStartTime = 0;
+    this.playbackStartTime = 0;
+    this.totalBytesReceived = 0;
+    this.totalBytesSent = 0;
+  }
+  getPlaybackState() {
+    return this.playbackState;
+  }
+  setPlaybackState(state) {
+    this.playbackState = state;
+  }
+  getRecordingState() {
+    return this.recordingState;
+  }
+  setRecordingState(state) {
+    this.recordingState = state;
+    if (state === "recording" /* RECORDING */) {
+      this.recordingStartTime = Date.now();
+    }
+  }
+  isPlaying() {
+    return this.playbackState === "playing" /* PLAYING */;
+  }
+  isRecording() {
+    return this.recordingState === "recording" /* RECORDING */;
+  }
+  addToQueue(chunk) {
+    this.audioQueue.push(chunk);
+  }
+  getQueue() {
+    return this.audioQueue;
+  }
+  clearQueue() {
+    this.audioQueue = [];
+  }
+  addToBuffer(chunk) {
+    this.audioBuffer.push(chunk);
+    this.audioBufferSize += chunk.byteLength;
+    this.totalBytesReceived += chunk.byteLength;
+  }
+  getBuffer() {
+    return this.audioBuffer;
+  }
+  getBufferSize() {
+    return this.audioBufferSize;
+  }
+  getBufferInfo() {
+    return {
+      chunks: this.audioBuffer.length,
+      totalBytes: this.audioBufferSize,
+      duration: this.audioBufferSize / (16e3 * 2),
+      isStreaming: !this.isStreamingComplete
+    };
+  }
+  clearBuffer() {
+    this.audioBuffer = [];
+    this.audioBufferSize = 0;
+    this.isStreamingComplete = false;
+  }
+  setStreamingComplete(complete) {
+    this.isStreamingComplete = complete;
+  }
+  isStreamComplete() {
+    return this.isStreamingComplete;
+  }
+  setCurrentAudioElement(element) {
+    this.currentAudioElement = element;
+    if (element) {
+      this.playbackStartTime = Date.now();
+    }
+  }
+  getCurrentAudioElement() {
+    return this.currentAudioElement;
+  }
+  getPlaybackMetrics() {
+    if (!this.currentAudioElement) return null;
+    return {
+      currentTime: this.currentAudioElement.currentTime,
+      duration: this.currentAudioElement.duration,
+      buffered: this.currentAudioElement.buffered,
+      readyState: this.currentAudioElement.readyState,
+      networkState: this.currentAudioElement.networkState
+    };
+  }
+  getRecordingMetrics() {
+    return {
+      startTime: this.recordingStartTime,
+      duration: this.recordingStartTime ? Date.now() - this.recordingStartTime : 0,
+      totalBytes: this.totalBytesSent,
+      sampleRate: 16e3,
+      channelCount: 1
+    };
+  }
+  addBytesSent(bytes) {
+    this.totalBytesSent += bytes;
+  }
+  getTotalBytesReceived() {
+    return this.totalBytesReceived;
+  }
+  getTotalBytesSent() {
+    return this.totalBytesSent;
+  }
+  reset() {
+    this.playbackState = "idle" /* IDLE */;
+    this.recordingState = "idle" /* IDLE */;
+    this.audioQueue = [];
+    this.audioBuffer = [];
+    this.audioBufferSize = 0;
+    this.isStreamingComplete = false;
+    this.currentAudioElement = null;
+    this.recordingStartTime = 0;
+    this.playbackStartTime = 0;
+  }
+  resetPlayback() {
+    this.playbackState = "idle" /* IDLE */;
+    this.audioQueue = [];
+    this.audioBuffer = [];
+    this.audioBufferSize = 0;
+    this.isStreamingComplete = false;
+    this.currentAudioElement = null;
+    this.playbackStartTime = 0;
+  }
+  resetRecording() {
+    this.recordingState = "idle" /* IDLE */;
+    this.recordingStartTime = 0;
+    this.totalBytesSent = 0;
+  }
+};
+
+// src/models/ConnectionState.ts
+var ConnectionState2 = class {
+  constructor() {
+    this.state = "disconnected" /* DISCONNECTED */;
+    this.metrics = {
+      duration: 0,
+      reconnectAttempts: 0,
+      bytesSent: 0,
+      bytesReceived: 0,
+      messagesSent: 0,
+      messagesReceived: 0
+    };
+    this.lastError = null;
+    this.reconnectTimer = null;
+  }
+  getState() {
+    return this.state;
+  }
+  setState(state) {
+    this.state = state;
+    if (state === "connected" /* CONNECTED */) {
+      this.metrics.connectedAt = Date.now();
+      this.metrics.reconnectAttempts = 0;
+    } else if (state === "disconnected" /* DISCONNECTED */ && this.metrics.connectedAt) {
+      this.metrics.disconnectedAt = Date.now();
+      this.metrics.duration = this.metrics.disconnectedAt - this.metrics.connectedAt;
+    }
+  }
+  isConnected() {
+    return this.state === "connected" /* CONNECTED */;
+  }
+  isConnecting() {
+    return this.state === "connecting" /* CONNECTING */;
+  }
+  isDisconnected() {
+    return this.state === "disconnected" /* DISCONNECTED */;
+  }
+  isDisconnecting() {
+    return this.state === "disconnecting" /* DISCONNECTING */;
+  }
+  hasError() {
+    return this.state === "error" /* ERROR */;
+  }
+  getMetrics() {
+    const current = { ...this.metrics };
+    if (this.metrics.connectedAt && !this.metrics.disconnectedAt) {
+      current.duration = Date.now() - this.metrics.connectedAt;
+    }
+    return current;
+  }
+  incrementReconnectAttempts() {
+    this.metrics.reconnectAttempts++;
+  }
+  getReconnectAttempts() {
+    return this.metrics.reconnectAttempts;
+  }
+  resetReconnectAttempts() {
+    this.metrics.reconnectAttempts = 0;
+  }
+  addBytesSent(bytes) {
+    this.metrics.bytesSent += bytes;
+  }
+  addBytesReceived(bytes) {
+    this.metrics.bytesReceived += bytes;
+  }
+  incrementMessagesSent() {
+    this.metrics.messagesSent++;
+  }
+  incrementMessagesReceived() {
+    this.metrics.messagesReceived++;
+  }
+  setLastError(error) {
+    this.lastError = error;
+    this.state = "error" /* ERROR */;
+  }
+  getLastError() {
+    return this.lastError;
+  }
+  clearError() {
+    this.lastError = null;
+    if (this.state === "error" /* ERROR */) {
+      this.state = "disconnected" /* DISCONNECTED */;
+    }
+  }
+  setReconnectTimer(timer) {
+    this.clearReconnectTimer();
+    this.reconnectTimer = timer;
+  }
+  clearReconnectTimer() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+  }
+  reset() {
+    this.state = "disconnected" /* DISCONNECTED */;
+    this.metrics = {
+      duration: 0,
+      reconnectAttempts: 0,
+      bytesSent: 0,
+      bytesReceived: 0,
+      messagesSent: 0,
+      messagesReceived: 0
+    };
+    this.lastError = null;
+    this.clearReconnectTimer();
+  }
+  getDuration() {
+    if (this.metrics.connectedAt) {
+      const end = this.metrics.disconnectedAt || Date.now();
+      return end - this.metrics.connectedAt;
+    }
+    return 0;
+  }
+};
+
+// src/models/VoiceMetrics.ts
+var VoiceMetrics = class {
+  constructor() {
+    this.rms = 0;
+    this.db = -Infinity;
+    this.isActive = false;
+    this.isPaused = false;
+    this.noiseFloor = 0;
+    this.threshold = 0.25;
+    this.voiceStartTime = 0;
+    this.voiceEndTime = 0;
+    this.totalVoiceTime = 0;
+    this.history = [];
+    this.maxHistoryLength = 100;
+  }
+  update(metrics) {
+    this.rms = metrics.rms;
+    this.db = metrics.db;
+    this.isActive = metrics.isActive;
+    this.isPaused = metrics.isPaused;
+    this.noiseFloor = metrics.noiseFloor;
+    this.threshold = metrics.threshold;
+    if (metrics.isActive && !this.isActive && !this.voiceStartTime) {
+      this.voiceStartTime = Date.now();
+    } else if (!metrics.isActive && this.isActive && this.voiceStartTime) {
+      this.voiceEndTime = Date.now();
+      this.totalVoiceTime += this.voiceEndTime - this.voiceStartTime;
+      this.voiceStartTime = 0;
+      this.voiceEndTime = 0;
+    }
+    this.addToHistory(metrics);
+  }
+  addToHistory(metrics) {
+    this.history.push(metrics);
+    if (this.history.length > this.maxHistoryLength) {
+      this.history.shift();
+    }
+  }
+  getCurrent() {
+    return {
+      rms: this.rms,
+      db: this.db,
+      isActive: this.isActive,
+      isPaused: this.isPaused,
+      noiseFloor: this.noiseFloor,
+      threshold: this.threshold
+    };
+  }
+  getRMS() {
+    return this.rms;
+  }
+  getDB() {
+    return this.db;
+  }
+  isVoiceActive() {
+    return this.isActive;
+  }
+  isMicrophonePaused() {
+    return this.isPaused;
+  }
+  getNoiseFloor() {
+    return this.noiseFloor;
+  }
+  getThreshold() {
+    return this.threshold;
+  }
+  getVoiceDuration() {
+    if (this.voiceStartTime) {
+      return Date.now() - this.voiceStartTime;
+    }
+    return 0;
+  }
+  getTotalVoiceTime() {
+    return this.totalVoiceTime;
+  }
+  getHistory(count) {
+    if (count !== void 0) {
+      return this.history.slice(-count);
+    }
+    return [...this.history];
+  }
+  getAverageRMS(count = 10) {
+    const recent = this.history.slice(-count);
+    if (recent.length === 0) return 0;
+    const sum = recent.reduce((acc, m) => acc + m.rms, 0);
+    return sum / recent.length;
+  }
+  getAverageDB(count = 10) {
+    const recent = this.history.slice(-count);
+    if (recent.length === 0) return -Infinity;
+    const sum = recent.reduce((acc, m) => acc + m.db, 0);
+    return sum / recent.length;
+  }
+  getPeakRMS() {
+    if (this.history.length === 0) return 0;
+    return Math.max(...this.history.map((m) => m.rms));
+  }
+  getPeakDB() {
+    if (this.history.length === 0) return -Infinity;
+    return Math.max(...this.history.map((m) => m.db));
+  }
+  getActivityRatio(windowSize = 100) {
+    const recent = this.history.slice(-windowSize);
+    if (recent.length === 0) return 0;
+    const activeCount = recent.filter((m) => m.isActive).length;
+    return activeCount / recent.length;
+  }
+  setMaxHistoryLength(length) {
+    this.maxHistoryLength = length;
+    while (this.history.length > length) {
+      this.history.shift();
+    }
+  }
+  reset() {
+    this.rms = 0;
+    this.db = -Infinity;
+    this.isActive = false;
+    this.isPaused = false;
+    this.noiseFloor = 0;
+    this.voiceStartTime = 0;
+    this.voiceEndTime = 0;
+    this.totalVoiceTime = 0;
+    this.history = [];
+  }
+  clearHistory() {
+    this.history = [];
+  }
+};
+
+// src/types/config.ts
+var LogLevel = /* @__PURE__ */ ((LogLevel3) => {
+  LogLevel3[LogLevel3["NONE"] = 0] = "NONE";
+  LogLevel3[LogLevel3["ERROR"] = 1] = "ERROR";
+  LogLevel3[LogLevel3["WARN"] = 2] = "WARN";
+  LogLevel3[LogLevel3["INFO"] = 3] = "INFO";
+  LogLevel3[LogLevel3["DEBUG"] = 4] = "DEBUG";
+  return LogLevel3;
+})(LogLevel || {});
+var DEFAULT_CONFIG = {
+  audio: {
+    constraints: {
+      sampleRate: 16e3,
+      channelCount: 1,
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true
+    },
+    processor: {
+      voiceThreshold: 0.08,
+      silenceThreshold: 0.05,
+      minSilenceFrames: 8,
+      maxPreRollBuffers: 5,
+      sampleRate: 16e3
+    },
+    processorPath: "/audio-processor.js",
+    minBufferSize: 32e3,
+    targetChunks: 16,
+    chunkSize: 1024,
+    playbackRetryInterval: 10,
+    playbackRetryMaxAttempts: 50,
+    resumeDelay: 150,
+    failsafeResumeTimeout: 1e4
+  },
+  websocket: {
+    reconnect: false,
+    // Disabled by default, original client doesn't auto-reconnect
+    maxReconnectAttempts: 5,
+    reconnectDelay: 1e3,
+    reconnectBackoffMultiplier: 1.5,
+    maxReconnectDelay: 3e4,
+    pingInterval: 3e4,
+    pongTimeout: 5e3,
+    connectionTimeout: 1e4,
+    binaryType: "arraybuffer"
+  },
+  logging: {
+    level: 3 /* INFO */,
+    enableConsole: true,
+    enableEvents: true,
+    includeTimestamp: true,
+    includeContext: true
+  },
+  features: {
+    enableVAD: true,
+    enableNoiseReduction: true,
+    enableEchoCancellation: true,
+    enableAutoGainControl: true,
+    enableOnHoldAudio: true,
+    enablePreRollBuffer: true,
+    enableMetrics: true,
+    metricsInterval: 1e3,
+    enableDebugLogs: false
+  }
+};
+
+// src/utils/logger.ts
+var Logger = class {
+  constructor(config, eventEmitter) {
+    this.config = config;
+    this.eventEmitter = eventEmitter;
+  }
+  error(message, context, data) {
+    this.log(1 /* ERROR */, message, context, data);
+  }
+  warn(message, context, data) {
+    this.log(2 /* WARN */, message, context, data);
+  }
+  info(message, context, data) {
+    this.log(3 /* INFO */, message, context, data);
+  }
+  debug(message, context, data) {
+    this.log(4 /* DEBUG */, message, context, data);
+  }
+  log(level, message, context, data) {
+    if (level > this.config.level) {
+      return;
+    }
+    if (this.config.customLogger) {
+      this.config.customLogger(level, message, context, data);
+      return;
+    }
+    if (this.config.enableConsole) {
+      this.logToConsole(level, message, context, data);
+    }
+    if (this.config.enableEvents && this.eventEmitter) {
+      this.logToEvents(level, message, context, data);
+    }
+  }
+  logToConsole(level, message, context, data) {
+    const timestamp = this.config.includeTimestamp ? `[${(/* @__PURE__ */ new Date()).toISOString()}]` : "";
+    const contextStr = this.config.includeContext && context ? `[${context}]` : "";
+    const prefix = [timestamp, contextStr].filter(Boolean).join(" ");
+    const fullMessage = `${prefix} ${message}`;
+    switch (level) {
+      case 1 /* ERROR */:
+        console.error(fullMessage, data || "");
+        break;
+      case 2 /* WARN */:
+        console.warn(fullMessage, data || "");
+        break;
+      case 3 /* INFO */:
+        console.info(fullMessage, data || "");
+        break;
+      case 4 /* DEBUG */:
+        console.debug(fullMessage, data || "");
+        break;
+    }
+  }
+  logToEvents(level, message, context, data) {
+    if (!this.eventEmitter) return;
+    switch (level) {
+      case 1 /* ERROR */:
+        this.eventEmitter.emit({
+          type: "error" /* ERROR */,
+          timestamp: Date.now(),
+          error: new Error(message),
+          message,
+          context
+        });
+        break;
+      case 2 /* WARN */:
+        this.eventEmitter.emit({
+          type: "warning" /* WARNING */,
+          timestamp: Date.now(),
+          message,
+          context
+        });
+        break;
+      case 3 /* INFO */:
+        this.eventEmitter.emit({
+          type: "info" /* INFO */,
+          timestamp: Date.now(),
+          message,
+          context
+        });
+        break;
+      case 4 /* DEBUG */:
+        this.eventEmitter.emit({
+          type: "debug" /* DEBUG */,
+          timestamp: Date.now(),
+          message,
+          data
+        });
+        break;
+    }
+  }
+  setLevel(level) {
+    this.config.level = level;
+  }
+  getLevel() {
+    return this.config.level;
+  }
+  updateConfig(config) {
+    this.config = { ...this.config, ...config };
+  }
+};
+function createLogger(config, eventEmitter) {
+  return new Logger(config, eventEmitter);
 }
 
-var WebSocketService = {};
-
-var websocket = {};
-
-var hasRequiredWebsocket;
-
-function requireWebsocket () {
-	if (hasRequiredWebsocket) return websocket;
-	hasRequiredWebsocket = 1;
-	(function (exports$1) {
-var ConnectionState,WebSocketMessageType;Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.WebSocketMessageType=exports$1.ConnectionState=void 0,function(e){e.DISCONNECTED="disconnected",e.CONNECTING="connecting",e.CONNECTED="connected",e.DISCONNECTING="disconnecting",e.ERROR="error";}(ConnectionState||(exports$1.ConnectionState=ConnectionState={})),function(e){e.AUDIO_CHUNK="audio_chunk",e.AUDIO_COMPLETE="audio_complete",e.PAUSE_INPUT="pause_input",e.RESUME_INPUT="resume_input",e.START_ON_HOLD="start_on_hold",e.STOP_ON_HOLD="stop_on_hold",e.CLEAR_BUFFER="clear_buffer",e.CLOSE="close",e.STATUS="status",e.TRANSCRIPT="transcript",e.ERROR="error",e.PING="ping",e.PONG="pong";}(WebSocketMessageType||(exports$1.WebSocketMessageType=WebSocketMessageType={})); 
-	} (websocket));
-	return websocket;
+// src/utils/validators.ts
+var ValidationError = class extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "ValidationError";
+  }
+};
+function validateConfig(config) {
+  if (!config.chatbotUuid || typeof config.chatbotUuid !== "string") {
+    throw new ValidationError("chatbotUuid is required and must be a string");
+  }
+  if (!config.userUniqueId || typeof config.userUniqueId !== "string") {
+    throw new ValidationError("userUniqueId is required and must be a string");
+  }
+  if (!config.apiBase || typeof config.apiBase !== "string") {
+    throw new ValidationError("apiBase is required and must be a string");
+  }
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(config.chatbotUuid)) {
+    throw new ValidationError("chatbotUuid must be a valid UUID");
+  }
+  if (config.audio) {
+    validateAudioConfig(config.audio);
+  }
+  if (config.websocket) {
+    validateWebSocketConfig(config.websocket);
+  }
+  if (config.logging) {
+    validateLoggingConfig(config.logging);
+  }
+}
+function validateAudioConfig(config) {
+  if (!config) return;
+  if (config.constraints) {
+    if (config.constraints.sampleRate && config.constraints.sampleRate < 8e3) {
+      throw new ValidationError("sampleRate must be at least 8000");
+    }
+    if (config.constraints.channelCount && config.constraints.channelCount < 1) {
+      throw new ValidationError("channelCount must be at least 1");
+    }
+  }
+  if (config.processor) {
+    if (config.processor.voiceThreshold !== void 0 && (config.processor.voiceThreshold < 0 || config.processor.voiceThreshold > 1)) {
+      throw new ValidationError("voiceThreshold must be between 0 and 1");
+    }
+    if (config.processor.silenceThreshold !== void 0 && (config.processor.silenceThreshold < 0 || config.processor.silenceThreshold > 1)) {
+      throw new ValidationError("silenceThreshold must be between 0 and 1");
+    }
+  }
+}
+function validateWebSocketConfig(config) {
+  if (!config) return;
+  if (config.maxReconnectAttempts !== void 0 && config.maxReconnectAttempts < 0) {
+    throw new ValidationError("maxReconnectAttempts must be non-negative");
+  }
+  if (config.reconnectDelay !== void 0 && config.reconnectDelay < 0) {
+    throw new ValidationError("reconnectDelay must be non-negative");
+  }
+  if (config.connectionTimeout !== void 0 && config.connectionTimeout < 1e3) {
+    throw new ValidationError("connectionTimeout must be at least 1000ms");
+  }
+}
+function validateLoggingConfig(config) {
+  if (!config) return;
+  if (config.level !== void 0 && (config.level < 0 || config.level > 4)) {
+    throw new ValidationError("log level must be between 0 and 4");
+  }
 }
 
-var events = {};
-
-var hasRequiredEvents;
-
-function requireEvents () {
-	if (hasRequiredEvents) return events;
-	hasRequiredEvents = 1;
-	(function (exports$1) {
-var EventType;Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.EventType=void 0,function(e){e.CONNECTED="connected",e.DISCONNECTED="disconnected",e.CONNECTION_ERROR="connection_error",e.AI_PLAYBACK_STARTED="ai_playback_started",e.AI_PLAYBACK_CHUNK="ai_playback_chunk",e.AI_PLAYBACK_COMPLETED="ai_playback_completed",e.AI_PLAYBACK_ERROR="ai_playback_error",e.USER_RECORDING_STARTED="user_recording_started",e.USER_RECORDING_STOPPED="user_recording_stopped",e.USER_RECORDING_DATA="user_recording_data",e.VOICE_DETECTED="voice_detected",e.VOICE_ENDED="voice_ended",e.VOICE_METRICS="voice_metrics",e.MICROPHONE_PAUSED="microphone_paused",e.MICROPHONE_RESUMED="microphone_resumed",e.TRANSCRIPT_RECEIVED="transcript_received",e.AI_RESPONSE_RECEIVED="ai_response_received",e.ON_HOLD_STARTED="on_hold_started",e.ON_HOLD_STOPPED="on_hold_stopped",e.CLEAR_BUFFER="clear_buffer",e.ERROR="error",e.WARNING="warning",e.INFO="info",e.DEBUG="debug";}(EventType||(exports$1.EventType=EventType={})); 
-	} (events));
-	return events;
-}
-
-var hasRequiredWebSocketService;
-
-function requireWebSocketService () {
-	if (hasRequiredWebSocketService) return WebSocketService;
-	hasRequiredWebSocketService = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.WebSocketService=void 0;const websocket_1=requireWebsocket(),events_1=requireEvents();class WebSocketService{ws=null;config;eventEmitter;connectionState;pingInterval=null;reconnectAttempt=0;intentionalDisconnect=false;constructor(e,t,n){this.config=e,this.eventEmitter=t,this.connectionState=n;}async connect(){if(!this.connectionState.isConnected()&&!this.connectionState.isConnecting()){this.intentionalDisconnect=false,this.connectionState.setState(websocket_1.ConnectionState.CONNECTING);try{const e=this.buildWebSocketURL();this.ws=new WebSocket(e),this.ws.binaryType="arraybuffer",await this.setupWebSocket();}catch(e){throw this.connectionState.setState(websocket_1.ConnectionState.ERROR),await this.eventEmitter.emit({type:events_1.EventType.CONNECTION_ERROR,timestamp:Date.now(),error:e,message:e.message}),e}}}buildWebSocketURL(){return `${this.config.url.startsWith("https")?"wss":"ws"}://${this.config.url.replace(/^https?:\/\//,"")}/ws/modo-live?${new URLSearchParams({chatbot_uuid:this.config.chatbotUuid,user_unique_id:this.config.userUniqueId}).toString()}`}setupWebSocket(){return new Promise((e,t)=>{if(!this.ws)return void t(new Error("WebSocket not initialized"));const n=setTimeout(()=>{t(new Error("Connection timeout")),this.disconnect();},this.config.connectionTimeout||1e4);this.ws.onopen=()=>{clearTimeout(n),this.connectionState.setState(websocket_1.ConnectionState.CONNECTED),this.connectionState.resetReconnectAttempts(),this.startPingInterval(),this.eventEmitter.emit({type:events_1.EventType.CONNECTED,timestamp:Date.now(),chatbotUuid:this.config.chatbotUuid,userUniqueId:this.config.userUniqueId}),e();},this.ws.onerror=e=>{clearTimeout(n),this.eventEmitter.emit({type:events_1.EventType.ERROR,timestamp:Date.now(),error:new Error("WebSocket error"),message:"WebSocket connection error"}),t(new Error("WebSocket connection error"));},this.ws.onmessage=e=>{this.handleMessage(e);},this.ws.onclose=e=>{clearTimeout(n),this.handleClose(e);};})}async handleMessage(e){if(this.connectionState.incrementMessagesReceived(),e.data instanceof ArrayBuffer)this.connectionState.addBytesReceived(e.data.byteLength),await this.handleBinaryMessage(e.data);else if("string"==typeof e.data)try{const t=JSON.parse(e.data);await this.handleTextMessage(t);}catch(e){console.error("Failed to parse WebSocket message:",e);}}async handleBinaryMessage(e){await this.eventEmitter.emit({type:events_1.EventType.AI_PLAYBACK_CHUNK,timestamp:Date.now(),data:new Uint8Array(e),size:e.byteLength,totalReceived:this.connectionState.getMetrics().bytesReceived});}async handleTextMessage(e){switch(e.type){case websocket_1.WebSocketMessageType.AUDIO_COMPLETE:await this.eventEmitter.emit({type:events_1.EventType.AI_PLAYBACK_COMPLETED,timestamp:Date.now(),totalBytes:this.connectionState.getMetrics().bytesReceived,duration:0});break;case websocket_1.WebSocketMessageType.PAUSE_INPUT:await this.eventEmitter.emit({type:events_1.EventType.MICROPHONE_PAUSED,timestamp:Date.now()});break;case websocket_1.WebSocketMessageType.RESUME_INPUT:await this.eventEmitter.emit({type:events_1.EventType.MICROPHONE_RESUMED,timestamp:Date.now()});break;case websocket_1.WebSocketMessageType.START_ON_HOLD:await this.eventEmitter.emit({type:events_1.EventType.MICROPHONE_PAUSED,timestamp:Date.now()}),await this.eventEmitter.emit({type:events_1.EventType.ON_HOLD_STARTED,timestamp:Date.now()});break;case websocket_1.WebSocketMessageType.STOP_ON_HOLD:await this.eventEmitter.emit({type:events_1.EventType.MICROPHONE_RESUMED,timestamp:Date.now()}),await this.eventEmitter.emit({type:events_1.EventType.ON_HOLD_STOPPED,timestamp:Date.now()});break;case websocket_1.WebSocketMessageType.CLEAR_BUFFER:await this.eventEmitter.emit({type:events_1.EventType.CLEAR_BUFFER,timestamp:Date.now()});break;case websocket_1.WebSocketMessageType.STATUS:await this.eventEmitter.emit({type:events_1.EventType.INFO,timestamp:Date.now(),message:e.message||"Status update",context:"WebSocket"});break;case websocket_1.WebSocketMessageType.CLOSE:const t=e.message||"Server closing connection";console.log("👋 Server sent goodbye:",t),await this.eventEmitter.emit({type:events_1.EventType.INFO,timestamp:Date.now(),message:t,context:"WebSocket"}),setTimeout(()=>{this.ws&&(this.intentionalDisconnect=true,this.ws.close(1e3,t));},3e3);break;case websocket_1.WebSocketMessageType.TRANSCRIPT:e.data&&"object"==typeof e.data&&"text"in e.data&&await this.eventEmitter.emit({type:events_1.EventType.TRANSCRIPT_RECEIVED,timestamp:Date.now(),text:e.data.text,language:e.data.language});break;case websocket_1.WebSocketMessageType.ERROR:e.data&&"object"==typeof e.data&&"message"in e.data&&await this.eventEmitter.emit({type:events_1.EventType.ERROR,timestamp:Date.now(),error:new Error(e.data.message),message:e.data.message});}}handleClose(e){this.stopPingInterval(),this.connectionState.setLastError({code:e.code,reason:e.reason,timestamp:Date.now(),wasClean:e.wasClean}),this.eventEmitter.emit({type:events_1.EventType.DISCONNECTED,timestamp:Date.now(),reason:e.reason,code:e.code}),!this.intentionalDisconnect&&this.config.reconnect&&this.reconnectAttempt<(this.config.maxReconnectAttempts||5)?this.scheduleReconnect():this.connectionState.setState(websocket_1.ConnectionState.DISCONNECTED);}scheduleReconnect(){this.reconnectAttempt++,this.connectionState.incrementReconnectAttempts();const e=this.config.reconnectDelay||1e3,t=setTimeout(()=>{this.connect().catch(e=>{console.error("Reconnection failed:",e);});},e);this.connectionState.setReconnectTimer(t);}send(e){if(!this.ws||this.ws.readyState!==WebSocket.OPEN)throw new Error("WebSocket is not connected");this.ws.send(e),this.connectionState.incrementMessagesSent(),e instanceof ArrayBuffer?this.connectionState.addBytesSent(e.byteLength):this.connectionState.addBytesSent((new TextEncoder).encode(e).byteLength);}disconnect(){this.ws&&(this.intentionalDisconnect=true,this.connectionState.setState(websocket_1.ConnectionState.DISCONNECTING),this.stopPingInterval(),this.connectionState.clearReconnectTimer(),this.ws.readyState!==WebSocket.OPEN&&this.ws.readyState!==WebSocket.CONNECTING||this.ws.close(1e3,"Client disconnect"),this.ws=null,this.connectionState.setState(websocket_1.ConnectionState.DISCONNECTED),this.reconnectAttempt=0);}startPingInterval(){}stopPingInterval(){this.pingInterval&&(clearInterval(this.pingInterval),this.pingInterval=null);}isConnected(){return null!==this.ws&&this.ws.readyState===WebSocket.OPEN}getReadyState(){return this.ws?.readyState??WebSocket.CLOSED}}exports$1.WebSocketService=WebSocketService; 
-	} (WebSocketService));
-	return WebSocketService;
-}
-
-var AudioService = {};
-
-var audio = {};
-
-var hasRequiredAudio;
-
-function requireAudio () {
-	if (hasRequiredAudio) return audio;
-	hasRequiredAudio = 1;
-	(function (exports$1) {
-var AudioPlaybackState,RecordingState;Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.RecordingState=exports$1.AudioPlaybackState=void 0,function(e){e.IDLE="idle",e.BUFFERING="buffering",e.PLAYING="playing",e.PAUSED="paused",e.COMPLETED="completed",e.ERROR="error";}(AudioPlaybackState||(exports$1.AudioPlaybackState=AudioPlaybackState={})),function(e){e.IDLE="idle",e.RECORDING="recording",e.PAUSED="paused",e.STOPPED="stopped";}(RecordingState||(exports$1.RecordingState=RecordingState={})); 
-	} (audio));
-	return audio;
-}
-
-var hasRequiredAudioService;
-
-function requireAudioService () {
-	if (hasRequiredAudioService) return AudioService;
-	hasRequiredAudioService = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.AudioService=void 0;const audio_1=requireAudio(),events_1=requireEvents();class AudioService{eventEmitter;audioState;voiceMetrics;config;audioContext=null;mediaStream=null;audioWorkletNode=null;playbackRetryTimer=null;micResumeTimeout=null;constructor(e,t,i,o){this.eventEmitter=e,this.audioState=t,this.voiceMetrics=i,this.config=o;}async initialize(e){try{console.log("🔧 Initializing AudioService..."),console.log(`   Processor Path: ${this.config.processorPath}`),console.log(`   Voice Threshold: ${this.config.processor.voiceThreshold}`);const t=await navigator.mediaDevices.getUserMedia({audio:{deviceId:e?{exact:e}:void 0,...this.config.constraints}});console.log("✅ Microphone stream obtained"),this.mediaStream=t,this.audioContext=new AudioContext,console.log(`   AudioContext created: ${this.audioContext.sampleRate}Hz`),console.log("📦 Loading audio-processor.js..."),await this.audioContext.audioWorklet.addModule(this.config.processorPath),console.log("✅ Audio processor loaded successfully!"),await this.setupAudioWorklet(),await this.eventEmitter.emit({type:events_1.EventType.USER_RECORDING_STARTED,timestamp:Date.now(),deviceId:e||"default",deviceLabel:t.getAudioTracks()[0]?.label||"Unknown"}),this.audioState.setRecordingState(audio_1.RecordingState.RECORDING);}catch(e){throw await this.eventEmitter.emit({type:events_1.EventType.ERROR,timestamp:Date.now(),error:e,message:`Failed to initialize audio: ${e.message}`}),e}}async setupAudioWorklet(){if(!this.audioContext||!this.mediaStream)throw new Error("Audio context or media stream not initialized");console.log("🔌 Setting up audio worklet...");const e=this.audioContext.createMediaStreamSource(this.mediaStream);this.audioWorkletNode=new AudioWorkletNode(this.audioContext,"audio-processor",{processorOptions:this.config.processor}),console.log("✅ AudioWorkletNode created"),console.log("   Processor options:",this.config.processor),this.audioWorkletNode.port.onmessage=e=>{console.log("📨 Message from audio processor:",e.data instanceof ArrayBuffer?`ArrayBuffer ${e.data.byteLength} bytes`:e.data.type),e.data instanceof ArrayBuffer?(console.log(`🎵 Raw audio buffer: ${e.data.byteLength} bytes`),this.handleAudioData(e.data)):this.handleWorkletMessage(e.data);},e.connect(this.audioWorkletNode),this.audioWorkletNode.connect(this.audioContext.destination),console.log("🔗 Audio nodes connected successfully");}handleWorkletMessage(e){switch(e.type){case "audioData":e.audioData&&(console.log(`🎵 Audio data received from worklet: ${e.audioData.byteLength} bytes`),this.handleAudioData(e.audioData));break;case "voice-level":case "voiceLevel":if(void 0!==e.rms&&void 0!==e.db){const t={rms:e.rms,db:e.db,isActive:e.isActive??false,isPaused:e.isPaused??false,noiseFloor:e.noiseFloor??0,threshold:this.config.processor.voiceThreshold};this.voiceMetrics.update(t),this.eventEmitter.emit({type:events_1.EventType.VOICE_METRICS,timestamp:Date.now(),...t}),e.isActive&&!this.voiceMetrics.isVoiceActive()?this.eventEmitter.emit({type:events_1.EventType.VOICE_DETECTED,timestamp:Date.now(),rms:e.rms,db:e.db}):!e.isActive&&this.voiceMetrics.isVoiceActive()&&this.eventEmitter.emit({type:events_1.EventType.VOICE_ENDED,timestamp:Date.now(),duration:this.voiceMetrics.getVoiceDuration()});}break;case "voice-ended":console.log("🎬 Voice ended signal received from audio processor"),this.eventEmitter.emit({type:events_1.EventType.VOICE_ENDED,timestamp:Date.now(),duration:this.voiceMetrics.getVoiceDuration()});}}handleAudioData(e){console.log(`📤 Sending audio data: ${e.byteLength} bytes`),this.eventEmitter.emit({type:events_1.EventType.USER_RECORDING_DATA,timestamp:Date.now(),data:e,byteLength:e.byteLength}),this.audioState.addBytesSent(e.byteLength);}async handleIncomingAudioChunk(e){const t=new Uint8Array(e);this.audioState.addToBuffer(t),this.audioState.isPlaying()||await this.attemptPlayback();}async attemptPlayback(){const e=this.audioState.getBufferInfo(),t=this.audioState.isPlaying()?.75*this.config.minBufferSize:this.config.minBufferSize,i=this.audioState.isPlaying()?.75*this.config.targetChunks:this.config.targetChunks;e.totalBytes>=t||e.chunks>=i||this.audioState.isStreamComplete()&&e.totalBytes>0?await this.playNextSegment():this.playbackRetryTimer||(this.playbackRetryTimer=setTimeout(()=>{this.playbackRetryTimer=null,this.attemptPlayback();},this.config.playbackRetryInterval));}async playNextSegment(){this.playbackRetryTimer&&(clearTimeout(this.playbackRetryTimer),this.playbackRetryTimer=null);const e=this.audioState.getBuffer();if(0===e.length)return void(this.audioState.isStreamComplete()&&await this.completePlayback());const t=this.combineBuffers(e);this.audioState.clearBuffer();const i=new Blob([t.buffer],{type:"audio/mpeg"}),o=URL.createObjectURL(i),a=new Audio(o);this.audioState.setCurrentAudioElement(a),this.audioState.setPlaybackState(audio_1.AudioPlaybackState.PLAYING),a.onended=()=>{URL.revokeObjectURL(o),Promise.resolve().then(()=>this.playNextSegment());},a.onerror=e=>{URL.revokeObjectURL(o),this.eventEmitter.emit({type:events_1.EventType.AI_PLAYBACK_ERROR,timestamp:Date.now(),error:new Error("Audio playback error"),message:"Failed to play audio segment"});};try{await a.play(),this.audioState.getPlaybackState()===audio_1.AudioPlaybackState.PLAYING&&await this.eventEmitter.emit({type:events_1.EventType.AI_PLAYBACK_STARTED,timestamp:Date.now()});}catch(e){await this.eventEmitter.emit({type:events_1.EventType.AI_PLAYBACK_ERROR,timestamp:Date.now(),error:e,message:"Failed to start audio playback"});}}combineBuffers(e){const t=e.reduce((e,t)=>e+t.byteLength,0),i=new Uint8Array(t);let o=0;for(const t of e)i.set(t,o),o+=t.byteLength;return i}async setStreamComplete(){this.audioState.setStreamingComplete(true),this.audioState.getBufferSize()>0&&!this.audioState.isPlaying()&&await this.playNextSegment();}async completePlayback(){this.audioState.setPlaybackState(audio_1.AudioPlaybackState.COMPLETED),await this.eventEmitter.emit({type:events_1.EventType.AI_PLAYBACK_COMPLETED,timestamp:Date.now(),totalBytes:this.audioState.getTotalBytesReceived(),duration:0}),await this.resumeMicrophone();}async pauseMicrophone(){this.audioWorkletNode&&(this.audioWorkletNode.port.postMessage({type:"pause"}),await this.eventEmitter.emit({type:events_1.EventType.MICROPHONE_PAUSED,timestamp:Date.now(),internal:true}));}async resumeMicrophone(){this.micResumeTimeout&&clearTimeout(this.micResumeTimeout),this.micResumeTimeout=setTimeout(async()=>{this.audioWorkletNode&&(this.audioWorkletNode.port.postMessage({type:"resume"}),await this.eventEmitter.emit({type:events_1.EventType.MICROPHONE_RESUMED,timestamp:Date.now(),internal:true})),this.micResumeTimeout=null;},this.config.resumeDelay);const e=setTimeout(()=>{this.audioWorkletNode&&this.audioWorkletNode.port.postMessage({type:"resume"});},this.config.failsafeResumeTimeout);if(this.micResumeTimeout){this.micResumeTimeout;this.micResumeTimeout=setTimeout(()=>{clearTimeout(e);},this.config.resumeDelay);}}async getAvailableDevices(){return (await navigator.mediaDevices.enumerateDevices()).filter(e=>"audioinput"===e.kind).map(e=>({deviceId:e.deviceId,label:e.label||`Microphone ${e.deviceId.slice(0,8)}`,kind:e.kind,groupId:e.groupId}))}async cleanup(){this.playbackRetryTimer&&clearTimeout(this.playbackRetryTimer),this.micResumeTimeout&&clearTimeout(this.micResumeTimeout);const e=this.audioState.getCurrentAudioElement();e&&(e.pause(),e.src=""),this.audioWorkletNode&&(this.audioWorkletNode.disconnect(),this.audioWorkletNode=null),this.mediaStream&&(this.mediaStream.getTracks().forEach(e=>e.stop()),this.mediaStream=null),this.audioContext&&"closed"!==this.audioContext.state&&(await this.audioContext.close(),this.audioContext=null),this.audioState.reset(),this.voiceMetrics.reset(),await this.eventEmitter.emit({type:events_1.EventType.USER_RECORDING_STOPPED,timestamp:Date.now(),duration:0,totalBytes:this.audioState.getTotalBytesSent()});}}exports$1.AudioService=AudioService; 
-	} (AudioService));
-	return AudioService;
-}
-
-var AudioState = {};
-
-var hasRequiredAudioState;
-
-function requireAudioState () {
-	if (hasRequiredAudioState) return AudioState;
-	hasRequiredAudioState = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.AudioState=void 0;const audio_1=requireAudio();class AudioState{playbackState=audio_1.AudioPlaybackState.IDLE;recordingState=audio_1.RecordingState.IDLE;audioQueue=[];audioBuffer=[];audioBufferSize=0;isStreamingComplete=false;currentAudioElement=null;recordingStartTime=0;playbackStartTime=0;totalBytesReceived=0;totalBytesSent=0;getPlaybackState(){return this.playbackState}setPlaybackState(t){this.playbackState=t;}getRecordingState(){return this.recordingState}setRecordingState(t){this.recordingState=t,t===audio_1.RecordingState.RECORDING&&(this.recordingStartTime=Date.now());}isPlaying(){return this.playbackState===audio_1.AudioPlaybackState.PLAYING}isRecording(){return this.recordingState===audio_1.RecordingState.RECORDING}addToQueue(t){this.audioQueue.push(t);}getQueue(){return this.audioQueue}clearQueue(){this.audioQueue=[];}addToBuffer(t){this.audioBuffer.push(t),this.audioBufferSize+=t.byteLength,this.totalBytesReceived+=t.byteLength;}getBuffer(){return this.audioBuffer}getBufferSize(){return this.audioBufferSize}getBufferInfo(){return {chunks:this.audioBuffer.length,totalBytes:this.audioBufferSize,duration:this.audioBufferSize/32e3,isStreaming:!this.isStreamingComplete}}clearBuffer(){this.audioBuffer=[],this.audioBufferSize=0,this.isStreamingComplete=false;}setStreamingComplete(t){this.isStreamingComplete=t;}isStreamComplete(){return this.isStreamingComplete}setCurrentAudioElement(t){this.currentAudioElement=t,t&&(this.playbackStartTime=Date.now());}getCurrentAudioElement(){return this.currentAudioElement}getPlaybackMetrics(){return this.currentAudioElement?{currentTime:this.currentAudioElement.currentTime,duration:this.currentAudioElement.duration,buffered:this.currentAudioElement.buffered,readyState:this.currentAudioElement.readyState,networkState:this.currentAudioElement.networkState}:null}getRecordingMetrics(){return {startTime:this.recordingStartTime,duration:this.recordingStartTime?Date.now()-this.recordingStartTime:0,totalBytes:this.totalBytesSent,sampleRate:16e3,channelCount:1}}addBytesSent(t){this.totalBytesSent+=t;}getTotalBytesReceived(){return this.totalBytesReceived}getTotalBytesSent(){return this.totalBytesSent}reset(){this.playbackState=audio_1.AudioPlaybackState.IDLE,this.recordingState=audio_1.RecordingState.IDLE,this.audioQueue=[],this.audioBuffer=[],this.audioBufferSize=0,this.isStreamingComplete=false,this.currentAudioElement=null,this.recordingStartTime=0,this.playbackStartTime=0;}resetPlayback(){this.playbackState=audio_1.AudioPlaybackState.IDLE,this.audioQueue=[],this.audioBuffer=[],this.audioBufferSize=0,this.isStreamingComplete=false,this.currentAudioElement=null,this.playbackStartTime=0;}resetRecording(){this.recordingState=audio_1.RecordingState.IDLE,this.recordingStartTime=0,this.totalBytesSent=0;}}exports$1.AudioState=AudioState; 
-	} (AudioState));
-	return AudioState;
-}
-
-var ConnectionState = {};
-
-var hasRequiredConnectionState;
-
-function requireConnectionState () {
-	if (hasRequiredConnectionState) return ConnectionState;
-	hasRequiredConnectionState = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.ConnectionState=void 0;const websocket_1=requireWebsocket();class ConnectionState{state=websocket_1.ConnectionState.DISCONNECTED;metrics={duration:0,reconnectAttempts:0,bytesSent:0,bytesReceived:0,messagesSent:0,messagesReceived:0};lastError=null;reconnectTimer=null;getState(){return this.state}setState(t){this.state=t,t===websocket_1.ConnectionState.CONNECTED?(this.metrics.connectedAt=Date.now(),this.metrics.reconnectAttempts=0):t===websocket_1.ConnectionState.DISCONNECTED&&this.metrics.connectedAt&&(this.metrics.disconnectedAt=Date.now(),this.metrics.duration=this.metrics.disconnectedAt-this.metrics.connectedAt);}isConnected(){return this.state===websocket_1.ConnectionState.CONNECTED}isConnecting(){return this.state===websocket_1.ConnectionState.CONNECTING}isDisconnected(){return this.state===websocket_1.ConnectionState.DISCONNECTED}isDisconnecting(){return this.state===websocket_1.ConnectionState.DISCONNECTING}hasError(){return this.state===websocket_1.ConnectionState.ERROR}getMetrics(){const t={...this.metrics};return this.metrics.connectedAt&&!this.metrics.disconnectedAt&&(t.duration=Date.now()-this.metrics.connectedAt),t}incrementReconnectAttempts(){this.metrics.reconnectAttempts++;}getReconnectAttempts(){return this.metrics.reconnectAttempts}resetReconnectAttempts(){this.metrics.reconnectAttempts=0;}addBytesSent(t){this.metrics.bytesSent+=t;}addBytesReceived(t){this.metrics.bytesReceived+=t;}incrementMessagesSent(){this.metrics.messagesSent++;}incrementMessagesReceived(){this.metrics.messagesReceived++;}setLastError(t){this.lastError=t,this.state=websocket_1.ConnectionState.ERROR;}getLastError(){return this.lastError}clearError(){this.lastError=null,this.state===websocket_1.ConnectionState.ERROR&&(this.state=websocket_1.ConnectionState.DISCONNECTED);}setReconnectTimer(t){this.clearReconnectTimer(),this.reconnectTimer=t;}clearReconnectTimer(){this.reconnectTimer&&(clearTimeout(this.reconnectTimer),this.reconnectTimer=null);}reset(){this.state=websocket_1.ConnectionState.DISCONNECTED,this.metrics={duration:0,reconnectAttempts:0,bytesSent:0,bytesReceived:0,messagesSent:0,messagesReceived:0},this.lastError=null,this.clearReconnectTimer();}getDuration(){if(this.metrics.connectedAt){return (this.metrics.disconnectedAt||Date.now())-this.metrics.connectedAt}return 0}}exports$1.ConnectionState=ConnectionState; 
-	} (ConnectionState));
-	return ConnectionState;
-}
-
-var VoiceMetrics = {};
-
-var hasRequiredVoiceMetrics;
-
-function requireVoiceMetrics () {
-	if (hasRequiredVoiceMetrics) return VoiceMetrics;
-	hasRequiredVoiceMetrics = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.VoiceMetrics=void 0;class VoiceMetrics{rms=0;db=-1/0;isActive=false;isPaused=false;noiseFloor=0;threshold=.25;voiceStartTime=0;voiceEndTime=0;totalVoiceTime=0;history=[];maxHistoryLength=100;update(t){this.rms=t.rms,this.db=t.db,this.isActive=t.isActive,this.isPaused=t.isPaused,this.noiseFloor=t.noiseFloor,this.threshold=t.threshold,!t.isActive||this.isActive||this.voiceStartTime?!t.isActive&&this.isActive&&this.voiceStartTime&&(this.voiceEndTime=Date.now(),this.totalVoiceTime+=this.voiceEndTime-this.voiceStartTime,this.voiceStartTime=0,this.voiceEndTime=0):this.voiceStartTime=Date.now(),this.addToHistory(t);}addToHistory(t){this.history.push(t),this.history.length>this.maxHistoryLength&&this.history.shift();}getCurrent(){return {rms:this.rms,db:this.db,isActive:this.isActive,isPaused:this.isPaused,noiseFloor:this.noiseFloor,threshold:this.threshold}}getRMS(){return this.rms}getDB(){return this.db}isVoiceActive(){return this.isActive}isMicrophonePaused(){return this.isPaused}getNoiseFloor(){return this.noiseFloor}getThreshold(){return this.threshold}getVoiceDuration(){return this.voiceStartTime?Date.now()-this.voiceStartTime:0}getTotalVoiceTime(){return this.totalVoiceTime}getHistory(t){return void 0!==t?this.history.slice(-t):[...this.history]}getAverageRMS(t=10){const i=this.history.slice(-t);if(0===i.length)return 0;return i.reduce((t,i)=>t+i.rms,0)/i.length}getAverageDB(t=10){const i=this.history.slice(-t);if(0===i.length)return  -1/0;return i.reduce((t,i)=>t+i.db,0)/i.length}getPeakRMS(){return 0===this.history.length?0:Math.max(...this.history.map(t=>t.rms))}getPeakDB(){return 0===this.history.length?-1/0:Math.max(...this.history.map(t=>t.db))}getActivityRatio(t=100){const i=this.history.slice(-t);if(0===i.length)return 0;return i.filter(t=>t.isActive).length/i.length}setMaxHistoryLength(t){for(this.maxHistoryLength=t;this.history.length>t;)this.history.shift();}reset(){this.rms=0,this.db=-1/0,this.isActive=false,this.isPaused=false,this.noiseFloor=0,this.voiceStartTime=0,this.voiceEndTime=0,this.totalVoiceTime=0,this.history=[];}clearHistory(){this.history=[];}}exports$1.VoiceMetrics=VoiceMetrics; 
-	} (VoiceMetrics));
-	return VoiceMetrics;
-}
-
-var logger = {};
-
-var config = {};
-
-var hasRequiredConfig;
-
-function requireConfig () {
-	if (hasRequiredConfig) return config;
-	hasRequiredConfig = 1;
-	(function (exports$1) {
-var LogLevel;Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.DEFAULT_CONFIG=exports$1.LogLevel=void 0,function(e){e[e.NONE=0]="NONE",e[e.ERROR=1]="ERROR",e[e.WARN=2]="WARN",e[e.INFO=3]="INFO",e[e.DEBUG=4]="DEBUG";}(LogLevel||(exports$1.LogLevel=LogLevel={})),exports$1.DEFAULT_CONFIG={apiBase:"https://live.modochats.com",audio:{constraints:{sampleRate:16e3,channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true},processor:{voiceThreshold:.08,silenceThreshold:.05,minSilenceFrames:8,maxPreRollBuffers:5,sampleRate:16e3},processorPath:"/audio-processor.js",minBufferSize:32e3,targetChunks:16,chunkSize:1024,playbackRetryInterval:10,playbackRetryMaxAttempts:50,resumeDelay:150,failsafeResumeTimeout:1e4},websocket:{reconnect:false,maxReconnectAttempts:5,reconnectDelay:1e3,reconnectBackoffMultiplier:1.5,maxReconnectDelay:3e4,pingInterval:3e4,pongTimeout:5e3,connectionTimeout:1e4,binaryType:"arraybuffer"},logging:{level:LogLevel.INFO,enableConsole:true,enableEvents:true,includeTimestamp:true,includeContext:true},features:{enableVAD:true,enableNoiseReduction:true,enableEchoCancellation:true,enableAutoGainControl:true,enableOnHoldAudio:true,enablePreRollBuffer:true,enableMetrics:true,metricsInterval:1e3,enableDebugLogs:false}}; 
-	} (config));
-	return config;
-}
-
-var hasRequiredLogger;
-
-function requireLogger () {
-	if (hasRequiredLogger) return logger;
-	hasRequiredLogger = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.Logger=void 0,exports$1.createLogger=createLogger,exports$1.formatBytes=formatBytes,exports$1.formatDuration=formatDuration,exports$1.formatTimestamp=formatTimestamp;const config_1=requireConfig(),events_1=requireEvents();class Logger{config;eventEmitter;constructor(e,t){this.config=e,this.eventEmitter=t;}error(e,t,o){this.log(config_1.LogLevel.ERROR,e,t,o);}warn(e,t,o){this.log(config_1.LogLevel.WARN,e,t,o);}info(e,t,o){this.log(config_1.LogLevel.INFO,e,t,o);}debug(e,t,o){this.log(config_1.LogLevel.DEBUG,e,t,o);}log(e,t,o,n){e>this.config.level||(this.config.customLogger?this.config.customLogger(e,t,o,n):(this.config.enableConsole&&this.logToConsole(e,t,o,n),this.config.enableEvents&&this.eventEmitter&&this.logToEvents(e,t,o,n)));}logToConsole(e,t,o,n){const i=`${[this.config.includeTimestamp?`[${(new Date).toISOString()}]`:"",this.config.includeContext&&o?`[${o}]`:""].filter(Boolean).join(" ")} ${t}`;switch(e){case config_1.LogLevel.ERROR:console.error(i,n||"");break;case config_1.LogLevel.WARN:console.warn(i,n||"");break;case config_1.LogLevel.INFO:console.info(i,n||"");break;case config_1.LogLevel.DEBUG:console.debug(i,n||"");}}logToEvents(e,t,o,n){if(this.eventEmitter)switch(e){case config_1.LogLevel.ERROR:this.eventEmitter.emit({type:events_1.EventType.ERROR,timestamp:Date.now(),error:new Error(t),message:t,context:o});break;case config_1.LogLevel.WARN:this.eventEmitter.emit({type:events_1.EventType.WARNING,timestamp:Date.now(),message:t,context:o});break;case config_1.LogLevel.INFO:this.eventEmitter.emit({type:events_1.EventType.INFO,timestamp:Date.now(),message:t,context:o});break;case config_1.LogLevel.DEBUG:this.eventEmitter.emit({type:events_1.EventType.DEBUG,timestamp:Date.now(),message:t,data:n});}}setLevel(e){this.config.level=e;}getLevel(){return this.config.level}updateConfig(e){this.config={...this.config,...e};}}function createLogger(e,t){return new Logger(e,t)}function formatBytes(e){if(0===e)return "0 B";const t=Math.floor(Math.log(e)/Math.log(1024));return `${(e/Math.pow(1024,t)).toFixed(2)} ${["B","KB","MB","GB"][t]}`}function formatDuration(e){return e<1e3?`${e}ms`:e<6e4?`${(e/1e3).toFixed(2)}s`:e<36e5?`${(e/6e4).toFixed(2)}m`:`${(e/36e5).toFixed(2)}h`}function formatTimestamp(e){return new Date(e).toISOString()}exports$1.Logger=Logger; 
-	} (logger));
-	return logger;
-}
-
-var validators = {};
-
-var hasRequiredValidators;
-
-function requireValidators () {
-	if (hasRequiredValidators) return validators;
-	hasRequiredValidators = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.ValidationError=void 0,exports$1.validateConfig=validateConfig,exports$1.isValidUUID=isValidUUID,exports$1.isValidURL=isValidURL,exports$1.sanitizeString=sanitizeString,exports$1.validateDeviceId=validateDeviceId;class ValidationError extends Error{constructor(e){super(e),this.name="ValidationError";}}function validateConfig(e){if(!e.chatbotUuid||"string"!=typeof e.chatbotUuid)throw new ValidationError("chatbotUuid is required and must be a string");if(!e.userUniqueId||"string"!=typeof e.userUniqueId)throw new ValidationError("userUniqueId is required and must be a string");if(!e.apiBase||"string"!=typeof e.apiBase)throw new ValidationError("apiBase is required and must be a string");if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(e.chatbotUuid))throw new ValidationError("chatbotUuid must be a valid UUID");e.audio&&validateAudioConfig(e.audio),e.websocket&&validateWebSocketConfig(e.websocket),e.logging&&validateLoggingConfig(e.logging);}function validateAudioConfig(e){if(e){if(e.constraints){if(e.constraints.sampleRate&&e.constraints.sampleRate<8e3)throw new ValidationError("sampleRate must be at least 8000");if(e.constraints.channelCount&&e.constraints.channelCount<1)throw new ValidationError("channelCount must be at least 1")}if(e.processor){if(void 0!==e.processor.voiceThreshold&&(e.processor.voiceThreshold<0||e.processor.voiceThreshold>1))throw new ValidationError("voiceThreshold must be between 0 and 1");if(void 0!==e.processor.silenceThreshold&&(e.processor.silenceThreshold<0||e.processor.silenceThreshold>1))throw new ValidationError("silenceThreshold must be between 0 and 1")}}}function validateWebSocketConfig(e){if(e){if(void 0!==e.maxReconnectAttempts&&e.maxReconnectAttempts<0)throw new ValidationError("maxReconnectAttempts must be non-negative");if(void 0!==e.reconnectDelay&&e.reconnectDelay<0)throw new ValidationError("reconnectDelay must be non-negative");if(void 0!==e.connectionTimeout&&e.connectionTimeout<1e3)throw new ValidationError("connectionTimeout must be at least 1000ms")}}function validateLoggingConfig(e){if(e&&void 0!==e.level&&(e.level<0||e.level>4))throw new ValidationError("log level must be between 0 and 4")}function isValidUUID(e){return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(e)}function isValidURL(e){try{return new URL(e),!0}catch{return  false}}function sanitizeString(e,i=1e3){return e.trim().slice(0,i)}function validateDeviceId(e){return "default"===e||/^[a-zA-Z0-9_-]+$/.test(e)}exports$1.ValidationError=ValidationError; 
-	} (validators));
-	return validators;
-}
-
-var hasRequiredModoVoiceClient;
-
-function requireModoVoiceClient () {
-	if (hasRequiredModoVoiceClient) return ModoVoiceClient;
-	hasRequiredModoVoiceClient = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.ModoVoiceClient=void 0;const EventEmitter_1=requireEventEmitter(),WebSocketService_1=requireWebSocketService(),AudioService_1=requireAudioService(),AudioState_1=requireAudioState(),ConnectionState_1=requireConnectionState(),VoiceMetrics_1=requireVoiceMetrics(),logger_1=requireLogger(),validators_1=requireValidators(),config_1=requireConfig(),events_1=requireEvents(),audio_1=requireAudio();class ModoVoiceClient{config;eventEmitter;audioState;connectionState;voiceMetrics;logger;webSocketService;audioService;initialized=false;constructor(e){(0, validators_1.validateConfig)(e),this.config=this.mergeWithDefaults(e),this.eventEmitter=new EventEmitter_1.EventEmitter,this.audioState=new AudioState_1.AudioState,this.connectionState=new ConnectionState_1.ConnectionState,this.voiceMetrics=new VoiceMetrics_1.VoiceMetrics,this.logger=(0, logger_1.createLogger)(this.config.logging,this.eventEmitter),this.webSocketService=new WebSocketService_1.WebSocketService({url:this.config.apiBase,chatbotUuid:this.config.chatbotUuid,userUniqueId:this.config.userUniqueId,...this.config.websocket},this.eventEmitter,this.connectionState),this.audioService=new AudioService_1.AudioService(this.eventEmitter,this.audioState,this.voiceMetrics,this.config.audio),this.setupInternalListeners();}mergeWithDefaults(e){return {apiBase:e.apiBase,chatbotUuid:e.chatbotUuid,userUniqueId:e.userUniqueId,audio:{...config_1.DEFAULT_CONFIG.audio,...e.audio},websocket:{...config_1.DEFAULT_CONFIG.websocket,...e.websocket},logging:{...config_1.DEFAULT_CONFIG.logging,...e.logging},features:{...config_1.DEFAULT_CONFIG.features,...e.features}}}setupInternalListeners(){this.eventEmitter.on(events_1.EventType.AI_PLAYBACK_CHUNK,async e=>{"data"in e&&e.data instanceof Uint8Array&&(await this.audioService.handleIncomingAudioChunk(e.data.buffer),this.logger.debug(`Received audio chunk: ${e.data.byteLength} bytes`,"AudioService"));}),this.eventEmitter.on(events_1.EventType.AI_PLAYBACK_STARTED,async()=>{await this.audioService.pauseMicrophone(),this.logger.debug("Microphone paused during AI playback","ModoVoiceClient");}),this.eventEmitter.on(events_1.EventType.USER_RECORDING_DATA,async e=>{if("data"in e&&this.webSocketService.isConnected())try{this.webSocketService.send(e.data);}catch(e){this.logger.error("Failed to send audio data","WebSocketService",e);}}),this.eventEmitter.on(events_1.EventType.AI_PLAYBACK_COMPLETED,async()=>{await this.audioService.setStreamComplete();}),this.eventEmitter.on(events_1.EventType.CLEAR_BUFFER,async()=>{this.audioState.clearBuffer(),this.audioState.setStreamingComplete(false),this.audioState.setPlaybackState(audio_1.AudioPlaybackState.IDLE);const e=this.audioState.getCurrentAudioElement();if(e){try{e.pause(),e.currentTime=0;}catch(e){}this.audioState.setCurrentAudioElement(null);}}),this.eventEmitter.on(events_1.EventType.MICROPHONE_PAUSED,async e=>{"internal"in e||await this.audioService.pauseMicrophone();}),this.eventEmitter.on(events_1.EventType.MICROPHONE_RESUMED,async e=>{"internal"in e||await this.audioService.resumeMicrophone();});}async connect(e){if(this.connectionState.isConnected())this.logger.warn("Already connected","ModoVoiceClient");else try{this.logger.info("Connecting to Modo Voice Agent...","ModoVoiceClient"),await this.audioService.initialize(e),this.initialized=!0,await this.webSocketService.connect(),this.logger.info("Successfully connected","ModoVoiceClient");}catch(e){throw this.logger.error("Connection failed","ModoVoiceClient",e),e}}async disconnect(){if(this.connectionState.isConnected())try{this.logger.info("Disconnecting...","ModoVoiceClient"),this.webSocketService.disconnect(),await this.audioService.cleanup(),this.initialized=!1,this.logger.info("Successfully disconnected","ModoVoiceClient");}catch(e){throw this.logger.error("Disconnect failed","ModoVoiceClient",e),e}else this.logger.warn("Not connected","ModoVoiceClient");}on(e,t){return this.eventEmitter.on(e,t)}once(e,t){return this.eventEmitter.once(e,t)}off(e,t){this.eventEmitter.off(e,t);}onAny(e){return this.eventEmitter.onAny(e)}offAny(e){this.eventEmitter.offAny(e);}isConnected(){return this.connectionState.isConnected()}isInitialized(){return this.initialized}getConnectionMetrics(){return this.connectionState.getMetrics()}getVoiceMetrics(){return this.voiceMetrics.getCurrent()}async getAvailableDevices(){return this.audioService.getAvailableDevices()}setLogLevel(e){this.logger.setLevel(e);}getConfig(){return {...this.config}}updateConfig(e){if(this.connectionState.isConnected())throw new Error("Cannot update config while connected");this.config=this.mergeWithDefaults({...this.config,...e}),e.logging&&this.logger.updateConfig(e.logging);}}exports$1.ModoVoiceClient=ModoVoiceClient; 
-	} (ModoVoiceClient));
-	return ModoVoiceClient;
-}
-
-var models = {};
-
-var hasRequiredModels;
-
-function requireModels () {
-	if (hasRequiredModels) return models;
-	hasRequiredModels = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.VoiceMetrics=exports$1.ConnectionState=exports$1.AudioState=void 0;var AudioState_1=requireAudioState();Object.defineProperty(exports$1,"AudioState",{enumerable:true,get:function(){return AudioState_1.AudioState}});var ConnectionState_1=requireConnectionState();Object.defineProperty(exports$1,"ConnectionState",{enumerable:true,get:function(){return ConnectionState_1.ConnectionState}});var VoiceMetrics_1=requireVoiceMetrics();Object.defineProperty(exports$1,"VoiceMetrics",{enumerable:true,get:function(){return VoiceMetrics_1.VoiceMetrics}}); 
-	} (models));
-	return models;
-}
-
-var services = {};
-
-var hasRequiredServices;
-
-function requireServices () {
-	if (hasRequiredServices) return services;
-	hasRequiredServices = 1;
-	(function (exports$1) {
-Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.AudioService=exports$1.WebSocketService=exports$1.EventEmitter=void 0;var EventEmitter_1=requireEventEmitter();Object.defineProperty(exports$1,"EventEmitter",{enumerable:true,get:function(){return EventEmitter_1.EventEmitter}});var WebSocketService_1=requireWebSocketService();Object.defineProperty(exports$1,"WebSocketService",{enumerable:true,get:function(){return WebSocketService_1.WebSocketService}});var AudioService_1=requireAudioService();Object.defineProperty(exports$1,"AudioService",{enumerable:true,get:function(){return AudioService_1.AudioService}}); 
-	} (services));
-	return services;
-}
-
-var utils = {};
-
-var hasRequiredUtils;
-
-function requireUtils () {
-	if (hasRequiredUtils) return utils;
-	hasRequiredUtils = 1;
-	(function (exports$1) {
-var __createBinding=utils&&utils.__createBinding||(Object.create?function(e,t,r,i){ void 0===i&&(i=r);var o=Object.getOwnPropertyDescriptor(t,r);o&&!("get"in o?!t.__esModule:o.writable||o.configurable)||(o={enumerable:true,get:function(){return t[r]}}),Object.defineProperty(e,i,o);}:function(e,t,r,i){ void 0===i&&(i=r),e[i]=t[r];}),__exportStar=utils&&utils.__exportStar||function(e,t){for(var r in e)"default"===r||Object.prototype.hasOwnProperty.call(t,r)||__createBinding(t,e,r);};Object.defineProperty(exports$1,"__esModule",{value:true}),__exportStar(requireValidators(),exports$1),__exportStar(requireLogger(),exports$1); 
-	} (utils));
-	return utils;
-}
-
-var hasRequiredSrc;
-
-function requireSrc () {
-	if (hasRequiredSrc) return src;
-	hasRequiredSrc = 1;
-	(function (exports$1) {
-var __createBinding=src&&src.__createBinding||(Object.create?function(e,t,r,o){ void 0===o&&(o=r);var i=Object.getOwnPropertyDescriptor(t,r);i&&!("get"in i?!t.__esModule:i.writable||i.configurable)||(i={enumerable:true,get:function(){return t[r]}}),Object.defineProperty(e,o,i);}:function(e,t,r,o){ void 0===o&&(o=r),e[o]=t[r];}),__exportStar=src&&src.__exportStar||function(e,t){for(var r in e)"default"===r||Object.prototype.hasOwnProperty.call(t,r)||__createBinding(t,e,r);};Object.defineProperty(exports$1,"__esModule",{value:true}),exports$1.default=exports$1.WebSocketConnectionState=exports$1.ModoVoiceClient=void 0;var ModoVoiceClient_1=requireModoVoiceClient();Object.defineProperty(exports$1,"ModoVoiceClient",{enumerable:true,get:function(){return ModoVoiceClient_1.ModoVoiceClient}}),__exportStar(requireEvents(),exports$1),__exportStar(requireAudio(),exports$1),__exportStar(requireConfig(),exports$1);var websocket_1=requireWebsocket();Object.defineProperty(exports$1,"WebSocketConnectionState",{enumerable:true,get:function(){return websocket_1.ConnectionState}}),__exportStar(requireModels(),exports$1),__exportStar(requireServices(),exports$1),__exportStar(requireUtils(),exports$1);var ModoVoiceClient_2=requireModoVoiceClient();Object.defineProperty(exports$1,"default",{enumerable:true,get:function(){return ModoVoiceClient_2.ModoVoiceClient}}); 
-	} (src));
-	return src;
-}
-
-var srcExports = requireSrc();
-
-var ModoVoiceClientExports = requireModoVoiceClient();
+// src/ModoVoiceClient.ts
+var ModoVoiceClient = class {
+  constructor(config) {
+    this.initialized = false;
+    validateConfig(config);
+    this.config = this.mergeWithDefaults(config);
+    this.eventEmitter = new EventEmitter();
+    this.audioState = new AudioState();
+    this.connectionState = new ConnectionState2();
+    this.voiceMetrics = new VoiceMetrics();
+    this.logger = createLogger(this.config.logging, this.eventEmitter);
+    this.webSocketService = new WebSocketService(
+      {
+        url: this.config.apiBase,
+        chatbotUuid: this.config.chatbotUuid,
+        userUniqueId: this.config.userUniqueId,
+        ...this.config.websocket
+      },
+      this.eventEmitter,
+      this.connectionState
+    );
+    this.audioService = new AudioService(
+      this.eventEmitter,
+      this.audioState,
+      this.voiceMetrics,
+      this.config.audio
+    );
+    this.setupInternalListeners();
+  }
+  mergeWithDefaults(config) {
+    return {
+      apiBase: config.apiBase,
+      chatbotUuid: config.chatbotUuid,
+      userUniqueId: config.userUniqueId,
+      audio: { ...DEFAULT_CONFIG.audio, ...config.audio },
+      websocket: { ...DEFAULT_CONFIG.websocket, ...config.websocket },
+      logging: { ...DEFAULT_CONFIG.logging, ...config.logging },
+      features: { ...DEFAULT_CONFIG.features, ...config.features }
+    };
+  }
+  setupInternalListeners() {
+    this.eventEmitter.on("ai_playback_chunk" /* AI_PLAYBACK_CHUNK */, async (event) => {
+      if ("data" in event && event.data instanceof Uint8Array) {
+        await this.audioService.handleIncomingAudioChunk(event.data.buffer);
+        this.logger.debug(`Received audio chunk: ${event.data.byteLength} bytes`, "AudioService");
+      }
+    });
+    this.eventEmitter.on("ai_playback_started" /* AI_PLAYBACK_STARTED */, async () => {
+      await this.audioService.pauseMicrophone();
+      this.logger.debug("Microphone paused during AI playback", "ModoVoiceClient");
+    });
+    this.eventEmitter.on("user_recording_data" /* USER_RECORDING_DATA */, async (event) => {
+      if ("data" in event && this.webSocketService.isConnected()) {
+        try {
+          this.webSocketService.send(event.data);
+        } catch (error) {
+          this.logger.error("Failed to send audio data", "WebSocketService", error);
+        }
+      }
+    });
+    this.eventEmitter.on("ai_playback_completed" /* AI_PLAYBACK_COMPLETED */, async () => {
+      await this.audioService.setStreamComplete();
+    });
+    this.eventEmitter.on("clear_buffer" /* CLEAR_BUFFER */, async () => {
+      this.audioState.clearBuffer();
+      this.audioState.setStreamingComplete(false);
+      this.audioState.setPlaybackState("idle" /* IDLE */);
+      const currentAudio = this.audioState.getCurrentAudioElement();
+      if (currentAudio) {
+        try {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+        } catch (e) {
+        }
+        this.audioState.setCurrentAudioElement(null);
+      }
+    });
+    this.eventEmitter.on("microphone_paused" /* MICROPHONE_PAUSED */, async (event) => {
+      if (!("internal" in event)) {
+        await this.audioService.pauseMicrophone();
+      }
+    });
+    this.eventEmitter.on("microphone_resumed" /* MICROPHONE_RESUMED */, async (event) => {
+      if (!("internal" in event)) {
+        await this.audioService.resumeMicrophone();
+      }
+    });
+  }
+  async connect(deviceId) {
+    if (this.connectionState.isConnected()) {
+      this.logger.warn("Already connected", "ModoVoiceClient");
+      return;
+    }
+    try {
+      this.logger.info("Connecting to Modo Voice Agent...", "ModoVoiceClient");
+      await this.audioService.initialize(deviceId);
+      this.initialized = true;
+      await this.webSocketService.connect();
+      this.logger.info("Successfully connected", "ModoVoiceClient");
+    } catch (error) {
+      this.logger.error("Connection failed", "ModoVoiceClient", error);
+      throw error;
+    }
+  }
+  async disconnect() {
+    if (!this.connectionState.isConnected()) {
+      this.logger.warn("Not connected", "ModoVoiceClient");
+      return;
+    }
+    try {
+      this.logger.info("Disconnecting...", "ModoVoiceClient");
+      this.webSocketService.disconnect();
+      await this.audioService.cleanup();
+      this.initialized = false;
+      this.logger.info("Successfully disconnected", "ModoVoiceClient");
+    } catch (error) {
+      this.logger.error("Disconnect failed", "ModoVoiceClient", error);
+      throw error;
+    }
+  }
+  on(eventType, listener) {
+    return this.eventEmitter.on(eventType, listener);
+  }
+  once(eventType, listener) {
+    return this.eventEmitter.once(eventType, listener);
+  }
+  off(eventType, listener) {
+    this.eventEmitter.off(eventType, listener);
+  }
+  onAny(listener) {
+    return this.eventEmitter.onAny(listener);
+  }
+  offAny(listener) {
+    this.eventEmitter.offAny(listener);
+  }
+  isConnected() {
+    return this.connectionState.isConnected();
+  }
+  isInitialized() {
+    return this.initialized;
+  }
+  getConnectionMetrics() {
+    return this.connectionState.getMetrics();
+  }
+  getVoiceMetrics() {
+    return this.voiceMetrics.getCurrent();
+  }
+  async getAvailableDevices() {
+    return this.audioService.getAvailableDevices();
+  }
+  setLogLevel(level) {
+    this.logger.setLevel(level);
+  }
+  getConfig() {
+    return { ...this.config };
+  }
+  updateConfig(updates) {
+    if (this.connectionState.isConnected()) {
+      throw new Error("Cannot update config while connected");
+    }
+    this.config = this.mergeWithDefaults({ ...this.config, ...updates });
+    if (updates.logging) {
+      this.logger.updateConfig(updates.logging);
+    }
+  }
+};
 
 function initVoiceAgentLayout(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-voice-agent-overlay"),n=t?.querySelector(".mc-voice-close-btn"),c=t?.querySelector(".mc-voice-disconnect-btn"),o=e?.container?.querySelector(".mc-voice-call-btn");o&&(o.classList.remove("mc-hidden"),o.classList.add("mc-visible"));const i=t?.querySelector(".mc-voice-agent-logo");i&&e?.publicData?.image&&(i.src=e.publicData.image,i.alt=e.publicData.name||"چت بات");const a=t?.querySelector(".mc-voice-agent-title");a&&(a.textContent=e?.publicData?.name||"تماس صوتی"),o?.addEventListener("click",()=>{t&&(t.classList.remove("mc-hidden"),t.classList.add("mc-active"),e?.voiceAgent?.connect());}),n?.addEventListener("click",()=>{t&&(t.classList.remove("mc-active"),t.classList.add("mc-hidden"),e?.voiceAgent?.disconnect());}),c?.addEventListener("click",()=>{t&&(t.classList.remove("mc-active"),t.classList.add("mc-hidden"),e?.voiceAgent?.disconnect());});}function updateVoiceAgentStatus(e,t){const n=window.modoChatInstance?.(),c=n?.container?.querySelector(".mc-voice-agent-status");c&&(c.textContent=e,t&&(c.style.color=t));}function handleVoiceConnected(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-voice-agent-logo"),n=e?.container?.querySelector(".mc-voice-agent-status");t&&(t.style.animation="mc-voice-pulse 2s ease-in-out infinite"),n&&(n.style.animation="mc-pulse 1.5s ease-in-out infinite"),updateVoiceAgentStatus("متصل ✓","#68d391");}function handleVoiceDisconnected(e){const t=window.modoChatInstance?.(),n=t?.container?.querySelector(".mc-voice-agent-logo"),c=t?.container?.querySelector(".mc-voice-agent-status");n&&(n.style.animation="none"),c&&(c.style.animation="none");updateVoiceAgentStatus(e?`قطع شد: ${e}`:"قطع شد","#fc8181");}function handleVoiceConnectionError(e){updateVoiceAgentStatus(`خطا: ${e}`,"#fbb040"),console.error("🔴 Voice Connection Error:",e);}function handleMicrophonePaused(){updateVoiceAgentStatus("⏸ میکروفن متوقف شد","#fbb040");}function handleMicrophoneResumed(){updateVoiceAgentStatus("🎤 میکروفن فعال","#68d391");}
 
-class VoiceAgent{instance;holdMusicAudio;constructor(){const e=window.modoChatInstance?.();this.holdMusicAudio=new Audio("/audio/1.mp3"),this.holdMusicAudio.loop=true,this.instance=new ModoVoiceClientExports.ModoVoiceClient({apiBase:"http://localhost:8000",chatbotUuid:e?.publicData?.setting.uuid,userUniqueId:e?.customerData.uniqueId,logging:{level:srcExports.LogLevel.DEBUG,enableConsole:true,enableEvents:true,includeTimestamp:true,includeContext:true},audio:{constraints:{sampleRate:16e3,channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true},processor:{voiceThreshold:.08,silenceThreshold:.05,minSilenceFrames:8,maxPreRollBuffers:5,sampleRate:16e3},processorPath:"/audio-processor.js",minBufferSize:32e3,targetChunks:16,resumeDelay:150}}),this.instance.on(srcExports.EventType.CONNECTED,e=>{console.log("✅ Connected to Modo Voice Agent"),console.log(`   Chatbot: ${e.chatbotUuid}`),console.log(`   User: ${e.userUniqueId}`),handleVoiceConnected();}),this.instance.on(srcExports.EventType.DISCONNECTED,e=>{console.log("❌ Disconnected from Modo Voice Agent"),e.reason&&console.log(`   Reason: ${e.reason}`),handleVoiceDisconnected(e.reason);}),this.instance.on(srcExports.EventType.CONNECTION_ERROR,e=>{console.error("🔴 Connection Error:",e.message),handleVoiceConnectionError(e.message);}),this.instance.on(srcExports.EventType.AI_PLAYBACK_STARTED,()=>{console.log("🤖 AI started speaking..."),handleMicrophonePaused();}),this.instance.on(srcExports.EventType.AI_PLAYBACK_COMPLETED,()=>{console.log("✅ AI finished speaking"),handleMicrophoneResumed();}),this.instance.on(srcExports.EventType.VOICE_DETECTED,e=>{console.log(`🎤 Voice detected: RMS=${e.rms.toFixed(4)}, dB=${e.db.toFixed(1)}`);}),this.instance.on(srcExports.EventType.VOICE_METRICS,e=>{console.log(`📊 Voice metrics: RMS=${e.rms.toFixed(4)}, dB=${e.db.toFixed(1)}  `,e.isActive);}),this.instance.on(srcExports.EventType.VOICE_ENDED,e=>{console.log(`⏹ Voice ended: Duration=${e.duration}ms`);}),this.instance.on(srcExports.EventType.TRANSCRIPT_RECEIVED,e=>{console.log(`📝 User said: "${e.text}"`);}),this.instance.on(srcExports.EventType.AI_RESPONSE_RECEIVED,e=>{console.log(`💬 AI responded: "${e.text}"`);}),this.instance.on(srcExports.EventType.MICROPHONE_PAUSED,()=>{console.log("⏸ Microphone paused"),handleMicrophonePaused();}),this.instance.on(srcExports.EventType.MICROPHONE_RESUMED,()=>{console.log("▶ Microphone resumed"),handleMicrophoneResumed();}),this.instance.on(srcExports.EventType.ON_HOLD_STARTED,()=>{console.log("🎵 On-hold started - Playing hold music"),this.holdMusicAudio?.play().catch(e=>{console.error("Failed to play hold music:",e);});}),this.instance.on(srcExports.EventType.ON_HOLD_STOPPED,()=>{console.log("⏹ On-hold stopped - Stopping hold music"),this.holdMusicAudio&&(this.holdMusicAudio.pause(),this.holdMusicAudio.currentTime=0);}),this.initHtml();}async connect(){try{console.log("🔌 Connecting to Modo Voice Agent..."),await(this.instance?.connect()),console.log("\n✨ Connected! Start speaking...\n");}catch(e){console.error("Failed to connect:",e);}}async disconnect(){await(this.instance?.disconnect());}initHtml(){initVoiceAgentLayout();}toggleLayout(){this.toggleLayout();}}
+class VoiceAgent{instance;holdMusicAudio;constructor(){const e=window.modoChatInstance?.();this.holdMusicAudio=new Audio("https://modochats.s3.ir-thr-at1.arvanstorage.ir/on-hold.mp3"),this.holdMusicAudio.loop=true,this.instance=new ModoVoiceClient({apiBase:"https://live.modochats.com",chatbotUuid:e?.publicData?.setting.uuid,userUniqueId:e?.customerData.uniqueId,logging:{level:LogLevel.DEBUG,enableConsole:true,enableEvents:true,includeTimestamp:true,includeContext:true},audio:{constraints:{sampleRate:16e3,channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true},processor:{voiceThreshold:.08,silenceThreshold:.05,minSilenceFrames:8,maxPreRollBuffers:5,sampleRate:16e3},processorPath:"https://modochats.s3.ir-thr-at1.arvanstorage.ir/audio-processor.js",minBufferSize:32e3,targetChunks:16,resumeDelay:150}}),this.instance.on(EventType.CONNECTED,e=>{handleVoiceConnected();}),this.instance.on(EventType.DISCONNECTED,e=>{e.reason,handleVoiceDisconnected(e.reason);}),this.instance.on(EventType.CONNECTION_ERROR,e=>{handleVoiceConnectionError(e.message);}),this.instance.on(EventType.AI_PLAYBACK_STARTED,()=>{handleMicrophonePaused();}),this.instance.on(EventType.AI_PLAYBACK_COMPLETED,()=>{handleMicrophoneResumed();}),this.instance.on(EventType.VOICE_DETECTED,e=>{}),this.instance.on(EventType.VOICE_METRICS,e=>{}),this.instance.on(EventType.VOICE_ENDED,e=>{}),this.instance.on(EventType.TRANSCRIPT_RECEIVED,e=>{}),this.instance.on(EventType.AI_RESPONSE_RECEIVED,e=>{}),this.instance.on(EventType.MICROPHONE_PAUSED,()=>{handleMicrophonePaused();}),this.instance.on(EventType.MICROPHONE_RESUMED,()=>{handleMicrophoneResumed();}),this.instance.on(EventType.ON_HOLD_STARTED,()=>{this.holdMusicAudio?.play().catch(e=>{});}),this.instance.on(EventType.ON_HOLD_STOPPED,()=>{this.holdMusicAudio&&(this.holdMusicAudio.pause(),this.holdMusicAudio.currentTime=0);}),this.initHtml();}async connect(){try{await(this.instance?.connect());}catch(e){}}async disconnect(){await(this.instance?.disconnect());}initHtml(){initVoiceAgentLayout();}toggleLayout(){this.toggleLayout();}}
 
-class ModoChat{container;publicKey;publicData;customerData;conversation;socket;options={};openedCount=0;version;isInitialized=false;isOpen=false;voiceAgent;constructor(t,o){this.publicKey=t,this.customerData=new CustomerData(this,o?.userData),this.version=VERSION,this.options={position:o?.position||"right",theme:o?.theme,primaryColor:o?.primaryColor,title:o?.title||"",userData:o?.userData,foregroundColor:o?.foregroundColor,fullScreen:"boolean"==typeof o?.fullScreen&&o?.fullScreen},o?.autoInit&&this.init();}async init(){if(this.isInitialized)throw new Error("ModoChat already initialized");const t=await fetchModoPublicData(this.publicKey);if(this.publicData=new ModoPublicData(t),this.options={theme:this.options?.theme||this.publicData?.uiConfig?.theme||"dark",primaryColor:this.options?.primaryColor||this.publicData?.uiConfig?.primaryColor||"#667eea",foregroundColor:this.options?.foregroundColor||this.publicData?.uiConfig?.foregroundColor||"#fff"},!checkIfHostIsAllowed(this))throw new Error("host not allowed");if(await loadCss(),window.modoChatInstance=()=>this,createChatContainer(this),applyModoOptions(),loadStarters(),updateChatToggleImage(),updateChatTitle(),this.isInitialized=true,this.options.fullScreen){const t=this.container?.querySelector(".mc-chat-body");t&&(t.classList.remove("mc-hidden"),t.classList.add("mc-active"));try{await loadConversation(this);}finally{this.onOpen();}}else loadConversation(this);}async onOpen(){this.isOpen=true,this.openedCount++,this.conversation?.hideTooltip(),this.conversation?.markAsRead(),this.conversation?.scrollToBottom(),1===this.openedCount&&(this.conversation&&(await(this.conversation?.loadMessages()),await initSocket(),this.publicData?.voiceAgent&&(this.voiceAgent=new VoiceAgent)),await this.customerData.fetchUpdate());}onClose(){this.isOpen=false;}async updateUserData(t){await this.customerData.updateUserData(t);}}window.ModoChat=ModoChat;
+class ModoChat{container;publicKey;publicData;customerData;conversation;socket;options={};openedCount=0;version;isInitialized=false;isOpen=false;voiceAgent;constructor(t,o){this.publicKey=t,this.customerData=new CustomerData(this,o?.userData),this.version=VERSION,this.options={position:o?.position||"right",theme:o?.theme,primaryColor:o?.primaryColor,title:o?.title||"",userData:o?.userData,foregroundColor:o?.foregroundColor,fullScreen:"boolean"==typeof o?.fullScreen&&o?.fullScreen},o?.autoInit&&this.init();}async init(){if(this.isInitialized)throw new Error("ModoChat already initialized");const t=await fetchModoPublicData(this.publicKey);if(this.publicData=new ModoPublicData(t),this.options={theme:this.options?.theme||this.publicData?.uiConfig?.theme||"dark",primaryColor:this.options?.primaryColor||this.publicData?.uiConfig?.primaryColor||"#667eea",foregroundColor:this.options?.foregroundColor||this.publicData?.uiConfig?.foregroundColor||"#fff"},!checkIfHostIsAllowed(this))throw new Error("host not allowed");if(await loadCss(),window.modoChatInstance=()=>this,createChatContainer(this),applyModoOptions(),loadStarters(),updateChatToggleImage(),updateChatTitle(),this.isInitialized=true,this.options.fullScreen){const t=this.container?.querySelector(".mc-chat-body");t&&(t.classList.remove("mc-hidden"),t.classList.add("mc-active"));try{await loadConversation(this);}finally{this.onOpen();}}else loadConversation(this);}async onOpen(){this.isOpen=true,this.openedCount++,this.conversation?.hideTooltip(),this.conversation?.markAsRead(),this.conversation?.scrollToBottom(),1===this.openedCount&&(this.conversation&&(await(this.conversation?.loadMessages()),await initSocket()),this.publicData?.voiceAgent&&(this.voiceAgent=new VoiceAgent),await this.customerData.fetchUpdate());}onClose(){this.isOpen=false;}async updateUserData(t){await this.customerData.updateUserData(t);}}window.ModoChat=ModoChat;
 
   
   // Return the ModoChat class for UMD usage

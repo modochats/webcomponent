@@ -1,6 +1,7 @@
 node_modules
 yarn.lock
 .yarn
+!.yarn/releases
 dist
 app.js
 app.dev.js

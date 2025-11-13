@@ -4,7 +4,6 @@
   "description": "",
   "main": "dist/src/app.js",
   "type": "module",
-  "packageManager": "yarn@4.10.3",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch src/app.ts",
     "dev:ts": "NODE_ENV=development tsc --watch --noCheck",
@@ -15,9 +14,9 @@
     "compile": "npx tsc --noCheck",
     "minify": "node scripts/terser-minify.js",
     "rollup": "rollup --config rollup.config.js",
-    "build": "yarn compile && yarn minify && yarn rollup",
-    "build:cdn": "yarn build && node scripts/create-umd-bundle.js",
-    "render": "yarn && yarn build"
+    "build": "npm run compile && npm run minify && npm run rollup",
+    "build:cdn": "npm run build && node scripts/create-umd-bundle.js",
+    "render": "npm install && npm run build"
   },
   "keywords": [],
   "author": "",

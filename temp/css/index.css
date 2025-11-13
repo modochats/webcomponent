@@ -1714,6 +1714,9 @@
   opacity: 1;
   visibility: visible;
 }
+.mc-voice-call-btn.mc-hidden {
+  display: none !important;
+}
 
 .mc-voice-call-btn:hover {
   background: rgba(255, 255, 255, 0.3);

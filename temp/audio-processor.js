@@ -5,10 +5,10 @@ class AudioProcessor extends AudioWorkletProcessor {
         this.buffer = new Float32Array(this.bufferSize);
         this.bufferIndex = 0;
         
-        this.noiseThreshold = 0.015;
-        this.voiceThreshold = 0.03;
+        this.noiseThreshold = 0.01;
+        this.voiceThreshold = 0.08;
         this.silenceFrames = 0;
-        this.maxSilenceFrames = 10;
+        this.maxSilenceFrames = 8;
         this.isVoiceActive = false;
         this.isPaused = false;
         
@@ -19,11 +19,15 @@ class AudioProcessor extends AudioWorkletProcessor {
         this.previousSamples = new Float32Array(this.bufferSize).fill(0);
         
         this.preRollBuffer = [];
-        this.maxPreRollBuffers = 5; // Increased from 3 to capture more of the start
+        this.maxPreRollBuffers = 5;
+        
+        this.tailBuffer = [];
+        this.maxTailBuffers = 3;
+        this.sendingTail = false;
         
         this.justResumed = false;
         this.resumedFrameCount = 0;
-        this.resumedFrameThreshold = 100; // Be extra sensitive for ~3 seconds after resume
+        this.resumedFrameThreshold = 150;
         
         this.port.onmessage = (event) => {
             if (event.data.type === 'set-voice-threshold') {
@@ -117,7 +121,11 @@ class AudioProcessor extends AudioWorkletProcessor {
     
     applyNoiseGate(samples, rms) {
         const noiseFloor = this.getNoiseFloor();
-        const adaptiveThreshold = Math.max(this.noiseThreshold, noiseFloor * 1.8);
+        let adaptiveThreshold = Math.max(this.noiseThreshold, noiseFloor * 1.8);
+        
+        if (this.justResumed) {
+            adaptiveThreshold = adaptiveThreshold * 0.3;
+        }
         
         if (rms < adaptiveThreshold) {
             return new Float32Array(samples.length);
@@ -129,15 +137,12 @@ class AudioProcessor extends AudioWorkletProcessor {
     detectVoice(rms) {
         const noiseFloor = this.getNoiseFloor();
         
-        // Gradual sensitivity boost that fades over time
         let adaptiveVoiceThreshold;
         if (this.justResumed) {
             this.resumedFrameCount++;
             
-            // Gradually fade the boost from 30% to 100% over 3 seconds
-            // Frame 0-100: boost from 0.3x to 1.0x (very sensitive at first!)
             const boostProgress = Math.min(this.resumedFrameCount / this.resumedFrameThreshold, 1.0);
-            const boostMultiplier = 0.3 + (0.7 * boostProgress); // 0.3 → 1.0
+            const boostMultiplier = 0.2 + (0.8 * boostProgress);
             
             adaptiveVoiceThreshold = this.voiceThreshold * boostMultiplier;
             
@@ -150,8 +155,7 @@ class AudioProcessor extends AudioWorkletProcessor {
                 console.log('AudioProcessor: Sensitivity boost ended, returning to adaptive threshold');
             }
         } else {
-            // Normal adaptive threshold
-            const multiplier = 2.0;
+            const multiplier = 1.8;
             adaptiveVoiceThreshold = Math.max(this.voiceThreshold, noiseFloor * multiplier);
         }
         
@@ -171,13 +175,15 @@ class AudioProcessor extends AudioWorkletProcessor {
             this.silenceFrames++;
             if (this.silenceFrames > this.maxSilenceFrames) {
                 this.isVoiceActive = false;
+                this.sendingTail = true;
                 this.preRollBuffer = [];
+                return { justActivated: false, isActive: false, justDeactivated: true };
             }
         } else {
             this.updateNoiseProfile(this.buffer);
         }
         
-        return { justActivated: false, isActive: this.isVoiceActive };
+        return { justActivated: false, isActive: this.isVoiceActive, justDeactivated: false };
     }
     
     process(inputs, outputs, parameters) {
@@ -217,10 +223,24 @@ class AudioProcessor extends AudioWorkletProcessor {
                                 this.port.postMessage(preRollBuffer);
                             }
                             this.preRollBuffer = [];
+                            this.tailBuffer = [];
+                            this.sendingTail = false;
                         }
                         
                         if (voiceStatus.isActive) {
                             this.port.postMessage(int16Buffer.buffer);
+                            this.tailBuffer = [];
+                            this.sendingTail = false;
+                        } else if (this.sendingTail) {
+                            this.tailBuffer.push(int16Buffer.buffer);
+                            if (this.tailBuffer.length >= this.maxTailBuffers) {
+                                for (const tailBuffer of this.tailBuffer) {
+                                    this.port.postMessage(tailBuffer);
+                                }
+                                this.port.postMessage({ type: 'voice-ended' });
+                                this.tailBuffer = [];
+                                this.sendingTail = false;
+                            }
                         } else {
                             this.preRollBuffer.push(int16Buffer.buffer);
                             if (this.preRollBuffer.length > this.maxPreRollBuffers) {

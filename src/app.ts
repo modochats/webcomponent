@@ -87,8 +87,8 @@ class ModoChat {
       if (this.conversation) {
         await this.conversation?.loadMessages();
         await initSocket();
-        if (this.publicData?.voiceAgent) this.voiceAgent = new VoiceAgent();
       }
+      if (this.publicData?.voiceAgent) this.voiceAgent = new VoiceAgent();
       await this.customerData.fetchUpdate();
     }
   }

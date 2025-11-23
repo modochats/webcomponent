@@ -11,7 +11,6 @@ const checkIfHostIsAllowed = (modo: ModoChat) => {
   if (currentHost) return allowedHosts.includes(currentHost);
 };
 
-
 const loadConversation = async (modo: ModoChat) => {
   const savedUUid = localStorage.getItem(`modo-chat:${modo.publicKey}-conversation-uuid`);
   if (savedUUid) {

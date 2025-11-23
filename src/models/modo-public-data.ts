@@ -32,7 +32,7 @@ class ModoPublicData {
       allowedHosts: data.setting.allow_hosts?.split(",") ?? [],
       chatbot: data.setting.chatbot
     };
-    this.setting.allowedHosts.push("modochats");
+    this.setting.allowedHosts.push("modochats.com");
     this.uiConfig = {
       primaryColor: data.primary_color,
       foregroundColor: data.foreground_color,

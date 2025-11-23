@@ -44,6 +44,7 @@ class ModoChat {
     const publicDataRes = await fetchModoPublicData(this.publicKey);
     this.publicData = new ModoPublicData(publicDataRes);
     this.options = {
+      ...this.options,
       theme: this.options?.theme || this.publicData?.uiConfig?.theme || "dark",
       primaryColor: this.options?.primaryColor || this.publicData?.uiConfig?.primaryColor || "#667eea",
       foregroundColor: this.options?.foregroundColor || this.publicData?.uiConfig?.foregroundColor || "#fff"

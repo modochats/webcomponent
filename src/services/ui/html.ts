@@ -59,6 +59,15 @@ const createChatContainer = (modo: ModoChat) => {
 
       <div class="mc-chat-input-area">
         <input type="text" placeholder="پیام خود را تایپ کنید..." class="mc-chat-input">
+        <button class="mc-file-upload-btn" title="آپلود فایل">
+          <input type="file" class="mc-file-input" hidden />
+          <svg class="mc-file-upload-icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          <svg class="mc-file-remove-icon mc-hidden" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>
+          </svg>
+        </button>
         <button class="mc-send-message-btn" data-is-loading="false">
           <svg class="mc-send-icon" viewBox="0 0 24 24">
             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>

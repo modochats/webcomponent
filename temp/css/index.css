@@ -942,6 +942,81 @@
   text-decoration: underline;
 }
 
+/* File upload button */
+.mc-file-upload-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mc-file-upload-btn:hover {
+  border-color: var(--primary-color);
+  background: var(--bg-tertiary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mc-file-upload-btn:active {
+  transform: translateY(0);
+}
+
+.mc-file-upload-btn.mc-file-uploaded {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--white);
+}
+
+.mc-file-upload-btn.mc-file-uploaded:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.mc-file-upload-icon,
+.mc-file-remove-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  transition: var(--transition);
+}
+
+.mc-file-remove-icon.mc-hidden {
+  display: none;
+}
+
+.mc-file-upload-icon.mc-hidden {
+  display: none;
+}
+
+.mc-file-name {
+  position: absolute;
+  font-size: 10px;
+  white-space: nowrap;
+  padding: 0 4px;
+  max-width: 38px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mc-file-name.mc-hidden {
+  display: none;
+}
+
 .mc-chat-input {
   padding: 10px 16px;
   border: 2px solid var(--border-color);
@@ -955,7 +1030,7 @@
   transition: var(--transition);
   box-shadow: var(--shadow-sm);
   height: 44px;
-  width: calc(100% - 44px);
+  flex: 1;
 }
 
 .mc-chat-input:focus {

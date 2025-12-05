@@ -5,21 +5,32 @@ const fetchModoPublicData = async (publicKey: string) => {
   return await $fetch<Record<string, any>>(`/v1/chatbot/public/${publicKey}`);
 };
 
-const fetchSendMessage = async (chatbotId: number, content: string, uniqueId: string, conversationUuid?: string, phoneNumber?: string) => {
+const fetchSendMessage = async (
+  chatbotId: number,
+  content: string,
+  uniqueId: string,
+  conversationUuid?: string,
+  phoneNumber?: string,
+  options?: {
+    file?: File;
+    replyTo?: number;
+  }
+) => {
+  const formData = new FormData();
+  formData.append("chatbot_id", chatbotId.toString());
+  formData.append("content", content);
+  formData.append("message_type", "0");
+  formData.append("unique_id", uniqueId);
+  if (conversationUuid) formData.append("conversation_id", conversationUuid);
+  formData.append("url", window?.location?.href || "");
+  formData.append("title", document?.title || "");
+  if (phoneNumber && phoneNumber !== "no phone number") formData.append("phone_number", phoneNumber);
+  if (options?.file) formData.append("file", options.file);
+  if (options?.replyTo) formData.append("reply_to", options.replyTo.toString());
+
   return await $fetch("/v2/conversations/website/send-message/", {
     method: "POST",
-    body: {
-      chatbot_id: chatbotId,
-      content: content,
-      message_type: 0,
-      unique_id: uniqueId,
-      conversation_id: conversationUuid ? conversationUuid : undefined,
-      meta_data: {
-        url: window?.location?.href,
-        title: document?.title
-      },
-      phone_number: phoneNumber && phoneNumber !== "no phone number" ? phoneNumber : undefined
-    }
+    body: formData
   });
 };
 const fetchGetAccessTokenForSocket = async (chatbotId: string, conversationUuid: string, uniqueId: string) => {

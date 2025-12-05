@@ -102,24 +102,13 @@ const registerNewConversationListener = (modoContainer: HTMLDivElement) => {
 const registerFileUploadListener = (modoContainer: HTMLDivElement) => {
   const fileUploadBtn = modoContainer.querySelector(".mc-file-upload-btn") as HTMLButtonElement;
   const fileInput = modoContainer.querySelector(".mc-file-input") as HTMLInputElement;
-  const uploadIcon = modoContainer.querySelector(".mc-file-upload-icon") as SVGElement;
-  const removeIcon = modoContainer.querySelector(".mc-file-remove-icon") as SVGElement;
-  const fileName = modoContainer.querySelector(".mc-file-name") as HTMLElement;
-  const sendMessageBtn = modoContainer.querySelector(".mc-send-message-btn") as HTMLButtonElement;
-
-  // Store the selected file
-  let selectedFile: File | null = null;
+  const modoIns = window?.modoChatInstance?.();
 
   // Trigger file input when button is clicked
   fileUploadBtn.addEventListener("click", () => {
-    if (selectedFile) {
+    if (modoIns?.conversationMaster.fileMaster.file) {
       // If a file is selected, remove it
-      selectedFile = null;
-      fileInput.value = "";
-      uploadIcon.classList.remove("mc-hidden");
-      removeIcon.classList.add("mc-hidden");
-      fileName.classList.add("mc-hidden");
-      fileName.textContent = "";
+      modoIns?.conversationMaster.fileMaster.clearFile();
     } else {
       // Otherwise, open file picker
       fileInput.click();
@@ -129,32 +118,7 @@ const registerFileUploadListener = (modoContainer: HTMLDivElement) => {
   // Handle file selection
   fileInput.addEventListener("change", () => {
     if (fileInput.files && fileInput.files.length > 0) {
-      selectedFile = fileInput.files[0];
-      const name = selectedFile.name;
-      const truncatedName = name.length > 12 ? name.substring(0, 9) + "..." : name;
-
-      fileName.textContent = truncatedName;
-      fileName.title = name; // Full name on hover
-      uploadIcon.classList.add("mc-hidden");
-      removeIcon.classList.remove("mc-hidden");
-      fileName.classList.remove("mc-hidden");
-      fileUploadBtn.classList.add("mc-file-uploaded");
-    }
-  });
-
-  // Attach file to message when sending
-  const originalSendMessage = sendMessageBtn.onclick;
-  sendMessageBtn.addEventListener("click", () => {
-    if (selectedFile) {
-      // Store file globally so sendMessage function can access it
-      (window as any).modoChatSelectedFile = selectedFile;
-      selectedFile = null;
-      fileInput.value = "";
-      uploadIcon.classList.remove("mc-hidden");
-      removeIcon.classList.add("mc-hidden");
-      fileName.classList.add("mc-hidden");
-      fileName.textContent = "";
-      fileUploadBtn.classList.remove("mc-file-uploaded");
+      modoIns?.conversationMaster.fileMaster.setFile(fileInput.files[0]);
     }
   });
 };

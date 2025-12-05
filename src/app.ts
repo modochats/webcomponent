@@ -10,13 +10,15 @@ import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, 
 import {preloadAudio} from "./utils/audio.js";
 import {VERSION} from "./constants/index.js";
 import {VoiceAgent} from "./services/voice-agent/model.js";
+import {ConversationMaster} from "./models/conversation-master.js";
 
 class ModoChat {
   container?: HTMLDivElement;
   publicKey: string;
   publicData?: ModoPublicData;
   customerData: CustomerData;
-  conversation?: Conversation;
+
+  conversationMaster: ConversationMaster;
   socket?: Socket;
   options: Partial<ModoChatOptions> = {};
   openedCount: number = 0;
@@ -27,6 +29,7 @@ class ModoChat {
   constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
     this.publicKey = publicKey;
     this.customerData = new CustomerData(this, options?.userData);
+    this.conversationMaster = new ConversationMaster();
     this.version = VERSION;
     this.options = {
       position: options?.position || "right",
@@ -103,6 +106,12 @@ class ModoChat {
    */
   async updateUserData(newUserData: Record<string, any>) {
     await this.customerData.updateUserData(newUserData);
+  }
+  get conversation() {
+    return this.conversationMaster.conversation;
+  }
+  set conversation(conversation: Conversation | undefined) {
+    this.conversationMaster.conversation = conversation;
   }
 }
 

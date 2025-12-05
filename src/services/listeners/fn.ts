@@ -19,8 +19,14 @@ const sendMessage = async (message: string) => {
           message,
           modoInstance?.customerData.uniqueId,
           modoInstance?.conversation?.uuid,
-          modoInstance?.customerData.phoneNumber
+          modoInstance?.customerData.phoneNumber,
+          {
+            file: modoInstance.conversationMaster.fileMaster.file,
+            replyTo: modoInstance.conversationMaster.replyingTo?.id
+          }
         );
+        modoInstance.conversationMaster.fileMaster.clearFile();
+        modoInstance.conversationMaster.replyingTo = undefined;
 
         if (!modoInstance?.conversation?.uuid) {
           modoInstance.conversation = new Conversation(sendMsgRes.conversation);

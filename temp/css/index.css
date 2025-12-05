@@ -1565,9 +1565,8 @@
 /* Toggle button tooltip */
 .mc-toggle-tooltip {
   position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 110%;
+  right: 0%;
   margin-bottom: 8px;
   opacity: 0;
   visibility: hidden;
@@ -1576,7 +1575,6 @@
   z-index: 1000;
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(-4px);
 }
 
 .mc-toggle-tooltip.mc-hidden {
@@ -1600,8 +1598,7 @@
   content: "";
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 15%;
   border: 4px solid transparent;
   border-top-color: var(--bg-overlay);
   z-index: 100;

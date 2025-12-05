@@ -10,7 +10,7 @@ class ModoChatbot {
   uuid: string;
   allowedHosts: string[] = [];
   id: number;
-
+  greetingMessage?: string;
   uiConfig: {
     primaryColor: string;
     foregroundColor: string;
@@ -34,6 +34,32 @@ class ModoChatbot {
       foregroundColor: data.foreground_color,
       theme: data.theme
     };
+    this.greetingMessage = data.greeting_message;
+  }
+  showTooltip() {
+    const modoInstance = window.modoChatInstance?.();
+    const tooltip = modoInstance?.container?.querySelector(".mc-toggle-tooltip");
+    const tooltipText = modoInstance?.container?.querySelector(".mc-toggle-tooltip-text");
+    console.log(tooltip, tooltipText, modoInstance);
+    if (tooltip && tooltipText && this.greetingMessage) {
+      // Show the tooltip
+      tooltip.classList.remove("mc-hidden");
+
+      // Update tooltip text with greeting message
+      tooltipText.textContent = this.greetingMessage;
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        tooltip.classList.add("mc-hidden");
+      }, 5000);
+    }
+  }
+  hideTooltip() {
+    const modoInstance = window.modoChatInstance?.();
+    const tooltip = modoInstance?.container?.querySelector(".mc-toggle-tooltip");
+    if (tooltip) {
+      tooltip.classList.add("mc-hidden");
+    }
   }
 }
 export {ModoChatbot};

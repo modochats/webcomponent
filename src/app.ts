@@ -1,5 +1,5 @@
 import {ModoChatOptions} from "./types/app.js";
-import {ModoChatbot} from "./models/modo-public-data.js";
+import {ModoChatbot} from "./models/chatbot.js";
 import {fetchModoChatbot} from "./utils/fetch.js";
 import {checkIfHostIsAllowed, loadConversation} from "./services/checker.js";
 import {createChatContainer} from "./services/ui/html.js";
@@ -62,6 +62,7 @@ class ModoChat {
       updateChatTitle();
 
       this.isInitialized = true;
+      this.chatbot.showTooltip();
 
       // In fullscreen mode, automatically open the chat
       if (this.options.fullScreen) {
@@ -85,6 +86,7 @@ class ModoChat {
 
     // Hide tooltip when chat is opened
     this.conversation?.hideTooltip();
+    this.chatbot?.hideTooltip();
     this.conversation?.markAsRead();
     this.conversation?.scrollToBottom();
     if (this.openedCount === 1) {

@@ -1,18 +1,16 @@
-class ModoPublicData {
+class ModoChatbot {
   name: string;
   image: string;
   shortDescription: string;
   starters: string[] = [];
   voiceAgent: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  uuid: string;
+  allowedHosts: string[] = [];
+  id: number;
 
-  setting: {
-    createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
-    uuid: string;
-    allowedHosts: string[];
-    chatbot: number;
-  };
   uiConfig: {
     primaryColor: string;
     foregroundColor: string;
@@ -24,15 +22,13 @@ class ModoPublicData {
     this.shortDescription = data.short_description;
     this.starters = data.starters;
     this.voiceAgent = data.voice_agent;
-    this.setting = {
-      createdAt: data.setting.created_at,
-      updatedAt: data.setting.updated_at,
-      deletedAt: data.setting.deleted_at,
-      uuid: data.setting.unique_id,
-      allowedHosts: data.setting.allow_hosts?.split(",") ?? [],
-      chatbot: data.setting.chatbot
-    };
-    this.setting.allowedHosts.push("modochats.com");
+    this.createdAt = data.setting.created_at;
+    this.updatedAt = data.setting.updated_at;
+    this.deletedAt = data.setting.deleted_at;
+    this.uuid = data.setting.unique_id;
+    this.allowedHosts = data.setting.allow_hosts?.split(",") ?? [];
+    this.id = data.setting.chatbot;
+    this.allowedHosts.push("modochats.com");
     this.uiConfig = {
       primaryColor: data.primary_color,
       foregroundColor: data.foreground_color,
@@ -40,4 +36,4 @@ class ModoPublicData {
     };
   }
 }
-export {ModoPublicData};
+export {ModoChatbot};

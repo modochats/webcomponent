@@ -71,7 +71,7 @@ class CustomerData {
   }
 
   async fetchUpdate() {
-    await fetchUpdateUserData(this.modo.publicData?.setting.uuid as string, this.uniqueId, this.userData);
+    await fetchUpdateUserData(this.modo.chatbot?.uuid as string, this.uniqueId, this.userData);
   }
 }
 export {CustomerData};

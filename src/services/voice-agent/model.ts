@@ -19,7 +19,7 @@ class VoiceAgent {
     this.instance = new ModoVoiceClient({
       apiBase: "https://live.modochats.com",
       // apiBase: "http://localhost:8000",
-      chatbotUuid: modoInstance?.publicData?.setting.uuid as string,
+      chatbotUuid: modoInstance?.chatbot?.uuid as string,
       userUniqueId: modoInstance?.customerData.uniqueId as string,
       logging: {
         level: LogLevel.DEBUG,

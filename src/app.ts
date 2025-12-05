@@ -1,6 +1,6 @@
 import {ModoChatOptions} from "./types/app.js";
-import {ModoPublicData} from "./models/modo-public-data.js";
-import {fetchModoPublicData} from "./utils/fetch.js";
+import {ModoChatbot} from "./models/modo-public-data.js";
+import {fetchModoChatbot} from "./utils/fetch.js";
 import {checkIfHostIsAllowed, loadConversation} from "./services/checker.js";
 import {createChatContainer} from "./services/ui/html.js";
 import {CustomerData} from "./models/customer-data.js";
@@ -15,7 +15,7 @@ import {ConversationMaster} from "./models/conversation-master.js";
 class ModoChat {
   container?: HTMLDivElement;
   publicKey: string;
-  publicData?: ModoPublicData;
+  chatbot?: ModoChatbot;
   customerData: CustomerData;
 
   conversationMaster: ConversationMaster;
@@ -44,13 +44,13 @@ class ModoChat {
   }
   async init() {
     if (this.isInitialized) throw new Error("ModoChat already initialized");
-    const publicDataRes = await fetchModoPublicData(this.publicKey);
-    this.publicData = new ModoPublicData(publicDataRes);
+    const chatbotRes = await fetchModoChatbot(this.publicKey);
+    this.chatbot = new ModoChatbot(chatbotRes);
     this.options = {
       ...this.options,
-      theme: this.options?.theme || this.publicData?.uiConfig?.theme || "dark",
-      primaryColor: this.options?.primaryColor || this.publicData?.uiConfig?.primaryColor || "#667eea",
-      foregroundColor: this.options?.foregroundColor || this.publicData?.uiConfig?.foregroundColor || "#fff"
+      theme: this.options?.theme || this.chatbot?.uiConfig?.theme || "dark",
+      primaryColor: this.options?.primaryColor || this.chatbot?.uiConfig?.primaryColor || "#667eea",
+      foregroundColor: this.options?.foregroundColor || this.chatbot?.uiConfig?.foregroundColor || "#fff"
     };
     if (checkIfHostIsAllowed(this)) {
       await loadCss();
@@ -92,7 +92,7 @@ class ModoChat {
         await this.conversation?.loadMessages();
         await initSocket();
       }
-      if (this.publicData?.voiceAgent) this.voiceAgent = new VoiceAgent();
+      if (this.chatbot?.voiceAgent) this.voiceAgent = new VoiceAgent();
       await this.customerData.fetchUpdate();
     }
   }

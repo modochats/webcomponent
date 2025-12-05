@@ -7,7 +7,7 @@ import {loadStarters, switchToStarterLayout} from "./ui/fn.js";
 
 const checkIfHostIsAllowed = (modo: ModoChat) => {
   const currentHost = parse(window.location.origin).hostname;
-  const allowedHosts = modo.publicData?.setting.allowedHosts || [];
+  const allowedHosts = modo.chatbot?.allowedHosts || [];
   if (currentHost) return allowedHosts.includes(currentHost);
 };
 

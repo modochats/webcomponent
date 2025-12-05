@@ -38,7 +38,7 @@ function loadStarters() {
 
   startersContainer?.classList.remove("mc-hidden");
 
-  for (const starter of modoInstance?.publicData?.starters || []) {
+  for (const starter of modoInstance?.chatbot?.starters || []) {
     const starterElement = document.createElement("div");
     starterElement.className = "mc-starter-item";
     starterElement.textContent = starter;
@@ -65,9 +65,9 @@ function updateChatToggleImage() {
 
   // Update toggle button image
   if (toggleImageEl) {
-    if (modoInstance?.publicData?.image) {
-      toggleImageEl.src = modoInstance.publicData.image;
-      toggleImageEl.alt = modoInstance.publicData.name || "شروع گفتگو";
+    if (modoInstance?.chatbot?.image) {
+      toggleImageEl.src = modoInstance.chatbot.image;
+      toggleImageEl.alt = modoInstance.chatbot.name || "شروع گفتگو";
 
       // Add error handling for failed image loads
       toggleImageEl.onerror = () => {
@@ -83,9 +83,9 @@ function updateChatToggleImage() {
 
   // Update starter logo
   if (starterLogoEl) {
-    if (modoInstance?.publicData?.image) {
-      starterLogoEl.src = modoInstance.publicData.image;
-      starterLogoEl.alt = modoInstance.publicData.name || "لوگو چت بات";
+    if (modoInstance?.chatbot?.image) {
+      starterLogoEl.src = modoInstance.chatbot.image;
+      starterLogoEl.alt = modoInstance.chatbot.name || "لوگو چت بات";
       starterLogoEl.style.display = "block";
 
       // Add error handling for failed image loads
@@ -105,8 +105,8 @@ function updateChatTitle() {
   const starterTitleEl = modoInstance?.container?.querySelector(".mc-starter-title") as HTMLElement;
 
   if (chatTitleEl || starterTitleEl) {
-    // Use options title if no publicData name is available
-    const displayTitle = modoInstance?.options?.title || modoInstance?.publicData?.name || "Modo";
+    // Use options title if no chatbot name is available
+    const displayTitle = modoInstance?.options?.title || modoInstance?.chatbot?.name || "Modo";
 
     if (chatTitleEl) {
       chatTitleEl.textContent = displayTitle;
@@ -126,16 +126,16 @@ function applyModoOptions() {
   const options = modoInstance.options;
 
   // Apply position option
-  applyPositionOption(container, options.position);
+  applyPositionOption(container, options.position!);
 
   // Apply theme option
-  applyThemeOption(container, options.theme);
+  applyThemeOption(container, options.theme!);
 
   // Apply primary color option
-  applyPrimaryColorOption(container, options.primaryColor);
+  applyPrimaryColorOption(container, options.primaryColor!);
 
   // Apply foreground color option
-  applyForegroundColorOption(container, options.foregroundColor);
+  applyForegroundColorOption(container, options.foregroundColor!);
 }
 
 function applyPositionOption(container: HTMLDivElement, position: "left" | "right") {

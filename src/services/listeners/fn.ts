@@ -17,7 +17,7 @@ const sendMessage = async (message: string) => {
         modoInstance.conversationMaster.fileMaster.clearFile();
         modoInstance.conversationMaster.replyMaster.clearReply();
         const sendMsgRes = await fetchSendMessage(
-          modoInstance?.publicData?.setting.chatbot as number,
+          modoInstance?.chatbot?.id as number,
           message,
           modoInstance?.customerData.uniqueId,
           modoInstance?.conversation?.uuid,

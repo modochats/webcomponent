@@ -57,6 +57,20 @@ const createChatContainer = (modo: ModoChat) => {
         </div>
       </div>
 
+      <div class="mc-reply-preview mc-hidden">
+        <div class="mc-reply-preview-content">
+          <div class="mc-reply-preview-info">
+            <span class="mc-reply-preview-label">پاسخ به:</span>
+            <span class="mc-reply-preview-text"></span>
+          </div>
+          <button class="mc-reply-preview-close" title="لغو پاسخ">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <div class="mc-chat-input-area">
         <input type="text" placeholder="پیام خود را تایپ کنید..." class="mc-chat-input">
         <button class="mc-file-upload-btn" title="آپلود فایل">

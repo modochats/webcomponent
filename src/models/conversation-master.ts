@@ -3,9 +3,13 @@ import {Conversation, ConversationMessage} from "./conversation.js";
 class ConversationMaster {
   conversation?: Conversation;
   fileMaster: CMFileMaster;
-  replyingTo?: ConversationMessage;
+  replyMaster: CMReplyMaster;
   constructor() {
     this.fileMaster = new CMFileMaster();
+    this.replyMaster = new CMReplyMaster();
+  }
+  get replyingTo() {
+    return this.replyMaster.replyingTo;
   }
 }
 class CMFileMaster {
@@ -35,6 +39,52 @@ class CMFileMaster {
       uploadIcon.classList.remove("mc-hidden");
       removeIcon.classList.add("mc-hidden");
       fileUploadBtn.classList.remove("mc-file-uploaded");
+    }
+  }
+}
+
+class CMReplyMaster {
+  replyingTo?: ConversationMessage;
+
+  setReply(message: ConversationMessage) {
+    this.replyingTo = message;
+    this.updateReplyUI();
+  }
+
+  clearReply() {
+    this.replyingTo = undefined;
+    this.updateReplyUI();
+  }
+
+  private updateReplyUI() {
+    const modoContainer = window.modoChatInstance?.().container;
+    const replyPreview = modoContainer?.querySelector(".mc-reply-preview") as HTMLDivElement;
+    const replyText = modoContainer?.querySelector(".mc-reply-preview-text") as HTMLElement;
+    const chatMessagesContainer = modoContainer?.querySelector(".mc-chat-messages-con") as HTMLDivElement;
+
+    if (this.replyingTo) {
+      // Show reply preview
+      if (replyPreview && replyText) {
+        // Truncate content to 50 chars
+        const content = this.replyingTo.content.length > 50 ? this.replyingTo.content.substring(0, 50) + "..." : this.replyingTo.content;
+        replyText.textContent = content;
+        replyPreview.classList.remove("mc-hidden");
+
+        // Add reply active class to messages container
+        if (chatMessagesContainer) {
+          chatMessagesContainer.classList.add("mc-reply-active");
+        }
+      }
+    } else {
+      // Hide reply preview
+      if (replyPreview) {
+        replyPreview.classList.add("mc-hidden");
+
+        // Remove reply active class from messages container
+        if (chatMessagesContainer) {
+          chatMessagesContainer.classList.remove("mc-reply-active");
+        }
+      }
     }
   }
 }

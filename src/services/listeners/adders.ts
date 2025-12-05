@@ -33,6 +33,7 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
   registerPhoneNumberFormListeners(modoContainer);
   registerNewConversationListener(modoContainer);
   registerFileUploadListener(modoContainer);
+  registerReplyPreviewListener(modoContainer);
 };
 
 const registerSendMessageListener = (modoContainer: HTMLDivElement) => {
@@ -119,6 +120,43 @@ const registerFileUploadListener = (modoContainer: HTMLDivElement) => {
   fileInput.addEventListener("change", () => {
     if (fileInput.files && fileInput.files.length > 0) {
       modoIns?.conversationMaster.fileMaster.setFile(fileInput.files[0]);
+    }
+  });
+};
+
+const registerReplyPreviewListener = (modoContainer: HTMLDivElement) => {
+  const replyPreview = modoContainer.querySelector(".mc-reply-preview") as HTMLDivElement;
+  const replyPreviewClose = modoContainer.querySelector(".mc-reply-preview-close") as HTMLButtonElement;
+  const replyPreviewInfo = modoContainer.querySelector(".mc-reply-preview-info") as HTMLDivElement;
+
+  if (!replyPreview || !replyPreviewClose || !replyPreviewInfo) return;
+
+  // Close button - clear reply
+  replyPreviewClose.addEventListener("click", e => {
+    e.stopPropagation();
+    const modoInstance = window.modoChatInstance?.();
+    if (modoInstance?.conversationMaster) {
+      modoInstance.conversationMaster.replyMaster.clearReply();
+    }
+  });
+
+  // Click on preview info - scroll to message
+  replyPreviewInfo.addEventListener("click", () => {
+    const modoInstance = window.modoChatInstance?.();
+    const replyingTo = modoInstance?.conversationMaster.replyMaster.replyingTo;
+
+    if (replyingTo?.element) {
+      // Scroll to the message
+      const messagesContainer = modoContainer.querySelector(".mc-chat-messages-con") as HTMLDivElement;
+      if (messagesContainer) {
+        replyingTo.element.scrollIntoView({behavior: "smooth", block: "center"});
+
+        // Add a highlight effect
+        replyingTo.element.classList.add("mc-message-highlight");
+        setTimeout(() => {
+          replyingTo.element?.classList.remove("mc-message-highlight");
+        }, 2000);
+      }
     }
   });
 };

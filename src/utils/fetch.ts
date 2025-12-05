@@ -26,7 +26,7 @@ const fetchSendMessage = async (
   formData.append("title", document?.title || "");
   if (phoneNumber && phoneNumber !== "no phone number") formData.append("phone_number", phoneNumber);
   if (options?.file) formData.append("file", options.file);
-  if (options?.replyTo) formData.append("reply_to", options.replyTo.toString());
+  if (options?.replyTo) formData.append("response_to", options.replyTo.toString());
 
   return await $fetch("/v2/conversations/website/send-message/", {
     method: "POST",

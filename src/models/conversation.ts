@@ -155,6 +155,7 @@ class ConversationMessage {
   isRead: boolean = false;
   element?: HTMLDivElement;
   hasFeedback: boolean = false;
+  repliedTo?: ConversationMessage;
   constructor(init: Record<string, any>) {
     this.id = init.id;
     this.content = init.content;
@@ -176,6 +177,12 @@ class ConversationMessage {
         this.type = "UNKNOWN";
     }
     this.createdAt = init.created_at;
+    if (init.response_to) {
+      const modoInstance = window.modoChatInstance?.();
+      const message = modoInstance?.conversation?.messages.find(({id}) => id === init.response_to);
+      // const message = modoInstance?.conversation?.messages[0];
+      if (message) this.repliedTo = message;
+    }
   }
 
   fetchRead() {
@@ -199,8 +206,23 @@ class ConversationMessage {
       hour12: false
     });
 
+    // Build the HTML with replied-to message preview if exists
+    let repliedToHtml = "";
+    if (this.repliedTo) {
+      const repliedContent = this.repliedTo.content.length > 40 ? this.repliedTo.content.substring(0, 40) + "..." : this.repliedTo.content;
+      repliedToHtml = `
+        <div class="mc-replied-to-preview" data-reply-message-id="${this.repliedTo.id}">
+          <div class="mc-replied-to-header">
+            <span class="mc-replied-to-sender">${this.repliedTo.type === "USER" ? "شما" : "پشتیبان"}</span>
+          </div>
+          <div class="mc-replied-to-content">${repliedContent}</div>
+        </div>
+      `;
+    }
+
     this.element.innerHTML = `
-      <div class="mc-chat-message ${this.type === "USER" ? "mc-chat-message-user" : "mc-chat-message-supporter"}">
+    <div class="mc-chat-message ${this.type === "USER" ? "mc-chat-message-user" : "mc-chat-message-supporter"}">
+    ${repliedToHtml}
         <div class="mc-message-content">${marked.parse(this.content) as string}</div>
       </div>
       <div class="mc-message-footer">
@@ -225,9 +247,32 @@ class ConversationMessage {
     this.element.className = `mc-message-wrapper ${this.type === "USER" ? "mc-message-wrapper-user" : "mc-message-wrapper-supporter"}`;
     this.containerElement?.appendChild(this.element);
 
+    this.addElementListeners();
+
     // Add feedback event listeners for non-user messages
     if (this.type !== "USER") {
       this.addFeedbackListeners();
+    }
+
+    // Add clicked listener for replied-to preview
+    if (this.repliedTo) {
+      this.addRepliedToListener();
+    }
+  }
+
+  addRepliedToListener() {
+    const repliedToPreview = this.element?.querySelector(".mc-replied-to-preview") as HTMLDivElement;
+    if (repliedToPreview && this.repliedTo?.element) {
+      repliedToPreview.addEventListener("click", () => {
+        // Scroll to the replied message
+        this.repliedTo?.element?.scrollIntoView({behavior: "smooth", block: "center"});
+
+        // Add highlight effect
+        this.repliedTo?.element?.classList.add("mc-message-highlight");
+        setTimeout(() => {
+          this.repliedTo?.element?.classList.remove("mc-message-highlight");
+        }, 2000);
+      });
     }
   }
   showTooltip() {
@@ -320,6 +365,13 @@ class ConversationMessage {
       dislikeBtn.disabled = false;
       dislikeBtn.classList.remove("mc-feedback-disabled");
     }
+  }
+  addElementListeners() {
+    const modoInstance = window.modoChatInstance?.();
+
+    this.element?.addEventListener("dblclick", () => {
+      modoInstance?.conversationMaster.replyMaster.setReply(this);
+    });
   }
 }
 export {Conversation, ConversationMessage};

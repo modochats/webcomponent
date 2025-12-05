@@ -14,6 +14,8 @@ const sendMessage = async (message: string) => {
           const chatInput = modoInstance.container?.querySelector(".mc-chat-input") as HTMLInputElement;
           if (chatInput) chatInput.value = "";
         }
+        modoInstance.conversationMaster.fileMaster.clearFile();
+        modoInstance.conversationMaster.replyMaster.clearReply();
         const sendMsgRes = await fetchSendMessage(
           modoInstance?.publicData?.setting.chatbot as number,
           message,
@@ -25,8 +27,6 @@ const sendMessage = async (message: string) => {
             replyTo: modoInstance.conversationMaster.replyingTo?.id
           }
         );
-        modoInstance.conversationMaster.fileMaster.clearFile();
-        modoInstance.conversationMaster.replyingTo = undefined;
 
         if (!modoInstance?.conversation?.uuid) {
           modoInstance.conversation = new Conversation(sendMsgRes.conversation);

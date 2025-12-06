@@ -34,6 +34,7 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
   registerNewConversationListener(modoContainer);
   registerFileUploadListener(modoContainer);
   registerReplyPreviewListener(modoContainer);
+  registerTooltipCloseListener(modoContainer);
 };
 
 const registerSendMessageListener = (modoContainer: HTMLDivElement) => {
@@ -159,6 +160,21 @@ const registerReplyPreviewListener = (modoContainer: HTMLDivElement) => {
       }
     }
   });
+};
+
+const registerTooltipCloseListener = (modoContainer: HTMLDivElement) => {
+  const modoInstance = window.modoChatInstance?.();
+  const tooltipCloseBtn = modoContainer.querySelector(".mc-toggle-tooltip-close") as HTMLButtonElement;
+  const tooltip = modoContainer.querySelector(".mc-toggle-tooltip") as HTMLDivElement;
+  if (tooltipCloseBtn) {
+    tooltipCloseBtn.addEventListener("click", e => {
+      localStorage.setItem(`modochats:${modoInstance?.publicKey}-has-seen-greeting-message`, "true");
+      e.stopPropagation();
+      if (tooltip) {
+        tooltip.classList.add("mc-hidden");
+      }
+    });
+  }
 };
 
 export {registerListeners, registerNewConversationListener};

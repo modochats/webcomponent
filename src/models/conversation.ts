@@ -155,7 +155,8 @@ class ConversationMessage {
   isRead: boolean = false;
   element?: HTMLDivElement;
   hasFeedback: boolean = false;
-  repliedTo?: ConversationMessage;
+  repliedToId?: number;
+
   constructor(init: Record<string, any>) {
     this.id = init.id;
     this.content = init.content;
@@ -177,12 +178,7 @@ class ConversationMessage {
         this.type = "UNKNOWN";
     }
     this.createdAt = init.created_at;
-    if (init.response_to) {
-      const modoInstance = window.modoChatInstance?.();
-      const message = modoInstance?.conversation?.messages.find(({id}) => id === init.response_to);
-      // const message = modoInstance?.conversation?.messages[0];
-      if (message) this.repliedTo = message;
-    }
+    if (init.response_to) this.repliedToId = init.response_to;
   }
 
   fetchRead() {
@@ -372,6 +368,11 @@ class ConversationMessage {
     this.element?.addEventListener("dblclick", () => {
       modoInstance?.conversationMaster.replyMaster.setReply(this);
     });
+  }
+  get repliedTo() {
+    const modoInstance = window.modoChatInstance?.();
+    const message = modoInstance?.conversation?.messages.find(({id}) => id === this.repliedToId);
+    return message;
   }
 }
 export {Conversation, ConversationMessage};

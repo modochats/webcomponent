@@ -40,8 +40,9 @@ class ModoChatbot {
     const modoInstance = window.modoChatInstance?.();
     const tooltip = modoInstance?.container?.querySelector(".mc-toggle-tooltip");
     const tooltipText = modoInstance?.container?.querySelector(".mc-toggle-tooltip-text");
-    console.log(tooltip, tooltipText, modoInstance);
-    if (tooltip && tooltipText && this.greetingMessage) {
+    const hasSeen = localStorage.getItem(`modochats:${modoInstance?.publicKey}-has-seen-greeting-message`) === "true";
+
+    if (tooltip && tooltipText && this.greetingMessage && !hasSeen) {
       // Show the tooltip
       tooltip.classList.remove("mc-hidden");
 
@@ -49,9 +50,9 @@ class ModoChatbot {
       tooltipText.textContent = this.greetingMessage;
 
       // Auto-hide after 5 seconds
-      setTimeout(() => {
-        tooltip.classList.add("mc-hidden");
-      }, 5000);
+      // setTimeout(() => {
+      //   tooltip.classList.add("mc-hidden");
+      // }, 5000);
     }
   }
   hideTooltip() {

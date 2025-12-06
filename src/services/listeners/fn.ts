@@ -9,8 +9,10 @@ const sendMessage = async (message: string) => {
     if (checkIfUserHasPhoneNumber()) {
       const modoInstance = window.modoChatInstance?.();
       if (modoInstance) {
+        const savedFolder = modoInstance.conversationMaster.fileMaster.file;
+        const savedReply = modoInstance.conversationMaster.replyMaster.replyingTo?.id;
         if (modoInstance?.conversation?.uuid) {
-          modoInstance.conversation.addMessage({id: "temp", content: message, message_type: 0, created_at: new Date().toISOString()});
+          modoInstance.conversation.addMessage({id: "temp", content: message, message_type: 0, created_at: new Date().toISOString(), response_to: savedReply});
           const chatInput = modoInstance.container?.querySelector(".mc-chat-input") as HTMLInputElement;
           if (chatInput) chatInput.value = "";
         }
@@ -23,8 +25,8 @@ const sendMessage = async (message: string) => {
           modoInstance?.conversation?.uuid,
           modoInstance?.customerData.phoneNumber,
           {
-            file: modoInstance.conversationMaster.fileMaster.file,
-            replyTo: modoInstance.conversationMaster.replyingTo?.id
+            file: savedFolder,
+            replyTo: savedReply
           }
         );
 

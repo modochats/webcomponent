@@ -142,20 +142,43 @@ const createChatContainer = (modo: ModoChat) => {
   ${
     !modo.options.fullScreen
       ? `
-  <button class="mc-toggle-chat-btn">
-    <img class="mc-chat-toggle-image" src="" alt="شروع گفتگو" />
-    <svg class="mc-chat-toggle-close" viewBox="0 0 24 24" width="24" height="24">
-      <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>
-    </svg>
-    <!-- Badge for unread messages -->
-    <div class="mc-badge mc-hidden">
-      <span class="mc-badge-text">0</span>
-    </div>
-    <!-- Tooltip for toggle button -->
-    <div class="mc-toggle-tooltip mc-hidden">
-      <span class="mc-toggle-tooltip-text">شروع گفتگو</span>
-    </div>
-  </button>
+    <button class="mc-toggle-chat-btn">
+      <img
+        class="mc-chat-toggle-image"
+        src=""
+        alt="شروع گفتگو" />
+      <svg
+        class="mc-chat-toggle-close"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24">
+        <path
+          fill="currentColor"
+          d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" />
+      </svg>
+      <!-- Badge for unread messages -->
+      <div class="mc-badge mc-hidden">
+        <span class="mc-badge-text">0</span>
+      </div>
+      <!-- Tooltip for toggle button -->
+      <div class="mc-toggle-tooltip mc-hidden">
+        <div class="mc-tooltip-inner">
+          <div
+            class="mc-toggle-tooltip-close"
+            title="بستن">
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16">
+              <path
+                fill="currentColor"
+                d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" />
+            </svg>
+          </div>
+          <span class="mc-toggle-tooltip-text">شروع گفتگو</span>
+        </div>
+      </div>
+    </button>
   `
       : ""
   }

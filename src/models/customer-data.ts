@@ -1,5 +1,6 @@
 import {ModoChat} from "#src/app.js";
 import {fetchUpdateUserData} from "#src/utils/fetch.js";
+import {generateUUID} from "#src/utils/uuid.js";
 
 class CustomerData {
   private _uniqueId?: string;
@@ -32,7 +33,7 @@ class CustomerData {
       this._uniqueId = savedUniqueId;
     } else {
       // Generate a new UUID if no saved unique ID exists
-      this._uniqueId = crypto.randomUUID();
+      this._uniqueId = crypto.randomUUID ? crypto.randomUUID() : generateUUID();
       localStorage.setItem(`modo-chat:${this.modo.publicKey}-user-unique-id`, this._uniqueId);
     }
   }

@@ -9,9 +9,9 @@
 })(typeof globalThis !== 'undefined' ? globalThis : typeof self !== 'undefined' ? self : this, function () {
   'use strict';
   
-  class ModoPublicData{name;image;shortDescription;starters=[];voiceAgent;setting;uiConfig;constructor(t){this.name=t.name,this.image=t.image,this.shortDescription=t.short_description,this.starters=t.starters,this.voiceAgent=t.voice_agent,this.setting={createdAt:t.setting.created_at,updatedAt:t.setting.updated_at,deletedAt:t.setting.deleted_at,uuid:t.setting.unique_id,allowedHosts:t.setting.allow_hosts?.split(",")??[],chatbot:t.setting.chatbot},this.setting.allowedHosts.push("modochats.com"),this.uiConfig={primaryColor:t.primary_color,foregroundColor:t.foreground_color,theme:t.theme};}}
+  class ModoChatbot{name;image;shortDescription;starters=[];voiceAgent;createdAt;updatedAt;deletedAt;uuid;allowedHosts=[];id;greetingMessage;uiConfig;constructor(t){this.name=t.name,this.image=t.image,this.shortDescription=t.short_description,this.starters=t.starters,this.voiceAgent=t.voice_agent,this.createdAt=t.setting.created_at,this.updatedAt=t.setting.updated_at,this.deletedAt=t.setting.deleted_at,this.uuid=t.setting.unique_id,this.allowedHosts=t.setting.allow_hosts?.split(",")??[],this.id=t.setting.chatbot,this.allowedHosts.push("modochats.com"),this.uiConfig={primaryColor:t.primary_color,foregroundColor:t.foreground_color,theme:t.theme},this.greetingMessage=t.greeting_message;}showTooltip(){const t=window.modoChatInstance?.(),e=t?.container?.querySelector(".mc-toggle-tooltip"),o=t?.container?.querySelector(".mc-toggle-tooltip-text"),s="true"===localStorage.getItem(`modochats:${t?.publicKey}-has-seen-greeting-message`);e&&o&&this.greetingMessage&&!s&&(e.classList.remove("mc-hidden"),o.textContent=this.greetingMessage);}hideTooltip(){const t=window.modoChatInstance?.(),e=t?.container?.querySelector(".mc-toggle-tooltip");e&&e.classList.add("mc-hidden");}}
 
-const getEnvironment=()=>"undefined"!=typeof window&&window.ENVIRONMENT?window.ENVIRONMENT:"undefined"!=typeof process&&process.env?.NODE_ENV?process.env.NODE_ENV.toUpperCase():"PROD",isDev="DEV"===getEnvironment();"PROD"===getEnvironment();const BASE_API_URL=isDev?"https://dev-api.modochats.com":"https://api.modochats.com",BASE_WEBSOCKET_URL=isDev?"wss://dev-api.modochats.com/ws":"wss://api.modochats.com/ws",VERSION="0.43",NEW_MESSAGE_AUDIO_URL="https://modochats.s3.ir-thr-at1.arvanstorage.ir/new-message.mp3";
+const getEnvironment=()=>"undefined"!=typeof window&&window.ENVIRONMENT?window.ENVIRONMENT:"undefined"!=typeof process&&process.env?.NODE_ENV?process.env.NODE_ENV.toUpperCase():"PROD",isDev="DEV"===getEnvironment();"PROD"===getEnvironment();const BASE_API_URL=isDev?"https://dev-api.modochats.com":"https://api.modochats.com",BASE_WEBSOCKET_URL=isDev?"wss://dev-api.modochats.com/ws":"wss://api.modochats.com/ws",VERSION="0.5",BASE_STORAGE_URL="https://modostorage.ir",NEW_MESSAGE_AUDIO_URL=`${BASE_STORAGE_URL}/new-message.mp3`;
 
 const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
 const suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
@@ -640,9 +640,9 @@ const ofetch = createFetch({ fetch, Headers, AbortController });
 
 const $fetch=ofetch.create({baseURL:BASE_API_URL});
 
-const fetchModoPublicData=async e=>await $fetch(`/v1/chatbot/public/${e}`),fetchSendMessage=async(e,t,s,a,o)=>await $fetch("/v2/conversations/website/send-message/",{method:"POST",body:{chatbot_id:e,content:t,message_type:0,unique_id:s,conversation_id:a||void 0,meta_data:{url:window?.location?.href,title:document?.title},phone_number:o&&"no phone number"!==o?o:void 0}}),fetchGetAccessTokenForSocket=async(e,t,s)=>await $fetch("/v2/conversations/websocket/auth/",{method:"POST",body:{chatbot_id:e,conversation_uuid:t,unique_id:s}}),fetchConversationMessages=async(e,t)=>await $fetch(`/v2/conversations/website/conversations/${e}/chatbot/${t}/messages/`),fetchUpdateUserData=async(e,t,s)=>await $fetch("/v1/chatbot/customners/set-user-data",{method:"POST",body:{chatbot_uuid:e,unique_id:t,user_data:s}}),fetchReadMessage=async e=>await $fetch(`/v2/conversations/messages/${e}/`,{method:"POST"}),fetchMarkConversationAsRead=async(e,t)=>await $fetch(`/v2/conversations/website/conversations/${e}/messages/seen`,{method:"POST",body:{unique_id:t}}),fetchMessageFeedback=async(e,t,s,a)=>await $fetch("/v2/conversations/website/conversations/messages/feedback",{method:"POST",body:{unique_id:t,feedback:a?1:0,message_id:e,conversation_uuid:s}}),fetchConversations=async(e,t)=>await $fetch(`/v2/conversations/website/conversations/${e}/customer/${t}`);
+const fetchModoChatbot=async e=>await $fetch(`/v1/chatbot/public/${e}`),fetchSendMessage=async(e,t,s,a,o,n)=>{const c=new FormData;return c.append("chatbot_id",e.toString()),c.append("content",t),c.append("message_type","0"),c.append("unique_id",s),a&&c.append("conversation_id",a),c.append("url",window?.location?.href||""),c.append("title",document?.title||""),o&&"no phone number"!==o&&c.append("phone_number",o),n?.file&&c.append("file",n.file),n?.replyTo&&c.append("response_to",n.replyTo.toString()),await $fetch("/v2/conversations/website/send-message/",{method:"POST",body:c})},fetchGetAccessTokenForSocket=async(e,t,s)=>await $fetch("/v2/conversations/websocket/auth/",{method:"POST",body:{chatbot_id:e,conversation_uuid:t,unique_id:s}}),fetchConversationMessages=async(e,t)=>await $fetch(`/v2/conversations/website/conversations/${e}/chatbot/${t}/messages/`),fetchUpdateUserData=async(e,t,s)=>await $fetch("/v1/chatbot/customners/set-user-data",{method:"POST",body:{chatbot_uuid:e,unique_id:t,user_data:s}}),fetchReadMessage=async e=>await $fetch(`/v2/conversations/messages/${e}/`,{method:"POST"}),fetchMarkConversationAsRead=async(e,t)=>await $fetch(`/v2/conversations/website/conversations/${e}/messages/seen`,{method:"POST",body:{unique_id:t}}),fetchMessageFeedback=async(e,t,s,a)=>await $fetch("/v2/conversations/website/conversations/messages/feedback",{method:"POST",body:{unique_id:t,feedback:a?1:0,message_id:e,conversation_uuid:s}}),fetchConversations=async(e,t)=>await $fetch(`/v2/conversations/website/conversations/${e}/customer/${t}`);
 
-function switchToConversationLayout(){const t=window.modoChatInstance?.();t?.container?.querySelector(".mc-new-conversation-btn")?.classList.remove("mc-hidden"),t?.container?.querySelector(".mc-starters-con")?.classList.add("mc-hidden");}function switchToStarterLayout(){const t=window.modoChatInstance?.();t?.container?.querySelector(".mc-new-conversation-btn")?.classList.add("mc-hidden"),t?.container?.querySelector(".mc-starters-con")?.classList.remove("mc-hidden"),t?.container?.querySelector(".mc-conversation-status-icon")?.classList.add("mc-hidden");}function setConversationType(t){const e=window.modoChatInstance?.();e?.container?.querySelector(".mc-conversation-status-icon")?.classList.remove("mc-hidden");const o=e?.container?.querySelector(".mc-conversation-status-icon");o&&(o.classList.remove("mc-ai-mode","mc-human-mode"),"AI_CHAT"===t?o.classList.add("mc-ai-mode"):o.classList.add("mc-human-mode"));}function loadStarters(){const t=window.modoChatInstance?.(),e=t?.container?.querySelector(".mc-starters-con"),o=t?.container?.querySelector(".mc-starter-items");e?.classList.remove("mc-hidden");for(const e of t?.publicData?.starters||[]){const n=document.createElement("div");n.className="mc-starter-item",n.textContent=e,n.addEventListener("click",async()=>{const o=t?.container?.querySelector(".mc-chat-input"),n=t?.container?.querySelector(".mc-send-message-btn");switchToConversationLayout(),o&&(o.value=e,n.click());}),o?.appendChild(n);}}function updateChatToggleImage(){const t=window.modoChatInstance?.(),e=t?.container?.querySelector(".mc-chat-toggle-image"),o=t?.container?.querySelector(".mc-starter-logo"),n="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.1 3.9 23 5 23H11V21H5V3H13V9H21ZM23 18V16H15V18L19 22L15 26V28H23V26H19L23 22L19 18H23Z'/%3E%3C/svg%3E";e&&(t?.publicData?.image?(e.src=t.publicData.image,e.alt=t.publicData.name||"شروع گفتگو",e.onerror=()=>{e.src=n,e.alt="پشتیبانی چت";}):(e.src=n,e.alt="پشتیبانی چت")),o&&(t?.publicData?.image?(o.src=t.publicData.image,o.alt=t.publicData.name||"لوگو چت بات",o.style.display="block",o.onerror=()=>{o.style.display="none";}):o.style.display="none");}function updateChatTitle(){const t=window.modoChatInstance?.(),e=t?.container?.querySelector(".mc-chat-title"),o=t?.container?.querySelector(".mc-starter-title");if(e||o){const n=t?.options?.title||t?.publicData?.name||"Modo";e&&(e.textContent=n),o&&(o.textContent=n);}}function applyModoOptions(){const t=window.modoChatInstance?.();if(!t?.container||!t?.options)return;const e=t.container,o=t.options;applyPositionOption(e,o.position),applyThemeOption(e,o.theme),applyPrimaryColorOption(e,o.primaryColor),applyForegroundColorOption(e,o.foregroundColor);}function applyPositionOption(t,e){const o=window.modoChatInstance?.()?.container;if(o)if("left"===e){o.style.right="auto",o.style.left="32px",o.style.direction="ltr";const t=o.querySelector(".mc-chat-body");t&&(t.style.right="auto",t.style.left="0");}else {const t=o.querySelector(".mc-chat-body");t&&(t.style.left="auto",t.style.right="0");}}function applyThemeOption(t,e){const o=document.querySelector(".modo-chat-widget");"light"===e?o?.setAttribute("data-theme","light"):o?.removeAttribute("data-theme"),localStorage.setItem("modo-component:theme",e);}function applyPrimaryColorOption(t,e){const o=document.querySelector(".modo-chat-widget");if(o){o?.style.setProperty("--primary-color",e);const t=adjustColorBrightness(e,-20);o?.style.setProperty("--primary-hover",t);const n=adjustColorBrightness(e,15);o?.style.setProperty("--primary-gradient",`linear-gradient(135deg, ${e} 0%, ${n} 100%)`);}else console.error("modo chat widget not found");}function applyForegroundColorOption(t,e){const o=document.querySelector(".modo-chat-widget");o?(o?.style.setProperty("--foreground-color",e),o?.style.setProperty("--white",e)):console.error("modo chat widget not found");}function adjustColorBrightness(t,e){t=t.replace(/^#/,"");const o=parseInt(t,16),n=Math.round(2.55*e),a=(o>>16)+n,r=(o>>8&255)+n,c=(255&o)+n;return `#${(Math.max(0,Math.min(255,a))<<16|Math.max(0,Math.min(255,r))<<8|Math.max(0,Math.min(255,c))).toString(16).padStart(6,"0")}`}async function loadCss(){return await new Promise(t=>{const e=document.createElement("link"),o=isDev?"/css/index.css":"https://modochats.s3.ir-thr-at1.arvanstorage.ir/index.css";e.rel="stylesheet",e.href=o,document.head.appendChild(e),e.addEventListener("load",()=>{t("css loaded");});})}
+function switchToConversationLayout(){const t=window.modoChatInstance?.();t?.container?.querySelector(".mc-new-conversation-btn")?.classList.remove("mc-hidden"),t?.container?.querySelector(".mc-starters-con")?.classList.add("mc-hidden");}function switchToStarterLayout(){const t=window.modoChatInstance?.();t?.container?.querySelector(".mc-new-conversation-btn")?.classList.add("mc-hidden"),t?.container?.querySelector(".mc-starters-con")?.classList.remove("mc-hidden"),t?.container?.querySelector(".mc-conversation-status-icon")?.classList.add("mc-hidden");}function setConversationType(t){const e=window.modoChatInstance?.();e?.container?.querySelector(".mc-conversation-status-icon")?.classList.remove("mc-hidden");const o=e?.container?.querySelector(".mc-conversation-status-icon");o&&(o.classList.remove("mc-ai-mode","mc-human-mode"),"AI_CHAT"===t?o.classList.add("mc-ai-mode"):o.classList.add("mc-human-mode"));}function loadStarters(){const t=window.modoChatInstance?.(),e=t?.container?.querySelector(".mc-starters-con"),o=t?.container?.querySelector(".mc-starter-items");e?.classList.remove("mc-hidden");for(const e of t?.chatbot?.starters||[]){const n=document.createElement("div");n.className="mc-starter-item",n.textContent=e,n.addEventListener("click",async()=>{const o=t?.container?.querySelector(".mc-chat-input"),n=t?.container?.querySelector(".mc-send-message-btn");switchToConversationLayout(),o&&(o.value=e,n.click());}),o?.appendChild(n);}}function updateChatToggleImage(){const t=window.modoChatInstance?.(),e=t?.container?.querySelector(".mc-chat-toggle-image"),o=t?.container?.querySelector(".mc-starter-logo"),n="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.1 3.9 23 5 23H11V21H5V3H13V9H21ZM23 18V16H15V18L19 22L15 26V28H23V26H19L23 22L19 18H23Z'/%3E%3C/svg%3E";e&&(t?.chatbot?.image?(e.src=t.chatbot.image,e.alt=t.chatbot.name||"شروع گفتگو",e.onerror=()=>{e.src=n,e.alt="پشتیبانی چت";}):(e.src=n,e.alt="پشتیبانی چت")),o&&(t?.chatbot?.image?(o.src=t.chatbot.image,o.alt=t.chatbot.name||"لوگو چت بات",o.style.display="block",o.onerror=()=>{o.style.display="none";}):o.style.display="none");}function updateChatTitle(){const t=window.modoChatInstance?.(),e=t?.container?.querySelector(".mc-chat-title"),o=t?.container?.querySelector(".mc-starter-title");if(e||o){const n=t?.options?.title||t?.chatbot?.name||"Modo";e&&(e.textContent=n),o&&(o.textContent=n);}}function applyModoOptions(){const t=window.modoChatInstance?.();if(!t?.container||!t?.options)return;const e=t.container,o=t.options;applyPositionOption(e,o.position),applyThemeOption(e,o.theme),applyPrimaryColorOption(e,o.primaryColor),applyForegroundColorOption(e,o.foregroundColor);}function applyPositionOption(t,e){const o=window.modoChatInstance?.()?.container;if(o)if("left"===e){o.style.right="auto",o.style.left="32px",o.style.direction="ltr";const t=o.querySelector(".mc-chat-body");t&&(t.style.right="auto",t.style.left="0");}else {const t=o.querySelector(".mc-chat-body");t&&(t.style.left="auto",t.style.right="0");}}function applyThemeOption(t,e){const o=document.querySelector(".modo-chat-widget");"light"===e?o?.setAttribute("data-theme","light"):o?.removeAttribute("data-theme"),localStorage.setItem("modo-component:theme",e);}function applyPrimaryColorOption(t,e){const o=document.querySelector(".modo-chat-widget");if(o){o?.style.setProperty("--primary-color",e);const t=adjustColorBrightness(e,-20);o?.style.setProperty("--primary-hover",t);const n=adjustColorBrightness(e,15);o?.style.setProperty("--primary-gradient",`linear-gradient(135deg, ${e} 0%, ${n} 100%)`);}else console.error("modo chat widget not found");}function applyForegroundColorOption(t,e){const o=document.querySelector(".modo-chat-widget");o?(o?.style.setProperty("--foreground-color",e),o?.style.setProperty("--white",e)):console.error("modo chat widget not found");}function adjustColorBrightness(t,e){t=t.replace(/^#/,"");const o=parseInt(t,16),n=Math.round(2.55*e),a=(o>>16)+n,r=(o>>8&255)+n,c=(255&o)+n;return `#${(Math.max(0,Math.min(255,a))<<16|Math.max(0,Math.min(255,r))<<8|Math.max(0,Math.min(255,c))).toString(16).padStart(6,"0")}`}async function loadCss(){return await new Promise(t=>{const e=document.createElement("link"),o=isDev?"/css/index.css":`${BASE_STORAGE_URL}/index.css`;e.rel="stylesheet",e.href=o,document.head.appendChild(e),e.addEventListener("load",()=>{t("css loaded");});})}
 
 const audioCache=new Map,preloadAudio=e=>new Promise((a,o)=>{if(audioCache.has(e))return void a(audioCache.get(e));const t=new Audio(e);t.volume=.5,t.preload="auto",t.addEventListener("canplaythrough",()=>{audioCache.set(e,t),a(t);}),t.addEventListener("error",e=>{o(e);}),t.load();}),playAudio=async e=>{try{let a=audioCache.get(e);a||(a=new Audio(e),a.volume=.5,a.preload="auto"),await a.play();}catch(e){console.warn("Failed to play audio:",e);try{const e=new(window.AudioContext||window.webkitAudioContext),a=e.createOscillator(),o=e.createGain();a.connect(o),o.connect(e.destination),a.frequency.setValueAtTime(800,e.currentTime),a.type="sine",o.gain.setValueAtTime(.3,e.currentTime),o.gain.exponentialRampToValueAtTime(.01,e.currentTime+.5),a.start(e.currentTime),a.stop(e.currentTime+.5);}catch(e){console.warn("Audio fallback also failed:",e);}}};
 
@@ -719,7 +719,7 @@ ${e}</tr>
 `+this.renderer.text(a);t?n+=this.renderer.paragraph({type:"paragraph",raw:o,text:o,tokens:[{type:"text",raw:o,text:o,escaped:true}]}):n+=o;continue}default:{let a='Token with "'+s.type+'" type was not found.';if(this.options.silent)return console.error(a),"";throw new Error(a)}}}return n}parseInline(e,t=this.renderer){let n="";for(let r=0;r<e.length;r++){let i=e[r];if(this.options.extensions?.renderers?.[i.type]){let a=this.options.extensions.renderers[i.type].call({parser:this},i);if(a!==false||!["escape","html","link","image","strong","em","codespan","br","del","text"].includes(i.type)){n+=a||"";continue}}let s=i;switch(s.type){case "escape":{n+=t.text(s);break}case "html":{n+=t.html(s);break}case "link":{n+=t.link(s);break}case "image":{n+=t.image(s);break}case "strong":{n+=t.strong(s);break}case "em":{n+=t.em(s);break}case "codespan":{n+=t.codespan(s);break}case "br":{n+=t.br(s);break}case "del":{n+=t.del(s);break}case "text":{n+=t.text(s);break}default:{let a='Token with "'+s.type+'" type was not found.';if(this.options.silent)return console.error(a),"";throw new Error(a)}}}return n}};var S=class{options;block;constructor(e){this.options=e||T;}static passThroughHooks=new Set(["preprocess","postprocess","processAllTokens","emStrongMask"]);static passThroughHooksRespectAsync=new Set(["preprocess","postprocess","processAllTokens"]);preprocess(e){return e}postprocess(e){return e}processAllTokens(e){return e}emStrongMask(e){return e}provideLexer(){return this.block?x.lex:x.lexInline}provideParser(){return this.block?b.parse:b.parseInline}};var B=class{defaults=L();options=this.setOptions;parse=this.parseMarkdown(true);parseInline=this.parseMarkdown(false);Parser=b;Renderer=P;TextRenderer=$;Lexer=x;Tokenizer=y;Hooks=S;constructor(...e){this.use(...e);}walkTokens(e,t){let n=[];for(let r of e)switch(n=n.concat(t.call(this,r)),r.type){case "table":{let i=r;for(let s of i.header)n=n.concat(this.walkTokens(s.tokens,t));for(let s of i.rows)for(let a of s)n=n.concat(this.walkTokens(a.tokens,t));break}case "list":{let i=r;n=n.concat(this.walkTokens(i.items,t));break}default:{let i=r;this.defaults.extensions?.childTokens?.[i.type]?this.defaults.extensions.childTokens[i.type].forEach(s=>{let a=i[s].flat(1/0);n=n.concat(this.walkTokens(a,t));}):i.tokens&&(n=n.concat(this.walkTokens(i.tokens,t)));}}return n}use(...e){let t=this.defaults.extensions||{renderers:{},childTokens:{}};return e.forEach(n=>{let r={...n};if(r.async=this.defaults.async||r.async||false,n.extensions&&(n.extensions.forEach(i=>{if(!i.name)throw new Error("extension name required");if("renderer"in i){let s=t.renderers[i.name];s?t.renderers[i.name]=function(...a){let o=i.renderer.apply(this,a);return o===false&&(o=s.apply(this,a)),o}:t.renderers[i.name]=i.renderer;}if("tokenizer"in i){if(!i.level||i.level!=="block"&&i.level!=="inline")throw new Error("extension level must be 'block' or 'inline'");let s=t[i.level];s?s.unshift(i.tokenizer):t[i.level]=[i.tokenizer],i.start&&(i.level==="block"?t.startBlock?t.startBlock.push(i.start):t.startBlock=[i.start]:i.level==="inline"&&(t.startInline?t.startInline.push(i.start):t.startInline=[i.start]));}"childTokens"in i&&i.childTokens&&(t.childTokens[i.name]=i.childTokens);}),r.extensions=t),n.renderer){let i=this.defaults.renderer||new P(this.defaults);for(let s in n.renderer){if(!(s in i))throw new Error(`renderer '${s}' does not exist`);if(["options","parser"].includes(s))continue;let a=s,o=n.renderer[a],p=i[a];i[a]=(...u)=>{let c=o.apply(i,u);return c===false&&(c=p.apply(i,u)),c||""};}r.renderer=i;}if(n.tokenizer){let i=this.defaults.tokenizer||new y(this.defaults);for(let s in n.tokenizer){if(!(s in i))throw new Error(`tokenizer '${s}' does not exist`);if(["options","rules","lexer"].includes(s))continue;let a=s,o=n.tokenizer[a],p=i[a];i[a]=(...u)=>{let c=o.apply(i,u);return c===false&&(c=p.apply(i,u)),c};}r.tokenizer=i;}if(n.hooks){let i=this.defaults.hooks||new S;for(let s in n.hooks){if(!(s in i))throw new Error(`hook '${s}' does not exist`);if(["options","block"].includes(s))continue;let a=s,o=n.hooks[a],p=i[a];S.passThroughHooks.has(s)?i[a]=u=>{if(this.defaults.async&&S.passThroughHooksRespectAsync.has(s))return (async()=>{let g=await o.call(i,u);return p.call(i,g)})();let c=o.call(i,u);return p.call(i,c)}:i[a]=(...u)=>{if(this.defaults.async)return (async()=>{let g=await o.apply(i,u);return g===false&&(g=await p.apply(i,u)),g})();let c=o.apply(i,u);return c===false&&(c=p.apply(i,u)),c};}r.hooks=i;}if(n.walkTokens){let i=this.defaults.walkTokens,s=n.walkTokens;r.walkTokens=function(a){let o=[];return o.push(s.call(this,a)),i&&(o=o.concat(i.call(this,a))),o};}this.defaults={...this.defaults,...r};}),this}setOptions(e){return this.defaults={...this.defaults,...e},this}lexer(e,t){return x.lex(e,t??this.defaults)}parser(e,t){return b.parse(e,t??this.defaults)}parseMarkdown(e){return (n,r)=>{let i={...r},s={...this.defaults,...i},a=this.onError(!!s.silent,!!s.async);if(this.defaults.async===true&&i.async===false)return a(new Error("marked(): The async option was set to true by an extension. Remove async: false from the parse options object to return a Promise."));if(typeof n>"u"||n===null)return a(new Error("marked(): input parameter is undefined or null"));if(typeof n!="string")return a(new Error("marked(): input parameter is of type "+Object.prototype.toString.call(n)+", string expected"));if(s.hooks&&(s.hooks.options=s,s.hooks.block=e),s.async)return (async()=>{let o=s.hooks?await s.hooks.preprocess(n):n,u=await(s.hooks?await s.hooks.provideLexer():e?x.lex:x.lexInline)(o,s),c=s.hooks?await s.hooks.processAllTokens(u):u;s.walkTokens&&await Promise.all(this.walkTokens(c,s.walkTokens));let h=await(s.hooks?await s.hooks.provideParser():e?b.parse:b.parseInline)(c,s);return s.hooks?await s.hooks.postprocess(h):h})().catch(a);try{s.hooks&&(n=s.hooks.preprocess(n));let p=(s.hooks?s.hooks.provideLexer():e?x.lex:x.lexInline)(n,s);s.hooks&&(p=s.hooks.processAllTokens(p)),s.walkTokens&&this.walkTokens(p,s.walkTokens);let c=(s.hooks?s.hooks.provideParser():e?b.parse:b.parseInline)(p,s);return s.hooks&&(c=s.hooks.postprocess(c)),c}catch(o){return a(o)}}}onError(e,t){return n=>{if(n.message+=`
 Please report this to https://github.com/markedjs/marked.`,e){let r="<p>An error occurred:</p><pre>"+w(n.message+"",true)+"</pre>";return t?Promise.resolve(r):r}if(t)return Promise.reject(n);throw n}}};var _=new B;function k(l,e){return _.parse(l,e)}k.options=k.setOptions=function(l){return _.setOptions(l),k.defaults=_.defaults,G(k.defaults),k};k.getDefaults=L;k.defaults=T;k.use=function(...l){return _.use(...l),k.defaults=_.defaults,G(k.defaults),k};k.walkTokens=function(l,e){return _.walkTokens(l,e)};k.parseInline=_.parseInline;k.Parser=b;k.parser=b.parse;k.Renderer=P;k.TextRenderer=$;k.Lexer=x;k.lexer=x.lex;k.Tokenizer=y;k.Hooks=S;k.parse=k;k.options;k.setOptions;k.use;k.walkTokens;k.parseInline;b.parse;x.lex;
 
-class Conversation{uuid;chatbot;unreadCount;messages=[];status;uniqueId;constructor(e){this.uuid=e.uuid,this.chatbot=e.chatbot,this.unreadCount=e.unread_count,this.uniqueId=e.unique_id,this.setStatus(e.status),this.onInit();}addMessage(e,t){const s=window.modoChatInstance?.(),a=new ConversationMessage(e);a.initElement(),this.messages.push(a),t?.incoming&&(this.unreadCount++,s?.isOpen?this.markAsRead():(this.addBadge(),a.showTooltip(),playAudio(NEW_MESSAGE_AUDIO_URL).catch(console.warn))),this.scrollToBottom();}addSystemMessage(e){const t=document.querySelector(".mc-chat-messages-con");if(t){const s=document.createElement("div");s.className="mc-system-message",s.innerHTML=`\n        <div class="mc-system-message-content">\n          ${e}\n        </div>\n      `,t.appendChild(s),this.scrollToBottom();}}scrollToBottom(){const e=document.querySelector(".mc-chat-messages-con");e&&(e.scrollTop=e.scrollHeight);}clear(){this.messages=[];const e=window.modoChatInstance?.();localStorage.removeItem(`modo-chat:${e?.publicKey}-conversation-uuid`);const t=document.querySelector(".mc-chat-messages-con");t&&(t.innerHTML=""),switchToStarterLayout();}onInit(){switchToConversationLayout(),preloadAudio("./audio/new-message.mp3").catch(console.warn),this.status&&setConversationType(this.status);}setStatus(e){switch(e){case "ai_chat":this.status="AI_CHAT",setConversationType("AI_CHAT");break;case "supporter_chat":this.status="SUPPORTER_CHAT",setConversationType("SUPPORTER_CHAT");break;case "resolved":this.status="RESOLVED";break;default:this.status="UNKNOWN";}}async loadMessages(){const e=window.modoChatInstance?.(),t=await fetchConversationMessages(this.uuid,e?.publicKey);this.messages=[];const s=e?.container?.querySelector(".mc-chat-messages-con");s&&(s.innerHTML="");for(const e of t.results)this.addMessage(e);}addBadge(){const e=window.modoChatInstance?.();if(!e?.isOpen&&this.unreadCount>0&&e){const t=e.container?.querySelector(".mc-badge"),s=e.container?.querySelector(".mc-badge-text");if(t&&s){t.classList.remove("mc-hidden");const e=this.unreadCount>99?"99+":this.unreadCount.toString();s.textContent=e,this.unreadCount>99?t.classList.add("mc-badge-plus"):t.classList.remove("mc-badge-plus");}}}hideBadge(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-badge");t&&t.classList.add("mc-hidden");}hideTooltip(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-toggle-tooltip");t&&t.classList.add("mc-hidden");}markAsRead(){const e=window.modoChatInstance?.();fetchMarkConversationAsRead(this.uuid,e?.customerData.uniqueId).then(()=>{this.unreadCount=0,this.hideBadge();});}}class ConversationMessage{id;content;type;createdAt;isRead=false;element;hasFeedback=false;constructor(e){switch(this.id=e.id,this.content=e.content,this.isRead=e.is_read||false,e.message_type){case 0:this.type="USER";break;case 1:this.type="AI";break;case 2:this.type="SUPPORTER";break;case 3:this.type="SYSTEM";break;default:this.type="UNKNOWN";}this.createdAt=e.created_at;}fetchRead(){ false===this.isRead&&"USER"!==this.type&&(this.isRead=true,fetchReadMessage(this.id));}get containerElement(){return document.querySelector(".mc-chat-messages-con")}initElement(){this.element=document.createElement("div");const e=new Date(this.createdAt).toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit",hour12:false});this.element.innerHTML=`\n      <div class="mc-chat-message ${"USER"===this.type?"mc-chat-message-user":"mc-chat-message-supporter"}">\n        <div class="mc-message-content">${k.parse(this.content)}</div>\n      </div>\n      <div class="mc-message-footer">\n      ${"USER"!==this.type?`\n        <div class="mc-message-feedback">\n        <button class="mc-feedback-btn mc-feedback-dislike" data-message-id="${this.id}" title="مفید نبود">\n           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path fill="currentColor" d="m15 14l-.986.164A1 1 0 0 1 15 13zM4 14v1a1 1 0 0 1-1-1zm16.522-2.392l.98-.196zM6 3h11.36v2H6zm12.56 12H15v-2h3.56zm-2.573-1.164l.805 4.835L14.82 19l-.806-4.836zM14.82 21h-.214v-2h.214zm-3.543-1.781l-2.515-3.774l1.664-1.11l2.516 3.774zM7.93 15H4v-2h3.93zM3 14V6h2v8zm17.302-8.588l1.2 6l-1.96.392l-1.2-6zM8.762 15.445A1 1 0 0 0 7.93 15v-2a3 3 0 0 1 2.496 1.336zm8.03 3.226A2 2 0 0 1 14.82 21v-2zM18.56 13a1 1 0 0 0 .981-1.196l1.961-.392A3 3 0 0 1 18.561 15zm-1.2-10a3 3 0 0 1 2.942 2.412l-1.96.392A1 1 0 0 0 17.36 5zm-2.754 18a4 4 0 0 1-3.328-1.781l1.664-1.11a2 2 0 0 0 1.664.891zM6 5a1 1 0 0 0-1 1H3a3 3 0 0 1 3-3z"/><path stroke="currentColor" stroke-width="2" d="M8 14V4"/></g></svg>\n          </button>\n        <button class="mc-feedback-btn mc-feedback-like" data-message-id="${this.id}" title="مفید بود">\n        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path fill="currentColor" d="m15 10l-.74-.123a.75.75 0 0 0 .74.873zM4 10v-.75a.75.75 0 0 0-.75.75zm16.522 2.392l.735.147zM6 20.75h11.36v-1.5H6zm12.56-11.5H15v1.5h3.56zm-2.82.873l.806-4.835l-1.48-.247l-.806 4.836zm-.92-6.873h-.214v1.5h.213zm-3.335 1.67L8.97 8.693l1.248.832l2.515-3.773zM7.93 9.25H4v1.5h3.93zM3.25 10v8h1.5v-8zm16.807 8.54l1.2-6l-1.47-.295l-1.2 6zM8.97 8.692a1.25 1.25 0 0 1-1.04.557v1.5c.92 0 1.778-.46 2.288-1.225zm7.576-3.405A1.75 1.75 0 0 0 14.82 3.25v1.5a.25.25 0 0 1 .246.291zm2.014 5.462c.79 0 1.38.722 1.226 1.495l1.471.294A2.75 2.75 0 0 0 18.56 9.25zm-1.2 10a2.75 2.75 0 0 0 2.697-2.21l-1.47-.295a1.25 1.25 0 0 1-1.227 1.005zm-2.754-17.5a3.75 3.75 0 0 0-3.12 1.67l1.247.832a2.25 2.25 0 0 1 1.873-1.002zM6 19.25c-.69 0-1.25-.56-1.25-1.25h-1.5A2.75 2.75 0 0 0 6 20.75z"/><path stroke="currentColor" stroke-width="1.5" d="M8 10v10"/></g></svg>\n        </button>\n        </div>\n      `:""}\n    <div class="mc-message-time">${e}</div>\n      </div>\n    `,this.element.className="mc-message-wrapper "+("USER"===this.type?"mc-message-wrapper-user":"mc-message-wrapper-supporter"),this.containerElement?.appendChild(this.element),"USER"!==this.type&&this.addFeedbackListeners();}showTooltip(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-toggle-tooltip"),s=e?.container?.querySelector(".mc-toggle-tooltip-text");if(t&&s){t.classList.remove("mc-hidden");const e=this.content.length>50?this.content.substring(0,50)+"...":this.content;s.textContent=e,setTimeout(()=>{t.classList.add("mc-hidden");},3e3);}}addFeedbackListeners(){const e=this.element?.querySelector(".mc-feedback-like"),t=this.element?.querySelector(".mc-feedback-dislike");e&&e.addEventListener("click",()=>{this.sendFeedBack(true);}),t&&t.addEventListener("click",()=>{this.sendFeedBack(false);});}sendFeedBack(e){const t=window.modoChatInstance?.();this.hasFeedback||(this.hasFeedback=true,this.disableFeedbackButtons(),fetchMessageFeedback(this.id,t?.customerData.uniqueId,t?.conversation?.uuid,e).then(()=>{const t=this.element?.querySelector(".mc-feedback-like"),s=this.element?.querySelector(".mc-feedback-dislike");e&&t?t.classList.add("mc-feedback-active"):!e&&s&&s.classList.add("mc-feedback-active");}).catch(()=>{this.hasFeedback=false,this.enableFeedbackButtons();}));}disableFeedbackButtons(){const e=this.element?.querySelector(".mc-feedback-like"),t=this.element?.querySelector(".mc-feedback-dislike");e&&(e.disabled=true,e.classList.add("mc-feedback-disabled")),t&&(t.disabled=true,t.classList.add("mc-feedback-disabled"));}enableFeedbackButtons(){const e=this.element?.querySelector(".mc-feedback-like"),t=this.element?.querySelector(".mc-feedback-dislike");e&&(e.disabled=false,e.classList.remove("mc-feedback-disabled")),t&&(t.disabled=false,t.classList.remove("mc-feedback-disabled"));}}
+class Conversation{uuid;chatbot;unreadCount;messages=[];status;uniqueId;constructor(e){this.uuid=e.uuid,this.chatbot=e.chatbot,this.unreadCount=e.unread_count,this.uniqueId=e.unique_id,this.setStatus(e.status),this.onInit();}addMessage(e,t){const s=window.modoChatInstance?.(),i=new ConversationMessage(e);i.initElement(),this.messages.push(i),t?.incoming&&(this.unreadCount++,s?.isOpen?this.markAsRead():(this.addBadge(),i.showTooltip(),playAudio(NEW_MESSAGE_AUDIO_URL).catch(console.warn))),this.scrollToBottom();}addSystemMessage(e){const t=document.querySelector(".mc-chat-messages-con");if(t){const s=document.createElement("div");s.className="mc-system-message",s.innerHTML=`\n        <div class="mc-system-message-content">\n          ${e}\n        </div>\n      `,t.appendChild(s),this.scrollToBottom();}}scrollToBottom(){const e=document.querySelector(".mc-chat-messages-con");e&&(e.scrollTop=e.scrollHeight);}clear(){this.messages=[];const e=window.modoChatInstance?.();localStorage.removeItem(`modo-chat:${e?.publicKey}-conversation-uuid`);const t=document.querySelector(".mc-chat-messages-con");t&&(t.innerHTML=""),switchToStarterLayout();}onInit(){switchToConversationLayout(),preloadAudio("./audio/new-message.mp3").catch(console.warn),this.status&&setConversationType(this.status);}setStatus(e){switch(e){case "ai_chat":this.status="AI_CHAT",setConversationType("AI_CHAT");break;case "supporter_chat":this.status="SUPPORTER_CHAT",setConversationType("SUPPORTER_CHAT");break;case "resolved":this.status="RESOLVED";break;default:this.status="UNKNOWN";}}async loadMessages(){const e=window.modoChatInstance?.(),t=await fetchConversationMessages(this.uuid,e?.publicKey);this.messages=[];const s=e?.container?.querySelector(".mc-chat-messages-con");s&&(s.innerHTML="");for(const e of t.results)this.addMessage(e);}addBadge(){const e=window.modoChatInstance?.();if(!e?.isOpen&&this.unreadCount>0&&e){const t=e.container?.querySelector(".mc-badge"),s=e.container?.querySelector(".mc-badge-text");if(t&&s){t.classList.remove("mc-hidden");const e=this.unreadCount>99?"99+":this.unreadCount.toString();s.textContent=e,this.unreadCount>99?t.classList.add("mc-badge-plus"):t.classList.remove("mc-badge-plus");}}}hideBadge(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-badge");t&&t.classList.add("mc-hidden");}hideTooltip(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-toggle-tooltip");t&&t.classList.add("mc-hidden");}markAsRead(){const e=window.modoChatInstance?.();fetchMarkConversationAsRead(this.uuid,e?.customerData.uniqueId).then(()=>{this.unreadCount=0,this.hideBadge();});}}class ConversationMessage{id;content;type;createdAt;isRead=false;element;hasFeedback=false;repliedToId;fileSrc;constructor(e){switch(this.id=e.id,this.content=e.content,this.isRead=e.is_read||false,e.message_type){case 0:this.type="USER";break;case 1:this.type="AI";break;case 2:this.type="SUPPORTER";break;case 3:this.type="SYSTEM";break;default:this.type="UNKNOWN";}this.createdAt=e.created_at,e.response_to&&(this.repliedToId=e.response_to),e.file&&(this.fileSrc=e.file);}fetchRead(){ false===this.isRead&&"USER"!==this.type&&(this.isRead=true,fetchReadMessage(this.id));}get containerElement(){return document.querySelector(".mc-chat-messages-con")}initElement(){this.element=document.createElement("div");const e=new Date(this.createdAt).toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit",hour12:false});let t="";if(this.repliedTo){const e=this.repliedTo.content.length>40?this.repliedTo.content.substring(0,40)+"...":this.repliedTo.content;t=`\n        <div class="mc-replied-to-preview" data-reply-message-id="${this.repliedTo.id}">\n          <div class="mc-replied-to-header">\n            <span class="mc-replied-to-sender">${"USER"===this.repliedTo.type?"شما":"پشتیبان"}</span>\n          </div>\n          <div class="mc-replied-to-content">${e}</div>\n        </div>\n      `;}let s="";if(this.fileSrc){const e=this.fileSrc.length>20?this.fileSrc.substring(0,17)+"...":this.fileSrc;s=`\n        <a href="${this.fileSrc}" target="_blank" rel="noopener noreferrer" class="mc-file-preview" title="دانلود فایل">\n          <div class="mc-file-preview-icon">\n            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-8-6m4 18H6V4h7v5h5v11z"/></svg>\n          </div>\n          <div class="mc-file-preview-info">\n            <div class="mc-file-preview-name">${e}</div>\n            <div class="mc-file-preview-type">file</div>\n          </div>\n        </a>\n      `;}this.element.innerHTML=`\n    <div class="mc-chat-message ${"USER"===this.type?"mc-chat-message-user":"mc-chat-message-supporter"}">\n    ${t}\n    ${s}\n        <div class="mc-message-content">${k.parse(this.content)}</div>\n      </div>\n      <div class="mc-message-footer">\n      ${"USER"!==this.type?`\n        <div class="mc-message-feedback">\n        <button class="mc-feedback-btn mc-feedback-dislike" data-message-id="${this.id}" title="مفید نبود">\n           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path fill="currentColor" d="m15 14l-.986.164A1 1 0 0 1 15 13zM4 14v1a1 1 0 0 1-1-1zm16.522-2.392l.98-.196zM6 3h11.36v2H6zm12.56 12H15v-2h3.56zm-2.573-1.164l.805 4.835L14.82 19l-.806-4.836zM14.82 21h-.214v-2h.214zm-3.543-1.781l-2.515-3.774l1.664-1.11l2.516 3.774zM7.93 15H4v-2h3.93zM3 14V6h2v8zm17.302-8.588l1.2 6l-1.96.392l-1.2-6zM8.762 15.445A1 1 0 0 0 7.93 15v-2a3 3 0 0 1 2.496 1.336zm8.03 3.226A2 2 0 0 1 14.82 21v-2zM18.56 13a1 1 0 0 0 .981-1.196l1.961-.392A3 3 0 0 1 18.561 15zm-1.2-10a3 3 0 0 1 2.942 2.412l-1.96.392A1 1 0 0 0 17.36 5zm-2.754 18a4 4 0 0 1-3.328-1.781l1.664-1.11a2 2 0 0 0 1.664.891zM6 5a1 1 0 0 0-1 1H3a3 3 0 0 1 3-3z"/><path stroke="currentColor" stroke-width="2" d="M8 14V4"/></g></svg>\n          </button>\n        <button class="mc-feedback-btn mc-feedback-like" data-message-id="${this.id}" title="مفید بود">\n        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path fill="currentColor" d="m15 10l-.74-.123a.75.75 0 0 0 .74.873zM4 10v-.75a.75.75 0 0 0-.75.75zm16.522 2.392l.735.147zM6 20.75h11.36v-1.5H6zm12.56-11.5H15v1.5h3.56zm-2.82.873l.806-4.835l-1.48-.247l-.806 4.836zm-.92-6.873h-.214v1.5h.213zm-3.335 1.67L8.97 8.693l1.248.832l2.515-3.773zM7.93 9.25H4v1.5h3.93zM3.25 10v8h1.5v-8zm16.807 8.54l1.2-6l-1.47-.295l-1.2 6zM8.97 8.692a1.25 1.25 0 0 1-1.04.557v1.5c.92 0 1.778-.46 2.288-1.225zm7.576-3.405A1.75 1.75 0 0 0 14.82 3.25v1.5a.25.25 0 0 1 .246.291zm2.014 5.462c.79 0 1.38.722 1.226 1.495l1.471.294A2.75 2.75 0 0 0 18.56 9.25zm-1.2 10a2.75 2.75 0 0 0 2.697-2.21l-1.47-.295a1.25 1.25 0 0 1-1.227 1.005zm-2.754-17.5a3.75 3.75 0 0 0-3.12 1.67l1.247.832a2.25 2.25 0 0 1 1.873-1.002zM6 19.25c-.69 0-1.25-.56-1.25-1.25h-1.5A2.75 2.75 0 0 0 6 20.75z"/><path stroke="currentColor" stroke-width="1.5" d="M8 10v10"/></g></svg>\n        </button>\n        </div>\n      `:""}\n    <div class="mc-message-time">${e}</div>\n      </div>\n    `,this.element.className="mc-message-wrapper "+("USER"===this.type?"mc-message-wrapper-user":"mc-message-wrapper-supporter"),this.containerElement?.appendChild(this.element),this.addElementListeners(),"USER"!==this.type&&this.addFeedbackListeners(),this.repliedTo&&this.addRepliedToListener();}addRepliedToListener(){const e=this.element?.querySelector(".mc-replied-to-preview");e&&this.repliedTo?.element&&e.addEventListener("click",()=>{this.repliedTo?.element?.scrollIntoView({behavior:"smooth",block:"center"}),this.repliedTo?.element?.classList.add("mc-message-highlight"),setTimeout(()=>{this.repliedTo?.element?.classList.remove("mc-message-highlight");},2e3);});}showTooltip(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-toggle-tooltip"),s=e?.container?.querySelector(".mc-toggle-tooltip-text");if(t&&s){t.classList.remove("mc-hidden");const e=this.content.length>50?this.content.substring(0,50)+"...":this.content;s.textContent=e,setTimeout(()=>{t.classList.add("mc-hidden");},3e3);}}addFeedbackListeners(){const e=this.element?.querySelector(".mc-feedback-like"),t=this.element?.querySelector(".mc-feedback-dislike");e&&e.addEventListener("click",()=>{this.sendFeedBack(true);}),t&&t.addEventListener("click",()=>{this.sendFeedBack(false);});}sendFeedBack(e){const t=window.modoChatInstance?.();this.hasFeedback||(this.hasFeedback=true,this.disableFeedbackButtons(),fetchMessageFeedback(this.id,t?.customerData.uniqueId,t?.conversation?.uuid,e).then(()=>{const t=this.element?.querySelector(".mc-feedback-like"),s=this.element?.querySelector(".mc-feedback-dislike");e&&t?t.classList.add("mc-feedback-active"):!e&&s&&s.classList.add("mc-feedback-active");}).catch(()=>{this.hasFeedback=false,this.enableFeedbackButtons();}));}disableFeedbackButtons(){const e=this.element?.querySelector(".mc-feedback-like"),t=this.element?.querySelector(".mc-feedback-dislike");e&&(e.disabled=true,e.classList.add("mc-feedback-disabled")),t&&(t.disabled=true,t.classList.add("mc-feedback-disabled"));}enableFeedbackButtons(){const e=this.element?.querySelector(".mc-feedback-like"),t=this.element?.querySelector(".mc-feedback-dislike");e&&(e.disabled=false,e.classList.remove("mc-feedback-disabled")),t&&(t.disabled=false,t.classList.remove("mc-feedback-disabled"));}addElementListeners(){const e=window.modoChatInstance?.();this.element?.addEventListener("dblclick",()=>{e?.conversationMaster.replyMaster.setReply(this);});}get repliedTo(){const e=window.modoChatInstance?.(),t=e?.conversation?.messages.find(({id:e})=>e===this.repliedToId);return t}}
 
 /**
  * Check if `vhost` is a valid suffix of `hostname` (top-domain)
@@ -1341,21 +1341,23 @@ function parse(url, options = {}) {
     return parseImpl(url, 5 /* FLAG.ALL */, suffixLookup, options, getEmptyResult());
 }
 
-const checkIfHostIsAllowed=o=>{const t=parse(window.location.origin).hostname,s=o.publicData?.setting.allowedHosts||[];if(t)return s.includes(t)},loadConversation=async o=>{const t=localStorage.getItem(`modo-chat:${o.publicKey}-conversation-uuid`);if(t){const s=await fetchConversations(t,o.customerData.uniqueId);s.results.length>0&&(o.conversation=new Conversation(s.results[0]),o.conversation.addBadge());}};
+const checkIfHostIsAllowed=o=>{const t=parse(window.location.origin).hostname,s=o.chatbot?.allowedHosts||[];if(t)return s.includes(t)},loadConversation=async o=>{const t=localStorage.getItem(`modo-chat:${o.publicKey}-conversation-uuid`);if(t){const s=await fetchConversations(t,o.customerData.uniqueId);s.results.length>0&&(o.conversation=new Conversation(s.results[0]),o.conversation?.addBadge());}};
 
 const PhoneNumberRegex=/^(\+98|0)?9\d{9}$/;
 
-class Socket{socket=null;token;isConnected=false;constructor(e){this.token=e,this.connect();}forceClosed=false;connect(e=false){const s=window.modoChatInstance?.(),t=`${BASE_WEBSOCKET_URL}/conversations/${s?.conversation?.uuid}/messages/?token=${this.token}`;this.socket=new WebSocket(t),this.socket.addEventListener("open",()=>{this.isConnected=true,this.updateConnectionStatus(true),this.socket?.send(JSON.stringify({type:"join_messages"})),e&&s?.conversation?.loadMessages();}),this.socket.onmessage=e=>{const s=JSON.parse(e.data);this.onMessage(s);},this.socket.onclose=()=>this.onclose();}updateConnectionStatus(e){const s=window.modoChatInstance?.(),t=s?.container?.querySelector(".mc-connection-status");t&&(t.className="mc-connection-status "+(e?"mc-connected":"mc-disconnected"));}onMessage(e){const s=window.modoChatInstance?.();switch(e.type){case "new_message":if("USER"===new ConversationMessage(e.message).type)return;s?.conversation?.addMessage(e.message,{incoming:true});break;case "ai_response":s?.conversation?.addMessage(e.message,{incoming:true});break;case "conversation_status_change":s?.conversation?.setStatus(e.status),s?.conversation?.addSystemMessage(e.message);break;default:console.info("modo chat : unknown message type :",e);}}close(){const e=window.modoChatInstance?.();this.forceClosed=true,this.isConnected=false,this.updateConnectionStatus(false),this.socket?.close(),localStorage.removeItem(`modo-chat:${e?.publicKey}-conversation-access-token`);}onclose(){this.isConnected=false,this.updateConnectionStatus(false),false===this.forceClosed&&setTimeout(()=>{this.connect(true);},3e3);}}const initSocket=async()=>{const e=window.modoChatInstance?.();if(e){const s=localStorage.getItem(`modo-chat:${e.publicKey}-conversation-access-token`);let t="";if(s&&(t=s),!s){const s=await fetchGetAccessTokenForSocket(e.publicData?.setting.uuid,e.conversation?.uuid,e.customerData.uniqueId);localStorage.setItem(`modo-chat:${e.publicKey}-conversation-access-token`,s.access_token),t=s.access_token;}e.socket=new Socket(t);}};
+class Socket{socket=null;token;isConnected=false;constructor(e){this.token=e,this.connect();}forceClosed=false;connect(e=false){const s=window.modoChatInstance?.(),t=`${BASE_WEBSOCKET_URL}/conversations/${s?.conversation?.uuid}/messages/?token=${this.token}`;this.socket=new WebSocket(t),this.socket.addEventListener("open",()=>{this.isConnected=true,this.updateConnectionStatus(true),this.socket?.send(JSON.stringify({type:"join_messages"})),e&&s?.conversation?.loadMessages();}),this.socket.onmessage=e=>{const s=JSON.parse(e.data);this.onMessage(s);},this.socket.onclose=()=>this.onclose();}updateConnectionStatus(e){const s=window.modoChatInstance?.(),t=s?.container?.querySelector(".mc-connection-status");t&&(t.className="mc-connection-status "+(e?"mc-connected":"mc-disconnected"));}onMessage(e){const s=window.modoChatInstance?.();switch(e.type){case "new_message":if("USER"===new ConversationMessage(e.message).type)return;s?.conversation?.addMessage(e.message,{incoming:true});break;case "ai_response":s?.conversation?.addMessage(e.message,{incoming:true});break;case "conversation_status_change":s?.conversation?.setStatus(e.status),s?.conversation?.addSystemMessage(e.message);break;default:console.info("modo chat : unknown message type :",e);}}close(){const e=window.modoChatInstance?.();this.forceClosed=true,this.isConnected=false,this.updateConnectionStatus(false),this.socket?.close(),localStorage.removeItem(`modo-chat:${e?.publicKey}-conversation-access-token`);}onclose(){this.isConnected=false,this.updateConnectionStatus(false),false===this.forceClosed&&setTimeout(()=>{this.connect(true);},3e3);}}const initSocket=async()=>{const e=window.modoChatInstance?.();if(e){const s=localStorage.getItem(`modo-chat:${e.publicKey}-conversation-access-token`);let t="";if(s&&(t=s),!s){const s=await fetchGetAccessTokenForSocket(e.chatbot?.uuid,e.conversation?.uuid,e.customerData.uniqueId);localStorage.setItem(`modo-chat:${e.publicKey}-conversation-access-token`,s.access_token),t=s.access_token;}e.socket=new Socket(t);}};
 
-const sendMessage=async e=>{if(e.trim().length){if(!checkIfUserHasPhoneNumber())throw new Error("User has not submitted the phone number form");{const o=window.modoChatInstance?.();if(o){if(o?.conversation?.uuid){o.conversation.addMessage({id:"temp",content:e,message_type:0,created_at:(new Date).toISOString()});const t=o.container?.querySelector(".mc-chat-input");t&&(t.value="");}const t=await fetchSendMessage(o?.publicData?.setting.chatbot,e,o?.customerData.uniqueId,o?.conversation?.uuid,o?.customerData.phoneNumber);o?.conversation?.uuid||(o.conversation=new Conversation(t.conversation),o.conversation?.addMessage(t),localStorage.setItem(`modo-chat:${o.publicKey}-conversation-uuid`,o.conversation?.uuid),await initSocket(),"AI_CHAT"===o.conversation.status&&await o.conversation.loadMessages());}else console.error("ModoChat instance not found");}}},checkIfUserHasPhoneNumber=()=>{const e=window.modoChatInstance?.();return !!e?.customerData?.hasSubmittedPhoneForm()||(switchToPhoneNumberFormView(),false)},switchToPhoneNumberFormView=()=>{const e=window.modoChatInstance?.().container?.querySelector(".mc-form-overlay");e&&(e.classList.remove("mc-hidden"),e.classList.add("mc-active"));},submitPhoneNumberForm=e=>{const o=e.replace(/[۰-۹٠-٩]/g,e=>{const o="۰۱۲۳۴۵۶۷۸۹".indexOf(e);if(o>-1)return String(o);const t="٠١٢٣٤٥٦٧٨٩".indexOf(e);return t>-1?String(t):e});if(""===o.trim()||PhoneNumberRegex.test(o)){const o=window.modoChatInstance?.();if(o){o.customerData.savePhoneNumber(e.trim()||void 0);const t=o.container?.querySelector(".mc-form-overlay");t&&(t.classList.remove("mc-active"),t.classList.add("mc-hidden")),o.container?.querySelector(".mc-send-message-btn")?.click();}else console.error("ModoChat instance not found");}else alert("لطفا شماره تلفن معتبر وارد کنید یا فیلد را خالی بگذارید.");};
+const sendMessage=async e=>{if(e.trim().length){if(!checkIfUserHasPhoneNumber())throw new Error("User has not submitted the phone number form");{const o=window.modoChatInstance?.();if(o){const t=o.conversationMaster.fileMaster.file,n=o.conversationMaster.replyMaster.replyingTo?.id,s=t?URL.createObjectURL(t):void 0;if(o?.conversation?.uuid){o.conversation.addMessage({id:"temp",content:e,message_type:0,created_at:(new Date).toISOString(),response_to:n,file:s});const t=o.container?.querySelector(".mc-chat-input");t&&(t.value="");}o.conversationMaster.fileMaster.clearFile(),o.conversationMaster.replyMaster.clearReply();const r=await fetchSendMessage(o?.chatbot?.id,e,o?.customerData.uniqueId,o?.conversation?.uuid,o?.customerData.phoneNumber,{file:t,replyTo:n});o?.conversation?.uuid||(o.conversation=new Conversation(r.conversation),o.conversation?.addMessage(r),localStorage.setItem(`modo-chat:${o.publicKey}-conversation-uuid`,o.conversation?.uuid),await initSocket(),"AI_CHAT"===o.conversation.status&&await o.conversation.loadMessages());}else console.error("ModoChat instance not found");}}},checkIfUserHasPhoneNumber=()=>{const e=window.modoChatInstance?.();return !!e?.customerData?.hasSubmittedPhoneForm()||(switchToPhoneNumberFormView(),false)},switchToPhoneNumberFormView=()=>{const e=window.modoChatInstance?.().container?.querySelector(".mc-form-overlay");e&&(e.classList.remove("mc-hidden"),e.classList.add("mc-active"));},submitPhoneNumberForm=e=>{const o=e.replace(/[۰-۹٠-٩]/g,e=>{const o="۰۱۲۳۴۵۶۷۸۹".indexOf(e);if(o>-1)return String(o);const t="٠١٢٣٤٥٦٧٨٩".indexOf(e);return t>-1?String(t):e});if(""===o.trim()||PhoneNumberRegex.test(o)){const o=window.modoChatInstance?.();if(o){o.customerData.savePhoneNumber(e.trim()||void 0);const t=o.container?.querySelector(".mc-form-overlay");t&&(t.classList.remove("mc-active"),t.classList.add("mc-hidden")),o.container?.querySelector(".mc-send-message-btn")?.click();}else console.error("ModoChat instance not found");}else alert("لطفا شماره تلفن معتبر وارد کنید یا فیلد را خالی بگذارید.");};
 
-const registerListeners=e=>{let t=e.querySelector(".mc-chat-body");const n=e.querySelector(".mc-toggle-chat-btn");let s=false;const o=e.querySelector(".mc-footer-link");if(o){const e=window.modoChatInstance?.();o.href=`https://modochats.com?utm_source=${encodeURIComponent(window.location.origin)}`,o.title=`مودوچت v${e?.version||"0.1"}`;}n&&n.addEventListener("click",()=>{const e=window.modoChatInstance?.();s=!s,s?e?.onOpen():e?.onClose(),t?.classList.toggle("mc-hidden"),n.classList.toggle("mc-chat-open",s);},{capture:false}),registerSendMessageListener(e),registerPhoneNumberFormListeners(e),registerNewConversationListener(e);},registerSendMessageListener=e=>{const t=e.querySelector(".mc-chat-input"),n=e.querySelector(".mc-send-message-btn");let s=false;function o(){s=!s,t.disabled=s,n.disabled=s,n.setAttribute("data-is-loading",String(s));}t.addEventListener("keydown",e=>{if("Enter"===e.key){e.preventDefault();const n=t.value;o(),sendMessage(n).then(()=>{t.value="";}).finally(o);}}),n.addEventListener("click",e=>{e.preventDefault();const n=t.value;o(),sendMessage(n).then(()=>{t.value="";}).finally(o);});},registerPhoneNumberFormListeners=e=>{const t=e.querySelector(".mc-form-overlay"),n=e.querySelector(".mc-phone-input"),s=e.querySelector(".mc-form-submit-btn"),o=e.querySelector(".mc-form-cancel-btn");s.addEventListener("click",()=>{const e=n.value;submitPhoneNumberForm(e);}),o.addEventListener("click",()=>{t.classList.add("mc-hidden");});},registerNewConversationListener=e=>{e.querySelector(".mc-new-conversation-btn").addEventListener("click",()=>{const e=window.modoChatInstance?.();e?.conversation?.clear(),e?.socket?.close(),e&&(e.conversation=void 0,e.socket=void 0);});};
+const registerListeners=e=>{let t=e.querySelector(".mc-chat-body");const s=e.querySelector(".mc-toggle-chat-btn");let r=false;const n=e.querySelector(".mc-footer-link");if(n){const e=window.modoChatInstance?.();n.href=`https://modochats.com?utm_source=${encodeURIComponent(window.location.origin)}`,n.title=`مودوچت v${e?.version||"0.1"}`;}s&&s.addEventListener("click",()=>{const e=window.modoChatInstance?.();r=!r,r?e?.onOpen():e?.onClose(),t?.classList.toggle("mc-hidden"),s.classList.toggle("mc-chat-open",r);},{capture:false}),registerSendMessageListener(e),registerPhoneNumberFormListeners(e),registerNewConversationListener(e),registerFileUploadListener(e),registerReplyPreviewListener(e),registerTooltipCloseListener(e);},registerSendMessageListener=e=>{const t=e.querySelector(".mc-chat-input"),s=e.querySelector(".mc-send-message-btn");let r=false;function n(){r=!r,t.disabled=r,s.disabled=r,s.setAttribute("data-is-loading",String(r));}t.addEventListener("keydown",e=>{if("Enter"===e.key){e.preventDefault();const s=t.value;n(),sendMessage(s).then(()=>{t.value="";}).finally(n);}}),s.addEventListener("click",e=>{e.preventDefault();const s=t.value;n(),sendMessage(s).then(()=>{t.value="";}).finally(n);});},registerPhoneNumberFormListeners=e=>{const t=e.querySelector(".mc-form-overlay"),s=e.querySelector(".mc-phone-input"),r=e.querySelector(".mc-form-submit-btn"),n=e.querySelector(".mc-form-cancel-btn");r.addEventListener("click",()=>{const e=s.value;submitPhoneNumberForm(e);}),n.addEventListener("click",()=>{t.classList.add("mc-hidden");});},registerNewConversationListener=e=>{e.querySelector(".mc-new-conversation-btn").addEventListener("click",()=>{const e=window.modoChatInstance?.();e?.conversation?.clear(),e?.socket?.close(),e&&(e.conversation=void 0,e.socket=void 0);});},registerFileUploadListener=e=>{const t=e.querySelector(".mc-file-upload-btn"),s=e.querySelector(".mc-file-input"),r=window?.modoChatInstance?.();t.addEventListener("click",()=>{r?.conversationMaster.fileMaster.file?r?.conversationMaster.fileMaster.clearFile():s.click();}),s.addEventListener("change",()=>{s.files&&s.files.length>0&&r?.conversationMaster.fileMaster.setFile(s.files[0]);});},registerReplyPreviewListener=e=>{const t=e.querySelector(".mc-reply-preview"),s=e.querySelector(".mc-reply-preview-close"),r=e.querySelector(".mc-reply-preview-info");t&&s&&r&&(s.addEventListener("click",e=>{e.stopPropagation();const t=window.modoChatInstance?.();t?.conversationMaster&&t.conversationMaster.replyMaster.clearReply();}),r.addEventListener("click",()=>{const t=window.modoChatInstance?.(),s=t?.conversationMaster.replyMaster.replyingTo;if(s?.element){e.querySelector(".mc-chat-messages-con")&&(s.element.scrollIntoView({behavior:"smooth",block:"center"}),s.element.classList.add("mc-message-highlight"),setTimeout(()=>{s.element?.classList.remove("mc-message-highlight");},2e3));}}));},registerTooltipCloseListener=e=>{const t=window.modoChatInstance?.(),s=e.querySelector(".mc-toggle-tooltip-close"),r=e.querySelector(".mc-toggle-tooltip");s&&s.addEventListener("click",e=>{localStorage.setItem(`modochats:${t?.publicKey}-has-seen-greeting-message`,"true"),e.stopPropagation(),r&&r.classList.add("mc-hidden");});};
 
-const createChatContainer=n=>{n.container=document.createElement("div"),n.container.textContent="Start Chat",n.container.classList.add("modo-chat-widget"),n.options.fullScreen&&n.container.classList.add("mc-fullscreen"),document.body.appendChild(n.container);let t=document.createElement("div");n.container.appendChild(t),n.container.innerHTML=`\n  <div dir="rtl" class="mc-chat-inner">\n  <div class="mc-chat-body ${n.options.fullScreen?"mc-active":"mc-hidden"}">\n    <div class="mc-chat-container">\n      \x3c!-- Chat Header --\x3e\n      <div class="mc-chat-header">\n        <div style="display: flex; align-items: center; gap: 8px;">\n          <h3 class="mc-chat-title">پشتیبانی چت</h3>\n          <div class="mc-conversation-status-icon mc-hidden">\n            \x3c!-- Clean AI/Bot icon --\x3e\n            <svg class="mc-ai-chat-icon" style="width: 14px; height: 14px;" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">\x3c!-- Icon from Material Design Icons by Pictogrammers - https://github.com/Templarian/MaterialDesign/blob/master/LICENSE --\x3e<path fill="currentColor" d="M22 14h-1c0-3.87-3.13-7-7-7h-1V5.73A2 2 0 1 0 10 4c0 .74.4 1.39 1 1.73V7h-1c-3.87 0-7 3.13-7 7H2c-.55 0-1 .45-1 1v3c0 .55.45 1 1 1h1v1a2 2 0 0 0 2 2h14c1.11 0 2-.89 2-2v-1h1c.55 0 1-.45 1-1v-3c0-.55-.45-1-1-1m-1 3h-2v3H5v-3H3v-1h2v-2c0-2.76 2.24-5 5-5h4c2.76 0 5 2.24 5 5v2h2zM8.5 13.5l2.36 2.36l-1.18 1.18l-1.18-1.18l-1.18 1.18l-1.18-1.18zm7 0l2.36 2.36l-1.18 1.18l-1.18-1.18l-1.18 1.18l-1.18-1.18z"/></svg>\n            \x3c!-- Clean Human/Person icon --\x3e\n            <svg class="mc-human-chat-icon" viewBox="0 0 24 24" width="18" height="18">\n              <path fill="currentColor" d="M12 4C13.66 4 15 5.34 15 7C15 8.66 13.66 10 12 10C10.34 10 9 8.66 9 7C9 5.34 10.34 4 12 4ZM12 12C15.31 12 18 13.34 18 15V18H6V15C6 13.34 8.69 12 12 12Z"/>\n            </svg>\n            <div class="mc-tooltip">\n              <span class="mc-tooltip-text-ai">چت بات هوشمند</span>\n              <span class="mc-tooltip-text-human">پشتیبان انسانی</span>\n            </div>\n          </div>\n          <div class="mc-connection-status mc-disconnected"></div>\n        </div>\n        <div style="display: flex; align-items: center; gap: 8px;">\n          <button class="mc-new-conversation-btn mc-hidden">\n            +\n          </button>\n          <button class="mc-voice-call-btn mc-hidden" title="تماس صوتی">\n<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">\x3c!-- Icon from Google Material Icons by Material Design Authors - https://github.com/material-icons/material-icons/blob/master/LICENSE --\x3e<path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02z"/></svg>\n          </button>\n        </div>\n      </div>\n\n      <div class="mc-chat-messages-con">\n      </div> \n      <div class="mc-starters-con">\n        <div class="mc-starter-welcome">\n          <img class="mc-starter-logo" src="" alt="لوگو چت بات" style="display: none;">\n          <h2 class="mc-starter-title">پشتیبانی چت</h2>\n        </div>\n        <div class="mc-starter-items">\n        </div>\n      </div>\n\n      <div class="mc-chat-input-area">\n        <input type="text" placeholder="پیام خود را تایپ کنید..." class="mc-chat-input">\n        <button class="mc-send-message-btn" data-is-loading="false">\n          <svg class="mc-send-icon" viewBox="0 0 24 24">\n            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>\n          </svg>\n          <span class="mc-btn-loading">\n            <svg class="mc-loading-spinner" viewBox="0 0 24 24">\n              <circle class="mc-spinner-circle" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>\n              <path class="mc-spinner-path" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>\n            </svg>\n          </span>\n        </button>\n      </div>\n\n      <div class="mc-form-overlay mc-hidden">\n        <div class="mc-form-content">\n          <h3 class="mc-form-title">اطلاعات تماس</h3>\n          <p class="mc-form-subtitle">لطفا برای اطلاع رسانی بهتر پیام ها شماره خود را وارد کنید (اختیاری)</p>\n          <div class="mc-form-input-area">\n            <input type="tel" placeholder="شماره تلفن (اختیاری)" class="mc-phone-input">\n          </div>\n          <div class="mc-form-buttons">\n            <button class="mc-form-submit-btn">\n              ارسال\n            </button>\n            <button class="mc-form-cancel-btn">\n              لغو\n            </button>\n          </div>\n        </div>\n      </div>\n\n      \x3c!-- Chat Footer --\x3e\n      <div class="mc-chat-footer">\n        <span class="mc-footer-text">ساخته شده با </span>\n        <a href="" class="mc-footer-link" target="_blank" rel="noopener noreferrer" title="">مودوچت</a>\n      </div>\n\n      \x3c!-- Voice Agent Overlay --\x3e\n      <div class="mc-voice-agent-overlay mc-hidden">\n        <div class="mc-voice-agent-content">\n          <button class="mc-voice-close-btn">\n            <svg viewBox="0 0 24 24" width="24" height="24">\n              <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>\n            </svg>\n          </button>\n          \n          <div class="mc-voice-agent-center">\n            <img class="mc-voice-agent-logo" src="" alt="چت بات" />\n            <h2 class="mc-voice-agent-title">تماس صوتی</h2>\n            <p class="mc-voice-agent-status">درحال اتصال...</p>\n          </div>\n\n          <div class="mc-voice-agent-controls">\n            <button class="mc-voice-disconnect-btn" title="قطع تماس">\n              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">\x3c!-- Icon from Phosphor by Phosphor Icons - https://github.com/phosphor-icons/core/blob/main/LICENSE --\x3e<path fill="currentColor" d="M231.59 90.13C175.44 34 80.56 34 24.41 90.13c-20 20-21.92 49.49-4.69 71.71A16 16 0 0 0 32.35 168a15.8 15.8 0 0 0 5.75-1.08l49-17.37l.29-.11a16 16 0 0 0 9.75-11.73l5.9-29.52a76.52 76.52 0 0 1 49.68-.11l6.21 29.75a16 16 0 0 0 9.72 11.59l.29.11l49 17.39a16 16 0 0 0 18.38-5.06c17.19-22.24 15.26-51.73-4.73-71.73M223.67 152l-.3-.12l-48.82-17.33l-6.21-29.74A16 16 0 0 0 158 93a92.56 92.56 0 0 0-60.34.13a16 16 0 0 0-10.32 12l-5.9 29.51l-48.81 17.22c-.1 0-.17.13-.27.17c-12.33-15.91-11-36.23 3.36-50.58c25-25 58.65-37.53 92.28-37.53s67.27 12.51 92.28 37.53c14.33 14.35 15.72 34.67 3.39 50.55m.32 48a8 8 0 0 1-8 8H40a8 8 0 0 1 0-16h176a8 8 0 0 1 8 8Z"/></svg>\n            </button>\n          </div>\n        </div>\n      </div>\n    </div> \n  </div>\n  ${n.options.fullScreen?"":'\n  <button class="mc-toggle-chat-btn">\n    <img class="mc-chat-toggle-image" src="" alt="شروع گفتگو" />\n    <svg class="mc-chat-toggle-close" viewBox="0 0 24 24" width="24" height="24">\n      <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>\n    </svg>\n    \x3c!-- Badge for unread messages --\x3e\n    <div class="mc-badge mc-hidden">\n      <span class="mc-badge-text">0</span>\n    </div>\n    \x3c!-- Tooltip for toggle button --\x3e\n    <div class="mc-toggle-tooltip mc-hidden">\n      <span class="mc-toggle-tooltip-text">شروع گفتگو</span>\n    </div>\n  </button>\n  '}\n  </div>\n  `,registerListeners(n.container);};
+const createChatContainer=n=>{n.container=document.createElement("div"),n.container.textContent="Start Chat",n.container.classList.add("modo-chat-widget"),n.options.fullScreen&&n.container.classList.add("mc-fullscreen"),document.body.appendChild(n.container);let t=document.createElement("div");n.container.appendChild(t),n.container.innerHTML=`\n  <div dir="rtl" class="mc-chat-inner">\n  <div class="mc-chat-body ${n.options.fullScreen?"mc-active":"mc-hidden"}">\n    <div class="mc-chat-container">\n      \x3c!-- Chat Header --\x3e\n      <div class="mc-chat-header">\n        <div style="display: flex; align-items: center; gap: 8px;">\n          <h3 class="mc-chat-title">پشتیبانی چت</h3>\n          <div class="mc-conversation-status-icon mc-hidden">\n            \x3c!-- Clean AI/Bot icon --\x3e\n            <svg class="mc-ai-chat-icon" style="width: 14px; height: 14px;" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">\x3c!-- Icon from Material Design Icons by Pictogrammers - https://github.com/Templarian/MaterialDesign/blob/master/LICENSE --\x3e<path fill="currentColor" d="M22 14h-1c0-3.87-3.13-7-7-7h-1V5.73A2 2 0 1 0 10 4c0 .74.4 1.39 1 1.73V7h-1c-3.87 0-7 3.13-7 7H2c-.55 0-1 .45-1 1v3c0 .55.45 1 1 1h1v1a2 2 0 0 0 2 2h14c1.11 0 2-.89 2-2v-1h1c.55 0 1-.45 1-1v-3c0-.55-.45-1-1-1m-1 3h-2v3H5v-3H3v-1h2v-2c0-2.76 2.24-5 5-5h4c2.76 0 5 2.24 5 5v2h2zM8.5 13.5l2.36 2.36l-1.18 1.18l-1.18-1.18l-1.18 1.18l-1.18-1.18zm7 0l2.36 2.36l-1.18 1.18l-1.18-1.18l-1.18 1.18l-1.18-1.18z"/></svg>\n            \x3c!-- Clean Human/Person icon --\x3e\n            <svg class="mc-human-chat-icon" viewBox="0 0 24 24" width="18" height="18">\n              <path fill="currentColor" d="M12 4C13.66 4 15 5.34 15 7C15 8.66 13.66 10 12 10C10.34 10 9 8.66 9 7C9 5.34 10.34 4 12 4ZM12 12C15.31 12 18 13.34 18 15V18H6V15C6 13.34 8.69 12 12 12Z"/>\n            </svg>\n            <div class="mc-tooltip">\n              <span class="mc-tooltip-text-ai">چت بات هوشمند</span>\n              <span class="mc-tooltip-text-human">پشتیبان انسانی</span>\n            </div>\n          </div>\n          <div class="mc-connection-status mc-disconnected"></div>\n        </div>\n        <div style="display: flex; align-items: center; gap: 8px;">\n          <button class="mc-new-conversation-btn mc-hidden">\n            +\n          </button>\n          <button class="mc-voice-call-btn mc-hidden">\n           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">\x3c!-- Icon from Google Material Icons by Material Design Authors - https://github.com/material-icons/material-icons/blob/master/LICENSE --\x3e<path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02z"/></svg>\n           <div class="mc-voice-call-tooltip mc-hidden">\n             <div class="mc-voice-call-tooltip-text">مکالمه با هوش مصنوعی</div>\n            </div>\n          </button>\n        </div>\n      </div>\n\n      <div class="mc-chat-messages-con">\n      </div> \n      <div class="mc-starters-con">\n        <div class="mc-starter-welcome">\n          <img class="mc-starter-logo" src="" alt="لوگو چت بات" style="display: none;">\n          <h2 class="mc-starter-title">پشتیبانی چت</h2>\n        </div>\n        <div class="mc-starter-items">\n        </div>\n      </div>\n\n      <div class="mc-reply-preview mc-hidden">\n        <div class="mc-reply-preview-content">\n          <div class="mc-reply-preview-info">\n            <span class="mc-reply-preview-label">پاسخ به:</span>\n            <span class="mc-reply-preview-text"></span>\n          </div>\n          <button class="mc-reply-preview-close" title="لغو پاسخ">\n            <svg viewBox="0 0 24 24" width="16" height="16">\n              <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>\n            </svg>\n          </button>\n        </div>\n      </div>\n\n      <div class="mc-chat-input-area">\n        <input type="text" placeholder="پیام خود را تایپ کنید..." class="mc-chat-input">\n        <button class="mc-file-upload-btn" title="آپلود فایل">\n          <input type="file" class="mc-file-input" hidden />\n          <svg class="mc-file-upload-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">\x3c!-- Icon from Material Symbols Light by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --\x3e<path fill="currentColor" d="M16.346 11.385V6.769h1v4.616zm-5.538 5.457q-.452-.269-.726-.734q-.274-.466-.274-1.031V6.769h1zM11.96 21q-2.271 0-3.846-1.595t-1.575-3.867v-8.73q0-1.587 1.09-2.697Q8.722 3 10.309 3t2.678 1.11t1.091 2.698V14h-1V6.789q-.006-1.166-.802-1.977T10.308 4q-1.163 0-1.966.821q-.804.821-.804 1.987v8.73q-.005 1.853 1.283 3.157Q10.11 20 11.961 20q.556 0 1.056-.124t.945-.372v1.11q-.468.2-.972.293q-.505.093-1.03.093m4.386-1v-2.616h-2.615v-1h2.615V13.77h1v2.615h2.616v1h-2.616V20z"/></svg>\n          <svg class="mc-file-remove-icon mc-hidden" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">\x3c!-- Icon from Material Symbols Light by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --\x3e<path fill="currentColor" d="M11.962 21q-2.273 0-3.848-1.594t-1.575-3.867V7.954L2.091 3.508L2.8 2.8l18.4 18.4l-.708.708l-3.805-3.806q-.664 1.298-1.913 2.098t-2.812.8M7.539 8.954v6.584q-.006 1.852 1.282 3.157T11.961 20q1.356 0 2.413-.727t1.574-1.91l-1.98-1.98q-.087.742-.656 1.295q-.568.553-1.35.553q-.881 0-1.518-.627q-.636-.627-.636-1.527v-3.854zm3.269 3.269v2.854q0 .479.328.816q.328.338.806.338q.474 0 .801-.335t.334-.808v-.596zm5.538 1.33V6.77h1v7.804zm-3.269-3.307V6.79q-.006-1.166-.805-1.977T10.308 4q-.708 0-1.281.32q-.573.319-.961.857l-.714-.713q.529-.68 1.285-1.072T10.307 3q1.587 0 2.679 1.11t1.091 2.698v4.458zm-2.27-3.477v1.189l-1-1.02V6.77z"/></svg>\n        </button>\n        <button class="mc-send-message-btn" data-is-loading="false">\n          <svg class="mc-send-icon" viewBox="0 0 24 24">\n            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>\n          </svg>\n          <span class="mc-btn-loading">\n            <svg class="mc-loading-spinner" viewBox="0 0 24 24">\n              <circle class="mc-spinner-circle" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>\n              <path class="mc-spinner-path" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>\n            </svg>\n          </span>\n        </button>\n      </div>\n\n      <div class="mc-form-overlay mc-hidden">\n        <div class="mc-form-content">\n          <h3 class="mc-form-title">اطلاعات تماس</h3>\n          <p class="mc-form-subtitle">لطفا برای اطلاع رسانی بهتر پیام ها شماره خود را وارد کنید (اختیاری)</p>\n          <div class="mc-form-input-area">\n            <input type="tel" placeholder="شماره تلفن (اختیاری)" class="mc-phone-input">\n          </div>\n          <div class="mc-form-buttons">\n            <button class="mc-form-submit-btn">\n              ارسال\n            </button>\n            <button class="mc-form-cancel-btn">\n              لغو\n            </button>\n          </div>\n        </div>\n      </div>\n\n      \x3c!-- Chat Footer --\x3e\n      <div class="mc-chat-footer">\n        <span class="mc-footer-text">ساخته شده با </span>\n        <a href="" class="mc-footer-link" target="_blank" rel="noopener noreferrer" title="">مودوچت</a>\n      </div>\n\n      \x3c!-- Voice Agent Overlay --\x3e\n      <div class="mc-voice-agent-overlay mc-hidden">\n        <div class="mc-voice-agent-content">\n          <button class="mc-voice-close-btn">\n            <svg viewBox="0 0 24 24" width="24" height="24">\n              <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>\n            </svg>\n          </button>\n          \n          <div class="mc-voice-agent-center">\n            <img class="mc-voice-agent-logo" src="" alt="چت بات" />\n            <h2 class="mc-voice-agent-title">تماس صوتی</h2>\n            <p class="mc-voice-agent-status">درحال اتصال...</p>\n          </div>\n\n          <div class="mc-voice-agent-controls">\n            <button class="mc-voice-disconnect-btn" title="قطع تماس">\n              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">\x3c!-- Icon from Phosphor by Phosphor Icons - https://github.com/phosphor-icons/core/blob/main/LICENSE --\x3e<path fill="currentColor" d="M231.59 90.13C175.44 34 80.56 34 24.41 90.13c-20 20-21.92 49.49-4.69 71.71A16 16 0 0 0 32.35 168a15.8 15.8 0 0 0 5.75-1.08l49-17.37l.29-.11a16 16 0 0 0 9.75-11.73l5.9-29.52a76.52 76.52 0 0 1 49.68-.11l6.21 29.75a16 16 0 0 0 9.72 11.59l.29.11l49 17.39a16 16 0 0 0 18.38-5.06c17.19-22.24 15.26-51.73-4.73-71.73M223.67 152l-.3-.12l-48.82-17.33l-6.21-29.74A16 16 0 0 0 158 93a92.56 92.56 0 0 0-60.34.13a16 16 0 0 0-10.32 12l-5.9 29.51l-48.81 17.22c-.1 0-.17.13-.27.17c-12.33-15.91-11-36.23 3.36-50.58c25-25 58.65-37.53 92.28-37.53s67.27 12.51 92.28 37.53c14.33 14.35 15.72 34.67 3.39 50.55m.32 48a8 8 0 0 1-8 8H40a8 8 0 0 1 0-16h176a8 8 0 0 1 8 8Z"/></svg>\n            </button>\n          </div>\n        </div>\n      </div>\n    </div> \n  </div>\n  ${n.options.fullScreen?"":'\n    <button class="mc-toggle-chat-btn">\n      <img\n        class="mc-chat-toggle-image"\n        src=""\n        alt="شروع گفتگو" />\n      <svg\n        class="mc-chat-toggle-close"\n        viewBox="0 0 24 24"\n        width="24"\n        height="24">\n        <path\n          fill="currentColor"\n          d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" />\n      </svg>\n      \x3c!-- Badge for unread messages --\x3e\n      <div class="mc-badge mc-hidden">\n        <span class="mc-badge-text">0</span>\n      </div>\n      \x3c!-- Tooltip for toggle button --\x3e\n      <div class="mc-toggle-tooltip mc-hidden">\n        <div class="mc-tooltip-inner">\n          <div\n            class="mc-toggle-tooltip-close"\n            title="بستن">\n            <svg\n              viewBox="0 0 24 24"\n              width="16"\n              height="16">\n              <path\n                fill="currentColor"\n                d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" />\n            </svg>\n          </div>\n          <span class="mc-toggle-tooltip-text">شروع گفتگو</span>\n        </div>\n      </div>\n    </button>\n  '}\n  </div>\n  `,registerListeners(n.container);};
 
-class CustomerData{_uniqueId;_userData;modo;phoneNumber;constructor(e,t){this.modo=e,this.initializeUniqueId(),this.updateUserData(t),this.initializePhoneNumber();}initializePhoneNumber(){const e=localStorage.getItem(`modo-chat:${this.modo.publicKey}-user-phone-number`);e&&(this.phoneNumber=e);}initializeUniqueId(){const e=localStorage.getItem(`modo-chat:${this.modo.publicKey}-user-unique-id`);e?this._uniqueId=e:(this._uniqueId=crypto.randomUUID(),localStorage.setItem(`modo-chat:${this.modo.publicKey}-user-unique-id`,this._uniqueId));}get uniqueId(){return this._uniqueId}get userData(){return this._userData||{}}async updateUserData(e){e&&"object"==typeof e?this._userData=e:e&&console.warn("Invalid user data");}hasSubmittedPhoneForm(){return Boolean(this.phoneNumber)}savePhoneNumber(e){this.phoneNumber=e||"no phone number",localStorage.setItem(`modo-chat:${this.modo.publicKey}-user-phone-number`,e||"no phone number");}async fetchUpdate(){await fetchUpdateUserData(this.modo.publicData?.setting.uuid,this.uniqueId,this.userData);}}
+const generateUUID=()=>"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(x){const e=16*Math.random()|0;return ("x"===x?e:3&e|8).toString(16)});
 
-// src/services/EventEmitter.ts
+class CustomerData{_uniqueId;_userData;modo;phoneNumber;constructor(e,t){this.modo=e,this.initializeUniqueId(),this.updateUserData(t),this.initializePhoneNumber();}initializePhoneNumber(){const e=localStorage.getItem(`modo-chat:${this.modo.publicKey}-user-phone-number`);e&&(this.phoneNumber=e);}initializeUniqueId(){const e=localStorage.getItem(`modo-chat:${this.modo.publicKey}-user-unique-id`);e?this._uniqueId=e:(this._uniqueId=crypto.randomUUID?crypto.randomUUID():generateUUID(),localStorage.setItem(`modo-chat:${this.modo.publicKey}-user-unique-id`,this._uniqueId));}get uniqueId(){return this._uniqueId}get userData(){return this._userData||{}}async updateUserData(e){e&&"object"==typeof e?this._userData=e:e&&console.warn("Invalid user data");}hasSubmittedPhoneForm(){return Boolean(this.phoneNumber)}savePhoneNumber(e){this.phoneNumber=e||"no phone number",localStorage.setItem(`modo-chat:${this.modo.publicKey}-user-phone-number`,e||"no phone number");}async fetchUpdate(){await fetchUpdateUserData(this.modo.chatbot?.uuid,this.uniqueId,this.userData);}}
+
+// src/services/emitter/event-emitter.ts
 var EventEmitter = class {
   constructor() {
     this.listeners = {};
@@ -1398,24 +1400,18 @@ var EventEmitter = class {
   async emit(event) {
     const regularListeners = this.listeners[event.type];
     if (regularListeners) {
-      const promises = Array.from(regularListeners).map(
-        (listener) => this.safeInvoke(listener, event)
-      );
+      const promises = Array.from(regularListeners).map((listener) => this.safeInvoke(listener, event));
       await Promise.all(promises);
     }
     const onceListeners = this.onceListeners[event.type];
     if (onceListeners) {
       const listeners = Array.from(onceListeners);
       onceListeners.clear();
-      const promises = listeners.map(
-        (listener) => this.safeInvoke(listener, event)
-      );
+      const promises = listeners.map((listener) => this.safeInvoke(listener, event));
       await Promise.all(promises);
     }
     if (this.wildcardListeners.size > 0) {
-      const promises = Array.from(this.wildcardListeners).map(
-        (listener) => this.safeInvoke(listener, event)
-      );
+      const promises = Array.from(this.wildcardListeners).map((listener) => this.safeInvoke(listener, event));
       await Promise.all(promises);
     }
   }
@@ -1455,28 +1451,15 @@ var EventEmitter = class {
   }
 };
 
-// src/types/events.ts
+// src/services/shared/types/events.ts
 var EventType = /* @__PURE__ */ ((EventType2) => {
   EventType2["CONNECTED"] = "connected";
   EventType2["DISCONNECTED"] = "disconnected";
   EventType2["CONNECTION_ERROR"] = "connection_error";
-  EventType2["AI_PLAYBACK_STARTED"] = "ai_playback_started";
-  EventType2["AI_PLAYBACK_CHUNK"] = "ai_playback_chunk";
-  EventType2["AI_PLAYBACK_COMPLETED"] = "ai_playback_completed";
-  EventType2["AI_PLAYBACK_ERROR"] = "ai_playback_error";
-  EventType2["USER_RECORDING_STARTED"] = "user_recording_started";
-  EventType2["USER_RECORDING_STOPPED"] = "user_recording_stopped";
-  EventType2["USER_RECORDING_DATA"] = "user_recording_data";
-  EventType2["VOICE_DETECTED"] = "voice_detected";
-  EventType2["VOICE_ENDED"] = "voice_ended";
-  EventType2["VOICE_METRICS"] = "voice_metrics";
+  EventType2["TURN_CHANGED"] = "turn_changed";
   EventType2["MICROPHONE_PAUSED"] = "microphone_paused";
   EventType2["MICROPHONE_RESUMED"] = "microphone_resumed";
-  EventType2["TRANSCRIPT_RECEIVED"] = "transcript_received";
-  EventType2["AI_RESPONSE_RECEIVED"] = "ai_response_received";
-  EventType2["ON_HOLD_STARTED"] = "on_hold_started";
-  EventType2["ON_HOLD_STOPPED"] = "on_hold_stopped";
-  EventType2["CLEAR_BUFFER"] = "clear_buffer";
+  EventType2["AI_PLAYBACK_CHUNK"] = "ai_playback_chunk";
   EventType2["ERROR"] = "error";
   EventType2["WARNING"] = "warning";
   EventType2["INFO"] = "info";
@@ -1484,13 +1467,14 @@ var EventType = /* @__PURE__ */ ((EventType2) => {
   return EventType2;
 })(EventType || {});
 
-// src/services/WebSocketService.ts
+// src/services/web-socket/service.ts
 var WebSocketService = class {
   constructor(config, eventEmitter, connectionState) {
     this.ws = null;
     this.pingInterval = null;
     this.reconnectAttempt = 0;
     this.intentionalDisconnect = false;
+    this.turn = "Ai";
     this.config = config;
     this.eventEmitter = eventEmitter;
     this.connectionState = connectionState;
@@ -1593,83 +1577,15 @@ var WebSocketService = class {
   }
   async handleTextMessage(message) {
     switch (message.type) {
-      case "audio_complete" /* AUDIO_COMPLETE */:
-        await this.eventEmitter.emit({
-          type: "ai_playback_completed" /* AI_PLAYBACK_COMPLETED */,
-          timestamp: Date.now(),
-          totalBytes: this.connectionState.getMetrics().bytesReceived,
-          duration: 0
-        });
-        break;
-      case "pause_input" /* PAUSE_INPUT */:
-        await this.eventEmitter.emit({
-          type: "microphone_paused" /* MICROPHONE_PAUSED */,
-          timestamp: Date.now()
-        });
-        break;
-      case "resume_input" /* RESUME_INPUT */:
-        await this.eventEmitter.emit({
-          type: "microphone_resumed" /* MICROPHONE_RESUMED */,
-          timestamp: Date.now()
-        });
-        break;
-      case "start_on_hold" /* START_ON_HOLD */:
-        await this.eventEmitter.emit({
-          type: "microphone_paused" /* MICROPHONE_PAUSED */,
-          timestamp: Date.now()
-        });
-        await this.eventEmitter.emit({
-          type: "on_hold_started" /* ON_HOLD_STARTED */,
-          timestamp: Date.now()
-        });
-        break;
-      case "stop_on_hold" /* STOP_ON_HOLD */:
-        await this.eventEmitter.emit({
-          type: "microphone_resumed" /* MICROPHONE_RESUMED */,
-          timestamp: Date.now()
-        });
-        await this.eventEmitter.emit({
-          type: "on_hold_stopped" /* ON_HOLD_STOPPED */,
-          timestamp: Date.now()
-        });
-        break;
-      case "clear_buffer" /* CLEAR_BUFFER */:
-        await this.eventEmitter.emit({
-          type: "clear_buffer" /* CLEAR_BUFFER */,
-          timestamp: Date.now()
-        });
-        break;
-      case "status" /* STATUS */:
-        await this.eventEmitter.emit({
-          type: "info" /* INFO */,
-          timestamp: Date.now(),
-          message: message.message || "Status update",
-          context: "WebSocket"
-        });
-        break;
-      case "close" /* CLOSE */:
-        const closeMessage = message.message || "Server closing connection";
-        console.log("\u{1F44B} Server sent goodbye:", closeMessage);
-        await this.eventEmitter.emit({
-          type: "info" /* INFO */,
-          timestamp: Date.now(),
-          message: closeMessage,
-          context: "WebSocket"
-        });
-        setTimeout(() => {
-          if (this.ws) {
-            this.intentionalDisconnect = true;
-            this.ws.close(1e3, closeMessage);
-          }
-        }, 3e3);
-        break;
-      case "transcript" /* TRANSCRIPT */:
-        if (message.data && typeof message.data === "object" && "text" in message.data) {
+      case "TURN" /* TURN */:
+        const turnMsg = message;
+        if (turnMsg.message && "turn" in turnMsg.message) {
+          const turn = turnMsg.message.turn;
+          this.turn = turn === "ai" ? "Ai" : "User";
           await this.eventEmitter.emit({
-            type: "transcript_received" /* TRANSCRIPT_RECEIVED */,
+            type: "turn_changed" /* TURN_CHANGED */,
             timestamp: Date.now(),
-            text: message.data.text,
-            language: message.data.language
+            turn
           });
         }
         break;
@@ -1722,11 +1638,8 @@ var WebSocketService = class {
     }
     this.ws.send(data);
     this.connectionState.incrementMessagesSent();
-    if (data instanceof ArrayBuffer) {
-      this.connectionState.addBytesSent(data.byteLength);
-    } else {
-      this.connectionState.addBytesSent(new TextEncoder().encode(data).byteLength);
-    }
+    const byteSize = Math.ceil(data.length * 0.75);
+    this.connectionState.addBytesSent(byteSize);
   }
   disconnect() {
     if (!this.ws) return;
@@ -1758,323 +1671,41 @@ var WebSocketService = class {
   }
 };
 
-// src/services/AudioService.ts
-var AudioService = class {
-  constructor(eventEmitter, audioState, voiceMetrics, config) {
-    this.audioContext = null;
-    this.mediaStream = null;
-    this.audioWorkletNode = null;
-    this.playbackRetryTimer = null;
-    this.micResumeTimeout = null;
-    this.eventEmitter = eventEmitter;
-    this.audioState = audioState;
-    this.voiceMetrics = voiceMetrics;
-    this.config = config;
-  }
-  async initialize(deviceId) {
-    try {
-      console.log("\u{1F527} Initializing AudioService...");
-      console.log(`   Processor Path: ${this.config.processorPath}`);
-      console.log(`   Voice Threshold: ${this.config.processor.voiceThreshold}`);
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          deviceId: deviceId ? { exact: deviceId } : void 0,
-          ...this.config.constraints
-        }
-      });
-      console.log("\u2705 Microphone stream obtained");
-      this.mediaStream = stream;
-      this.audioContext = new AudioContext();
-      console.log(`   AudioContext created: ${this.audioContext.sampleRate}Hz`);
-      console.log("\u{1F4E6} Loading audio-processor.js...");
-      await this.audioContext.audioWorklet.addModule(this.config.processorPath);
-      console.log("\u2705 Audio processor loaded successfully!");
-      await this.setupAudioWorklet();
-      await this.eventEmitter.emit({
-        type: "user_recording_started" /* USER_RECORDING_STARTED */,
-        timestamp: Date.now(),
-        deviceId: deviceId || "default",
-        deviceLabel: stream.getAudioTracks()[0]?.label || "Unknown"
-      });
-      this.audioState.setRecordingState("recording" /* RECORDING */);
-    } catch (error) {
-      await this.eventEmitter.emit({
-        type: "error" /* ERROR */,
-        timestamp: Date.now(),
-        error,
-        message: `Failed to initialize audio: ${error.message}`
-      });
-      throw error;
-    }
-  }
-  async setupAudioWorklet() {
-    if (!this.audioContext || !this.mediaStream) {
-      throw new Error("Audio context or media stream not initialized");
-    }
-    console.log("\u{1F50C} Setting up audio worklet...");
-    const source = this.audioContext.createMediaStreamSource(this.mediaStream);
-    this.audioWorkletNode = new AudioWorkletNode(this.audioContext, "audio-processor", {
-      processorOptions: this.config.processor
-    });
-    console.log("\u2705 AudioWorkletNode created");
-    console.log("   Processor options:", this.config.processor);
-    this.audioWorkletNode.port.onmessage = (event) => {
-      console.log("\u{1F4E8} Message from audio processor:", event.data instanceof ArrayBuffer ? `ArrayBuffer ${event.data.byteLength} bytes` : event.data.type);
-      if (event.data instanceof ArrayBuffer) {
-        console.log(`\u{1F3B5} Raw audio buffer: ${event.data.byteLength} bytes`);
-        this.handleAudioData(event.data);
-      } else {
-        this.handleWorkletMessage(event.data);
-      }
-    };
-    source.connect(this.audioWorkletNode);
-    this.audioWorkletNode.connect(this.audioContext.destination);
-    console.log("\u{1F517} Audio nodes connected successfully");
-  }
-  handleWorkletMessage(data) {
-    switch (data.type) {
-      case "audioData":
-        if (data.audioData) {
-          console.log(`\u{1F3B5} Audio data received from worklet: ${data.audioData.byteLength} bytes`);
-          this.handleAudioData(data.audioData);
-        }
-        break;
-      case "voice-level":
-      // Match audio-processor.js format
-      case "voiceLevel":
-        if (data.rms !== void 0 && data.db !== void 0) {
-          const metrics = {
-            rms: data.rms,
-            db: data.db,
-            isActive: data.isActive ?? false,
-            isPaused: data.isPaused ?? false,
-            noiseFloor: data.noiseFloor ?? 0,
-            threshold: this.config.processor.voiceThreshold
-          };
-          this.voiceMetrics.update(metrics);
-          this.eventEmitter.emit({
-            type: "voice_metrics" /* VOICE_METRICS */,
-            timestamp: Date.now(),
-            ...metrics
-          });
-          if (data.isActive && !this.voiceMetrics.isVoiceActive()) {
-            this.eventEmitter.emit({
-              type: "voice_detected" /* VOICE_DETECTED */,
-              timestamp: Date.now(),
-              rms: data.rms,
-              db: data.db
-            });
-          } else if (!data.isActive && this.voiceMetrics.isVoiceActive()) {
-            this.eventEmitter.emit({
-              type: "voice_ended" /* VOICE_ENDED */,
-              timestamp: Date.now(),
-              duration: this.voiceMetrics.getVoiceDuration()
-            });
-          }
-        }
-        break;
-      case "voice-ended":
-        console.log("\u{1F3AC} Voice ended signal received from audio processor");
-        this.eventEmitter.emit({
-          type: "voice_ended" /* VOICE_ENDED */,
-          timestamp: Date.now(),
-          duration: this.voiceMetrics.getVoiceDuration()
-        });
-        break;
-    }
-  }
-  handleAudioData(audioData) {
-    console.log(`\u{1F4E4} Sending audio data: ${audioData.byteLength} bytes`);
-    this.eventEmitter.emit({
-      type: "user_recording_data" /* USER_RECORDING_DATA */,
-      timestamp: Date.now(),
-      data: audioData,
-      byteLength: audioData.byteLength
-    });
-    this.audioState.addBytesSent(audioData.byteLength);
-  }
-  async handleIncomingAudioChunk(chunk) {
-    const uint8Array = new Uint8Array(chunk);
-    this.audioState.addToBuffer(uint8Array);
-    if (!this.audioState.isPlaying()) {
-      await this.attemptPlayback();
-    }
-  }
-  async attemptPlayback() {
-    const bufferInfo = this.audioState.getBufferInfo();
-    const minSize = this.audioState.isPlaying() ? this.config.minBufferSize * 0.75 : this.config.minBufferSize;
-    const minChunks = this.audioState.isPlaying() ? this.config.targetChunks * 0.75 : this.config.targetChunks;
-    const shouldStart = bufferInfo.totalBytes >= minSize || bufferInfo.chunks >= minChunks || this.audioState.isStreamComplete() && bufferInfo.totalBytes > 0;
-    if (shouldStart) {
-      await this.playNextSegment();
-    } else if (!this.playbackRetryTimer) {
-      this.playbackRetryTimer = setTimeout(() => {
-        this.playbackRetryTimer = null;
-        this.attemptPlayback();
-      }, this.config.playbackRetryInterval);
-    }
-  }
-  async playNextSegment() {
-    if (this.playbackRetryTimer) {
-      clearTimeout(this.playbackRetryTimer);
-      this.playbackRetryTimer = null;
-    }
-    const buffer = this.audioState.getBuffer();
-    if (buffer.length === 0) {
-      if (this.audioState.isStreamComplete()) {
-        await this.completePlayback();
-      }
-      return;
-    }
-    const combined = this.combineBuffers(buffer);
-    this.audioState.clearBuffer();
-    const blob = new Blob([combined.buffer], { type: "audio/mpeg" });
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    this.audioState.setCurrentAudioElement(audio);
-    this.audioState.setPlaybackState("playing" /* PLAYING */);
-    audio.onended = () => {
-      URL.revokeObjectURL(url);
-      Promise.resolve().then(() => this.playNextSegment());
-    };
-    audio.onerror = (error) => {
-      URL.revokeObjectURL(url);
-      this.eventEmitter.emit({
-        type: "ai_playback_error" /* AI_PLAYBACK_ERROR */,
-        timestamp: Date.now(),
-        error: new Error("Audio playback error"),
-        message: "Failed to play audio segment"
-      });
-    };
-    try {
-      await audio.play();
-      if (this.audioState.getPlaybackState() === "playing" /* PLAYING */) {
-        await this.eventEmitter.emit({
-          type: "ai_playback_started" /* AI_PLAYBACK_STARTED */,
-          timestamp: Date.now()
-        });
-      }
-    } catch (error) {
-      await this.eventEmitter.emit({
-        type: "ai_playback_error" /* AI_PLAYBACK_ERROR */,
-        timestamp: Date.now(),
-        error,
-        message: "Failed to start audio playback"
-      });
-    }
-  }
-  combineBuffers(buffers) {
-    const totalLength = buffers.reduce((sum, buf) => sum + buf.byteLength, 0);
-    const result = new Uint8Array(totalLength);
-    let offset = 0;
-    for (const buffer of buffers) {
-      result.set(buffer, offset);
-      offset += buffer.byteLength;
-    }
-    return result;
-  }
-  async setStreamComplete() {
-    this.audioState.setStreamingComplete(true);
-    if (this.audioState.getBufferSize() > 0 && !this.audioState.isPlaying()) {
-      await this.playNextSegment();
-    }
-  }
-  async completePlayback() {
-    this.audioState.setPlaybackState("completed" /* COMPLETED */);
-    await this.eventEmitter.emit({
-      type: "ai_playback_completed" /* AI_PLAYBACK_COMPLETED */,
-      timestamp: Date.now(),
-      totalBytes: this.audioState.getTotalBytesReceived(),
-      duration: 0
-    });
-    await this.resumeMicrophone();
-  }
-  async pauseMicrophone() {
-    if (this.audioWorkletNode) {
-      this.audioWorkletNode.port.postMessage({ type: "pause" });
-      await this.eventEmitter.emit({
-        type: "microphone_paused" /* MICROPHONE_PAUSED */,
-        timestamp: Date.now(),
-        internal: true
-        // Prevent infinite loop
-      });
-    }
-  }
-  async resumeMicrophone() {
-    if (this.micResumeTimeout) {
-      clearTimeout(this.micResumeTimeout);
-    }
-    this.micResumeTimeout = setTimeout(async () => {
-      if (this.audioWorkletNode) {
-        this.audioWorkletNode.port.postMessage({ type: "resume" });
-        await this.eventEmitter.emit({
-          type: "microphone_resumed" /* MICROPHONE_RESUMED */,
-          timestamp: Date.now(),
-          internal: true
-          // Prevent infinite loop
-        });
-      }
-      this.micResumeTimeout = null;
-    }, this.config.resumeDelay);
-    const failsafeTimeout = setTimeout(() => {
-      if (this.audioWorkletNode) {
-        this.audioWorkletNode.port.postMessage({ type: "resume" });
-      }
-    }, this.config.failsafeResumeTimeout);
-    if (this.micResumeTimeout) {
-      this.micResumeTimeout;
-      this.micResumeTimeout = setTimeout(() => {
-        clearTimeout(failsafeTimeout);
-      }, this.config.resumeDelay);
-    }
-  }
-  async getAvailableDevices() {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    return devices.filter((device) => device.kind === "audioinput").map((device) => ({
-      deviceId: device.deviceId,
-      label: device.label || `Microphone ${device.deviceId.slice(0, 8)}`,
-      kind: device.kind,
-      groupId: device.groupId
-    }));
-  }
-  async cleanup() {
-    if (this.playbackRetryTimer) {
-      clearTimeout(this.playbackRetryTimer);
-    }
-    if (this.micResumeTimeout) {
-      clearTimeout(this.micResumeTimeout);
-    }
-    const currentElement = this.audioState.getCurrentAudioElement();
-    if (currentElement) {
-      currentElement.pause();
-      currentElement.src = "";
-    }
-    if (this.audioWorkletNode) {
-      this.audioWorkletNode.disconnect();
-      this.audioWorkletNode = null;
-    }
-    if (this.mediaStream) {
-      this.mediaStream.getTracks().forEach((track) => track.stop());
-      this.mediaStream = null;
-    }
-    if (this.audioContext && this.audioContext.state !== "closed") {
-      await this.audioContext.close();
-      this.audioContext = null;
-    }
-    this.audioState.reset();
-    this.voiceMetrics.reset();
-    await this.eventEmitter.emit({
-      type: "user_recording_stopped" /* USER_RECORDING_STOPPED */,
-      timestamp: Date.now(),
-      duration: 0,
-      totalBytes: this.audioState.getTotalBytesSent()
-    });
+// src/services/shared/types/config.ts
+var DEFAULT_CONFIG = {
+  audio: {
+    constraints: {
+      sampleRate: 16e3,
+      channelCount: 1,
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true
+    },
+    minBufferSize: 32e3,
+    targetChunks: 16,
+    chunkSize: 1024,
+    playbackRetryInterval: 10,
+    playbackRetryMaxAttempts: 50,
+    resumeDelay: 150,
+    failsafeResumeTimeout: 1e4
+  },
+  websocket: {
+    reconnect: false,
+    // Disabled by default, original client doesn't auto-reconnect
+    maxReconnectAttempts: 5,
+    reconnectDelay: 1e3,
+    reconnectBackoffMultiplier: 1.5,
+    maxReconnectDelay: 3e4,
+    pingInterval: 3e4,
+    pongTimeout: 5e3,
+    connectionTimeout: 1e4,
+    binaryType: "arraybuffer"
   }
 };
 
-// src/models/AudioState.ts
-var AudioState = class {
-  constructor() {
+// src/services/audio/input-processor.ts
+var AudioInputProcessor = class {
+  constructor(config, eventEmitter) {
     this.playbackState = "idle" /* IDLE */;
     this.recordingState = "idle" /* IDLE */;
     this.audioQueue = [];
@@ -2086,6 +1717,9 @@ var AudioState = class {
     this.playbackStartTime = 0;
     this.totalBytesReceived = 0;
     this.totalBytesSent = 0;
+    this.playbackRetryTimer = null;
+    this.config = config;
+    this.eventEmitter = eventEmitter;
   }
   getPlaybackState() {
     return this.playbackState;
@@ -2132,7 +1766,7 @@ var AudioState = class {
     return {
       chunks: this.audioBuffer.length,
       totalBytes: this.audioBufferSize,
-      duration: this.audioBufferSize / (16e3 * 2),
+      duration: this.audioBufferSize / (this.config.constraints.sampleRate * 2),
       isStreaming: !this.isStreamingComplete
     };
   }
@@ -2171,7 +1805,7 @@ var AudioState = class {
       startTime: this.recordingStartTime,
       duration: this.recordingStartTime ? Date.now() - this.recordingStartTime : 0,
       totalBytes: this.totalBytesSent,
-      sampleRate: 16e3,
+      sampleRate: this.config.constraints.sampleRate,
       channelCount: 1
     };
   }
@@ -2184,7 +1818,93 @@ var AudioState = class {
   getTotalBytesSent() {
     return this.totalBytesSent;
   }
+  async handleIncomingAudioChunk(unit8Array) {
+    this.addToBuffer(unit8Array);
+    if (!this.isPlaying()) {
+      try {
+        await this.attemptPlayback();
+      } catch (error) {
+        console.error("Error during playback attempt:", error);
+      }
+    }
+  }
+  async attemptPlayback() {
+    const bufferInfo = this.getBufferInfo();
+    const minSize = this.isPlaying() ? this.config.minBufferSize * 0.75 : this.config.minBufferSize;
+    const minChunks = this.isPlaying() ? this.config.targetChunks * 0.75 : this.config.targetChunks;
+    const shouldStart = bufferInfo.totalBytes >= minSize || bufferInfo.chunks >= minChunks || this.isStreamComplete() && bufferInfo.totalBytes > 0;
+    if (shouldStart) {
+      await this.playNextSegment();
+    } else if (!this.playbackRetryTimer) {
+      this.playbackRetryTimer = setTimeout(() => {
+        this.playbackRetryTimer = null;
+        this.attemptPlayback();
+      }, this.config.playbackRetryInterval);
+    }
+  }
+  async playNextSegment() {
+    if (this.playbackRetryTimer) {
+      clearTimeout(this.playbackRetryTimer);
+      this.playbackRetryTimer = null;
+    }
+    const buffer = this.getBuffer();
+    if (buffer.length === 0) {
+      await this.completePlayback();
+      return;
+    }
+    this.eventEmitter.emit({
+      type: "microphone_paused" /* MICROPHONE_PAUSED */,
+      timestamp: Date.now()
+    });
+    const combined = this.combineBuffers(buffer);
+    this.clearBuffer();
+    const blob = new Blob([combined.buffer], { type: "audio/mpeg" });
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    this.setCurrentAudioElement(audio);
+    this.setPlaybackState("playing" /* PLAYING */);
+    audio.onended = () => {
+      URL.revokeObjectURL(url);
+      Promise.resolve().then(() => {
+        this.playNextSegment();
+      });
+    };
+    audio.onerror = (error) => {
+      URL.revokeObjectURL(url);
+    };
+    try {
+      await audio.play();
+    } catch (error) {
+      console.error("Failed to start audio playback:", error);
+    }
+  }
+  combineBuffers(buffers) {
+    const totalLength = buffers.reduce((sum, buf) => sum + buf.byteLength, 0);
+    const result = new Uint8Array(totalLength);
+    let offset = 0;
+    for (const buffer of buffers) {
+      result.set(buffer, offset);
+      offset += buffer.byteLength;
+    }
+    return result;
+  }
+  async setStreamComplete() {
+    this.setStreamingComplete(true);
+    if (this.getBufferSize() > 0 && !this.isPlaying()) {
+      await this.playNextSegment();
+    }
+  }
+  async completePlayback() {
+    this.eventEmitter.emit({
+      type: "microphone_resumed" /* MICROPHONE_RESUMED */,
+      timestamp: Date.now()
+    });
+    this.setPlaybackState("completed" /* COMPLETED */);
+  }
   reset() {
+    if (this.playbackRetryTimer) {
+      clearTimeout(this.playbackRetryTimer);
+    }
     this.playbackState = "idle" /* IDLE */;
     this.recordingState = "idle" /* IDLE */;
     this.audioQueue = [];
@@ -2203,6 +1923,9 @@ var AudioState = class {
     this.isStreamingComplete = false;
     this.currentAudioElement = null;
     this.playbackStartTime = 0;
+    if (this.playbackRetryTimer) {
+      clearTimeout(this.playbackRetryTimer);
+    }
   }
   resetRecording() {
     this.recordingState = "idle" /* IDLE */;
@@ -2211,7 +1934,296 @@ var AudioState = class {
   }
 };
 
-// src/models/ConnectionState.ts
+// src/services/audio/output-processor.ts
+var AudioOutputProcessor = class {
+  constructor() {
+    this.audioContext = null;
+    this.mediaStream = null;
+    this.mediaStreamSource = null;
+    this.scriptProcessorNode = null;
+    this.recordedChunks = [];
+    this.bufferSize = 4096;
+    this.actualNumChannels = 0;
+    this.chunkAddCounter = 0;
+    this.getVolume = () => 0;
+  }
+  init({
+    audioContext,
+    mediaStream,
+    tempChunkCreateCallback,
+    getVolume
+  }) {
+    this.recordedChunks = [];
+    this.tempChunkCreateCallback = tempChunkCreateCallback;
+    if (getVolume) {
+      this.getVolume = getVolume;
+    }
+    try {
+      this.audioContext = audioContext;
+      this.mediaStream = mediaStream;
+      this.mediaStreamSource = this.audioContext.createMediaStreamSource(this.mediaStream);
+      const audioTrack = this.mediaStream.getAudioTracks()[0];
+      const trackSettings = audioTrack.getSettings();
+      this.actualNumChannels = trackSettings.channelCount || this.mediaStreamSource.channelCount || 1;
+      this.scriptProcessorNode = this.audioContext.createScriptProcessor(this.bufferSize, this.actualNumChannels, this.actualNumChannels);
+      this.scriptProcessorNode.onaudioprocess = (event) => {
+        const volume = this.getVolume();
+        this.addChunk(event);
+        if (this.chunkAddCounter >= 3) {
+          this.processAndEncode({ processAll: false });
+          this.chunkAddCounter = 0;
+        }
+      };
+      this.mediaStreamSource.connect(this.scriptProcessorNode);
+      this.scriptProcessorNode.connect(this.audioContext.destination);
+    } catch (err) {
+      console.error("Generator: Error starting recording:", err);
+      this.processAndEncode();
+    }
+  }
+  async addChunk(event) {
+    const inputBuffer = event.inputBuffer;
+    const bufferChannels = [];
+    for (let i = 0; i < this.actualNumChannels; i++) {
+      bufferChannels.push(new Float32Array(inputBuffer.getChannelData(i)));
+    }
+    this.recordedChunks.push(bufferChannels);
+    this.chunkAddCounter++;
+  }
+  async reset() {
+    await this.processAndEncode();
+    this.recordedChunks = [];
+    this.chunkAddCounter = 0;
+  }
+  async processAndEncode({ processAll } = { processAll: true }) {
+    if (this.recordedChunks.length === 0) return;
+    const chunksCopy = [...this.recordedChunks];
+    const chunksToProcess = processAll ? chunksCopy : chunksCopy.slice(-3);
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          const numberOfChannels = chunksToProcess[0].length;
+          const totalLength = chunksToProcess.reduce((sum, chunks) => sum + chunks[0].length, 0);
+          const combinedChannels = [];
+          for (let i = 0; i < numberOfChannels; i++) {
+            const channelData = new Float32Array(totalLength);
+            let offset = 0;
+            chunksToProcess.forEach((buffer, index) => {
+              channelData.set(buffer[i], offset);
+              offset += buffer[i].length;
+            });
+            combinedChannels.push(channelData);
+          }
+          if (processAll) this.recordedChunks = [];
+          const targetNumChannels = parseInt("1", 10);
+          let finalChannelData = [];
+          if (numberOfChannels === 1 && targetNumChannels === 2) {
+            finalChannelData.push(combinedChannels[0]);
+            finalChannelData.push(new Float32Array(combinedChannels[0]));
+          } else if (numberOfChannels === 2 && targetNumChannels === 1) {
+            const monoData = new Float32Array(totalLength);
+            for (let i = 0; i < totalLength; i++) {
+              monoData[i] = (combinedChannels[0][i] + combinedChannels[1][i]) / 2;
+            }
+            finalChannelData.push(monoData);
+          } else {
+            finalChannelData = combinedChannels;
+          }
+          const outputNumChannels = finalChannelData.length;
+          let interleavedData;
+          if (outputNumChannels === 1) {
+            interleavedData = finalChannelData[0];
+          } else {
+            interleavedData = new Float32Array(totalLength * 2);
+            for (let i = 0; i < totalLength; i++) {
+              interleavedData[i * 2] = finalChannelData[0][i];
+              interleavedData[i * 2 + 1] = finalChannelData[1][i];
+            }
+          }
+          let outputBuffer;
+          const numSamples = interleavedData.length;
+          outputBuffer = new Int16Array(numSamples);
+          for (let i = 0; i < numSamples; i++) {
+            const sample = Math.max(-1, Math.min(1, interleavedData[i]));
+            outputBuffer[i] = Math.round(sample * 32767);
+          }
+          const base64String = arrayBufferToBase64(outputBuffer.buffer);
+          resolve(base64String);
+          if (!processAll && this.tempChunkCreateCallback) this.tempChunkCreateCallback(base64String);
+        } catch (err) {
+          reject(err);
+        }
+      }, 50);
+    });
+  }
+};
+function arrayBufferToBase64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
+
+// src/services/audio/service.ts
+var AudioService = class {
+  constructor(eventEmitter, config) {
+    this.sendAudioToServer = null;
+    this.volume = 0;
+    this.audioContext = null;
+    this.mediaStream = null;
+    this.micResumeTimeout = null;
+    this.micPaused = false;
+    this.eventEmitter = eventEmitter;
+    this.inputProcessor = new AudioInputProcessor(config, this.eventEmitter);
+    this.config = config;
+    this.outputProcessor = new AudioOutputProcessor();
+  }
+  setSendAudioCallback(callback) {
+    this.sendAudioToServer = callback;
+  }
+  async initialize(deviceId) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          deviceId: deviceId ? { exact: deviceId } : void 0,
+          ...this.config.constraints
+        }
+      });
+      this.mediaStream = stream;
+      this.audioContext = new AudioContext({ sampleRate: this.config.constraints.sampleRate });
+      await this.audioContext.audioWorklet.addModule("https://moderndata.s3.ir-thr-at1.arvanstorage.ir/audio.js");
+      let microphone = this.audioContext.createMediaStreamSource(this.mediaStream);
+      const node = new AudioWorkletNode(this.audioContext, "vumeter");
+      node.port.onmessage = (event) => {
+        let _volume = 0;
+        let _sensibility = 5;
+        if (event.data.volume) _volume = event.data.volume;
+        this.volume = Math.round(_volume * 100 / _sensibility);
+      };
+      microphone.connect(node).connect(this.audioContext.destination);
+      this.audioContext.resume();
+      try {
+        this.outputProcessor.init({
+          audioContext: this.audioContext,
+          mediaStream: this.mediaStream,
+          tempChunkCreateCallback: (data) => {
+            if (this.micPaused) return;
+            this.sendAudioToServer?.(data);
+          },
+          getVolume: () => this.volume
+        });
+      } catch (err) {
+        console.error("Generator: Error starting recording:", err);
+      }
+      this.inputProcessor.setRecordingState("recording" /* RECORDING */);
+    } catch (error) {
+      await this.eventEmitter.emit({
+        type: "error" /* ERROR */,
+        timestamp: Date.now(),
+        error,
+        message: `Failed to initialize audio: ${error.message}`
+      });
+      throw error;
+    }
+  }
+  async handleIncomingAudioChunk(unit8Array) {
+    this.inputProcessor.handleIncomingAudioChunk(unit8Array);
+  }
+  async pauseMicrophone() {
+    this.micPaused = true;
+    this.mediaStream?.getAudioTracks().forEach((track) => track.enabled = false);
+  }
+  async resumeMicrophone() {
+    this.micPaused = false;
+    this.mediaStream?.getAudioTracks().forEach((track) => track.enabled = true);
+  }
+  async getAvailableDevices() {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    return devices.filter((device) => device.kind === "audioinput").map((device) => ({
+      deviceId: device.deviceId,
+      label: device.label || `Microphone ${device.deviceId.slice(0, 8)}`,
+      kind: device.kind,
+      groupId: device.groupId
+    }));
+  }
+  async cleanup() {
+    if (this.micResumeTimeout) {
+      clearTimeout(this.micResumeTimeout);
+    }
+    const currentElement = this.inputProcessor.getCurrentAudioElement();
+    if (currentElement) {
+      currentElement.pause();
+      currentElement.src = "";
+    }
+    if (this.mediaStream) {
+      this.mediaStream.getTracks().forEach((track) => track.stop());
+      this.mediaStream = null;
+    }
+    if (this.audioContext && this.audioContext.state !== "closed") {
+      await this.audioContext.close();
+      this.audioContext = null;
+    }
+    this.inputProcessor.reset();
+    this.outputProcessor.reset();
+  }
+};
+
+// src/services/shared/utils/validators.ts
+var ValidationError = class extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "ValidationError";
+  }
+};
+function validateConfig(config) {
+  if (!config.chatbotUuid || typeof config.chatbotUuid !== "string") {
+    throw new ValidationError("chatbotUuid is required and must be a string");
+  }
+  if (!config.userUniqueId || typeof config.userUniqueId !== "string") {
+    throw new ValidationError("userUniqueId is required and must be a string");
+  }
+  if (!config.apiBase || typeof config.apiBase !== "string") {
+    throw new ValidationError("apiBase is required and must be a string");
+  }
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(config.chatbotUuid)) {
+    throw new ValidationError("chatbotUuid must be a valid UUID");
+  }
+  if (config.audio) {
+    validateAudioConfig(config.audio);
+  }
+  if (config.websocket) {
+    validateWebSocketConfig(config.websocket);
+  }
+}
+function validateAudioConfig(config) {
+  if (!config) return;
+  if (config.constraints) {
+    if (config.constraints.sampleRate && config.constraints.sampleRate < 8e3) {
+      throw new ValidationError("sampleRate must be at least 8000");
+    }
+    if (config.constraints.channelCount && config.constraints.channelCount < 1) {
+      throw new ValidationError("channelCount must be at least 1");
+    }
+  }
+}
+function validateWebSocketConfig(config) {
+  if (!config) return;
+  if (config.maxReconnectAttempts !== void 0 && config.maxReconnectAttempts < 0) {
+    throw new ValidationError("maxReconnectAttempts must be non-negative");
+  }
+  if (config.reconnectDelay !== void 0 && config.reconnectDelay < 0) {
+    throw new ValidationError("reconnectDelay must be non-negative");
+  }
+  if (config.connectionTimeout !== void 0 && config.connectionTimeout < 1e3) {
+    throw new ValidationError("connectionTimeout must be at least 1000ms");
+  }
+}
+
+// src/services/web-socket/connection-state.ts
 var ConnectionState2 = class {
   constructor() {
     this.state = "disconnected" /* DISCONNECTED */;
@@ -2327,375 +2339,6 @@ var ConnectionState2 = class {
   }
 };
 
-// src/models/VoiceMetrics.ts
-var VoiceMetrics = class {
-  constructor() {
-    this.rms = 0;
-    this.db = -Infinity;
-    this.isActive = false;
-    this.isPaused = false;
-    this.noiseFloor = 0;
-    this.threshold = 0.25;
-    this.voiceStartTime = 0;
-    this.voiceEndTime = 0;
-    this.totalVoiceTime = 0;
-    this.history = [];
-    this.maxHistoryLength = 100;
-  }
-  update(metrics) {
-    this.rms = metrics.rms;
-    this.db = metrics.db;
-    this.isActive = metrics.isActive;
-    this.isPaused = metrics.isPaused;
-    this.noiseFloor = metrics.noiseFloor;
-    this.threshold = metrics.threshold;
-    if (metrics.isActive && !this.isActive && !this.voiceStartTime) {
-      this.voiceStartTime = Date.now();
-    } else if (!metrics.isActive && this.isActive && this.voiceStartTime) {
-      this.voiceEndTime = Date.now();
-      this.totalVoiceTime += this.voiceEndTime - this.voiceStartTime;
-      this.voiceStartTime = 0;
-      this.voiceEndTime = 0;
-    }
-    this.addToHistory(metrics);
-  }
-  addToHistory(metrics) {
-    this.history.push(metrics);
-    if (this.history.length > this.maxHistoryLength) {
-      this.history.shift();
-    }
-  }
-  getCurrent() {
-    return {
-      rms: this.rms,
-      db: this.db,
-      isActive: this.isActive,
-      isPaused: this.isPaused,
-      noiseFloor: this.noiseFloor,
-      threshold: this.threshold
-    };
-  }
-  getRMS() {
-    return this.rms;
-  }
-  getDB() {
-    return this.db;
-  }
-  isVoiceActive() {
-    return this.isActive;
-  }
-  isMicrophonePaused() {
-    return this.isPaused;
-  }
-  getNoiseFloor() {
-    return this.noiseFloor;
-  }
-  getThreshold() {
-    return this.threshold;
-  }
-  getVoiceDuration() {
-    if (this.voiceStartTime) {
-      return Date.now() - this.voiceStartTime;
-    }
-    return 0;
-  }
-  getTotalVoiceTime() {
-    return this.totalVoiceTime;
-  }
-  getHistory(count) {
-    if (count !== void 0) {
-      return this.history.slice(-count);
-    }
-    return [...this.history];
-  }
-  getAverageRMS(count = 10) {
-    const recent = this.history.slice(-count);
-    if (recent.length === 0) return 0;
-    const sum = recent.reduce((acc, m) => acc + m.rms, 0);
-    return sum / recent.length;
-  }
-  getAverageDB(count = 10) {
-    const recent = this.history.slice(-count);
-    if (recent.length === 0) return -Infinity;
-    const sum = recent.reduce((acc, m) => acc + m.db, 0);
-    return sum / recent.length;
-  }
-  getPeakRMS() {
-    if (this.history.length === 0) return 0;
-    return Math.max(...this.history.map((m) => m.rms));
-  }
-  getPeakDB() {
-    if (this.history.length === 0) return -Infinity;
-    return Math.max(...this.history.map((m) => m.db));
-  }
-  getActivityRatio(windowSize = 100) {
-    const recent = this.history.slice(-windowSize);
-    if (recent.length === 0) return 0;
-    const activeCount = recent.filter((m) => m.isActive).length;
-    return activeCount / recent.length;
-  }
-  setMaxHistoryLength(length) {
-    this.maxHistoryLength = length;
-    while (this.history.length > length) {
-      this.history.shift();
-    }
-  }
-  reset() {
-    this.rms = 0;
-    this.db = -Infinity;
-    this.isActive = false;
-    this.isPaused = false;
-    this.noiseFloor = 0;
-    this.voiceStartTime = 0;
-    this.voiceEndTime = 0;
-    this.totalVoiceTime = 0;
-    this.history = [];
-  }
-  clearHistory() {
-    this.history = [];
-  }
-};
-
-// src/types/config.ts
-var LogLevel = /* @__PURE__ */ ((LogLevel3) => {
-  LogLevel3[LogLevel3["NONE"] = 0] = "NONE";
-  LogLevel3[LogLevel3["ERROR"] = 1] = "ERROR";
-  LogLevel3[LogLevel3["WARN"] = 2] = "WARN";
-  LogLevel3[LogLevel3["INFO"] = 3] = "INFO";
-  LogLevel3[LogLevel3["DEBUG"] = 4] = "DEBUG";
-  return LogLevel3;
-})(LogLevel || {});
-var DEFAULT_CONFIG = {
-  audio: {
-    constraints: {
-      sampleRate: 16e3,
-      channelCount: 1,
-      echoCancellation: true,
-      noiseSuppression: true,
-      autoGainControl: true
-    },
-    processor: {
-      voiceThreshold: 0.08,
-      silenceThreshold: 0.05,
-      minSilenceFrames: 8,
-      maxPreRollBuffers: 5,
-      sampleRate: 16e3
-    },
-    processorPath: "/audio-processor.js",
-    minBufferSize: 32e3,
-    targetChunks: 16,
-    chunkSize: 1024,
-    playbackRetryInterval: 10,
-    playbackRetryMaxAttempts: 50,
-    resumeDelay: 150,
-    failsafeResumeTimeout: 1e4
-  },
-  websocket: {
-    reconnect: false,
-    // Disabled by default, original client doesn't auto-reconnect
-    maxReconnectAttempts: 5,
-    reconnectDelay: 1e3,
-    reconnectBackoffMultiplier: 1.5,
-    maxReconnectDelay: 3e4,
-    pingInterval: 3e4,
-    pongTimeout: 5e3,
-    connectionTimeout: 1e4,
-    binaryType: "arraybuffer"
-  },
-  logging: {
-    level: 3 /* INFO */,
-    enableConsole: true,
-    enableEvents: true,
-    includeTimestamp: true,
-    includeContext: true
-  },
-  features: {
-    enableVAD: true,
-    enableNoiseReduction: true,
-    enableEchoCancellation: true,
-    enableAutoGainControl: true,
-    enableOnHoldAudio: true,
-    enablePreRollBuffer: true,
-    enableMetrics: true,
-    metricsInterval: 1e3,
-    enableDebugLogs: false
-  }
-};
-
-// src/utils/logger.ts
-var Logger = class {
-  constructor(config, eventEmitter) {
-    this.config = config;
-    this.eventEmitter = eventEmitter;
-  }
-  error(message, context, data) {
-    this.log(1 /* ERROR */, message, context, data);
-  }
-  warn(message, context, data) {
-    this.log(2 /* WARN */, message, context, data);
-  }
-  info(message, context, data) {
-    this.log(3 /* INFO */, message, context, data);
-  }
-  debug(message, context, data) {
-    this.log(4 /* DEBUG */, message, context, data);
-  }
-  log(level, message, context, data) {
-    if (level > this.config.level) {
-      return;
-    }
-    if (this.config.customLogger) {
-      this.config.customLogger(level, message, context, data);
-      return;
-    }
-    if (this.config.enableConsole) {
-      this.logToConsole(level, message, context, data);
-    }
-    if (this.config.enableEvents && this.eventEmitter) {
-      this.logToEvents(level, message, context, data);
-    }
-  }
-  logToConsole(level, message, context, data) {
-    const timestamp = this.config.includeTimestamp ? `[${(/* @__PURE__ */ new Date()).toISOString()}]` : "";
-    const contextStr = this.config.includeContext && context ? `[${context}]` : "";
-    const prefix = [timestamp, contextStr].filter(Boolean).join(" ");
-    const fullMessage = `${prefix} ${message}`;
-    switch (level) {
-      case 1 /* ERROR */:
-        console.error(fullMessage, data || "");
-        break;
-      case 2 /* WARN */:
-        console.warn(fullMessage, data || "");
-        break;
-      case 3 /* INFO */:
-        console.info(fullMessage, data || "");
-        break;
-      case 4 /* DEBUG */:
-        console.debug(fullMessage, data || "");
-        break;
-    }
-  }
-  logToEvents(level, message, context, data) {
-    if (!this.eventEmitter) return;
-    switch (level) {
-      case 1 /* ERROR */:
-        this.eventEmitter.emit({
-          type: "error" /* ERROR */,
-          timestamp: Date.now(),
-          error: new Error(message),
-          message,
-          context
-        });
-        break;
-      case 2 /* WARN */:
-        this.eventEmitter.emit({
-          type: "warning" /* WARNING */,
-          timestamp: Date.now(),
-          message,
-          context
-        });
-        break;
-      case 3 /* INFO */:
-        this.eventEmitter.emit({
-          type: "info" /* INFO */,
-          timestamp: Date.now(),
-          message,
-          context
-        });
-        break;
-      case 4 /* DEBUG */:
-        this.eventEmitter.emit({
-          type: "debug" /* DEBUG */,
-          timestamp: Date.now(),
-          message,
-          data
-        });
-        break;
-    }
-  }
-  setLevel(level) {
-    this.config.level = level;
-  }
-  getLevel() {
-    return this.config.level;
-  }
-  updateConfig(config) {
-    this.config = { ...this.config, ...config };
-  }
-};
-function createLogger(config, eventEmitter) {
-  return new Logger(config, eventEmitter);
-}
-
-// src/utils/validators.ts
-var ValidationError = class extends Error {
-  constructor(message) {
-    super(message);
-    this.name = "ValidationError";
-  }
-};
-function validateConfig(config) {
-  if (!config.chatbotUuid || typeof config.chatbotUuid !== "string") {
-    throw new ValidationError("chatbotUuid is required and must be a string");
-  }
-  if (!config.userUniqueId || typeof config.userUniqueId !== "string") {
-    throw new ValidationError("userUniqueId is required and must be a string");
-  }
-  if (!config.apiBase || typeof config.apiBase !== "string") {
-    throw new ValidationError("apiBase is required and must be a string");
-  }
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!uuidRegex.test(config.chatbotUuid)) {
-    throw new ValidationError("chatbotUuid must be a valid UUID");
-  }
-  if (config.audio) {
-    validateAudioConfig(config.audio);
-  }
-  if (config.websocket) {
-    validateWebSocketConfig(config.websocket);
-  }
-  if (config.logging) {
-    validateLoggingConfig(config.logging);
-  }
-}
-function validateAudioConfig(config) {
-  if (!config) return;
-  if (config.constraints) {
-    if (config.constraints.sampleRate && config.constraints.sampleRate < 8e3) {
-      throw new ValidationError("sampleRate must be at least 8000");
-    }
-    if (config.constraints.channelCount && config.constraints.channelCount < 1) {
-      throw new ValidationError("channelCount must be at least 1");
-    }
-  }
-  if (config.processor) {
-    if (config.processor.voiceThreshold !== void 0 && (config.processor.voiceThreshold < 0 || config.processor.voiceThreshold > 1)) {
-      throw new ValidationError("voiceThreshold must be between 0 and 1");
-    }
-    if (config.processor.silenceThreshold !== void 0 && (config.processor.silenceThreshold < 0 || config.processor.silenceThreshold > 1)) {
-      throw new ValidationError("silenceThreshold must be between 0 and 1");
-    }
-  }
-}
-function validateWebSocketConfig(config) {
-  if (!config) return;
-  if (config.maxReconnectAttempts !== void 0 && config.maxReconnectAttempts < 0) {
-    throw new ValidationError("maxReconnectAttempts must be non-negative");
-  }
-  if (config.reconnectDelay !== void 0 && config.reconnectDelay < 0) {
-    throw new ValidationError("reconnectDelay must be non-negative");
-  }
-  if (config.connectionTimeout !== void 0 && config.connectionTimeout < 1e3) {
-    throw new ValidationError("connectionTimeout must be at least 1000ms");
-  }
-}
-function validateLoggingConfig(config) {
-  if (!config) return;
-  if (config.level !== void 0 && (config.level < 0 || config.level > 4)) {
-    throw new ValidationError("log level must be between 0 and 4");
-  }
-}
-
 // src/ModoVoiceClient.ts
 var ModoVoiceClient = class {
   constructor(config) {
@@ -2703,10 +2346,7 @@ var ModoVoiceClient = class {
     validateConfig(config);
     this.config = this.mergeWithDefaults(config);
     this.eventEmitter = new EventEmitter();
-    this.audioState = new AudioState();
     this.connectionState = new ConnectionState2();
-    this.voiceMetrics = new VoiceMetrics();
-    this.logger = createLogger(this.config.logging, this.eventEmitter);
     this.webSocketService = new WebSocketService(
       {
         url: this.config.apiBase,
@@ -2717,12 +2357,15 @@ var ModoVoiceClient = class {
       this.eventEmitter,
       this.connectionState
     );
-    this.audioService = new AudioService(
-      this.eventEmitter,
-      this.audioState,
-      this.voiceMetrics,
-      this.config.audio
-    );
+    this.audioService = new AudioService(this.eventEmitter, this.config.audio);
+    this.audioService.setSendAudioCallback((base64Audio) => {
+      if (this.webSocketService.isConnected()) {
+        try {
+          this.webSocketService.send(base64Audio);
+        } catch (error) {
+        }
+      }
+    });
     this.setupInternalListeners();
   }
   mergeWithDefaults(config) {
@@ -2731,88 +2374,45 @@ var ModoVoiceClient = class {
       chatbotUuid: config.chatbotUuid,
       userUniqueId: config.userUniqueId,
       audio: { ...DEFAULT_CONFIG.audio, ...config.audio },
-      websocket: { ...DEFAULT_CONFIG.websocket, ...config.websocket },
-      logging: { ...DEFAULT_CONFIG.logging, ...config.logging },
-      features: { ...DEFAULT_CONFIG.features, ...config.features }
+      websocket: { ...DEFAULT_CONFIG.websocket, ...config.websocket }
     };
   }
   setupInternalListeners() {
     this.eventEmitter.on("ai_playback_chunk" /* AI_PLAYBACK_CHUNK */, async (event) => {
       if ("data" in event && event.data instanceof Uint8Array) {
-        await this.audioService.handleIncomingAudioChunk(event.data.buffer);
-        this.logger.debug(`Received audio chunk: ${event.data.byteLength} bytes`, "AudioService");
+        await this.audioService.handleIncomingAudioChunk(event.data);
       }
     });
-    this.eventEmitter.on("ai_playback_started" /* AI_PLAYBACK_STARTED */, async () => {
+    this.eventEmitter.on("microphone_paused" /* MICROPHONE_PAUSED */, async () => {
       await this.audioService.pauseMicrophone();
-      this.logger.debug("Microphone paused during AI playback", "ModoVoiceClient");
     });
-    this.eventEmitter.on("user_recording_data" /* USER_RECORDING_DATA */, async (event) => {
-      if ("data" in event && this.webSocketService.isConnected()) {
-        try {
-          this.webSocketService.send(event.data);
-        } catch (error) {
-          this.logger.error("Failed to send audio data", "WebSocketService", error);
-        }
-      }
+    this.eventEmitter.on("microphone_resumed" /* MICROPHONE_RESUMED */, async () => {
+      await this.audioService.resumeMicrophone();
     });
-    this.eventEmitter.on("ai_playback_completed" /* AI_PLAYBACK_COMPLETED */, async () => {
-      await this.audioService.setStreamComplete();
-    });
-    this.eventEmitter.on("clear_buffer" /* CLEAR_BUFFER */, async () => {
-      this.audioState.clearBuffer();
-      this.audioState.setStreamingComplete(false);
-      this.audioState.setPlaybackState("idle" /* IDLE */);
-      const currentAudio = this.audioState.getCurrentAudioElement();
-      if (currentAudio) {
-        try {
-          currentAudio.pause();
-          currentAudio.currentTime = 0;
-        } catch (e) {
-        }
-        this.audioState.setCurrentAudioElement(null);
-      }
-    });
-    this.eventEmitter.on("microphone_paused" /* MICROPHONE_PAUSED */, async (event) => {
-      if (!("internal" in event)) {
-        await this.audioService.pauseMicrophone();
-      }
-    });
-    this.eventEmitter.on("microphone_resumed" /* MICROPHONE_RESUMED */, async (event) => {
-      if (!("internal" in event)) {
-        await this.audioService.resumeMicrophone();
-      }
+    this.eventEmitter.on("turn_changed" /* TURN_CHANGED */, async (event) => {
     });
   }
   async connect(deviceId) {
     if (this.connectionState.isConnected()) {
-      this.logger.warn("Already connected", "ModoVoiceClient");
       return;
     }
     try {
-      this.logger.info("Connecting to Modo Voice Agent...", "ModoVoiceClient");
       await this.audioService.initialize(deviceId);
       this.initialized = true;
       await this.webSocketService.connect();
-      this.logger.info("Successfully connected", "ModoVoiceClient");
     } catch (error) {
-      this.logger.error("Connection failed", "ModoVoiceClient", error);
       throw error;
     }
   }
   async disconnect() {
     if (!this.connectionState.isConnected()) {
-      this.logger.warn("Not connected", "ModoVoiceClient");
       return;
     }
     try {
-      this.logger.info("Disconnecting...", "ModoVoiceClient");
       this.webSocketService.disconnect();
       await this.audioService.cleanup();
       this.initialized = false;
-      this.logger.info("Successfully disconnected", "ModoVoiceClient");
     } catch (error) {
-      this.logger.error("Disconnect failed", "ModoVoiceClient", error);
       throw error;
     }
   }
@@ -2840,14 +2440,8 @@ var ModoVoiceClient = class {
   getConnectionMetrics() {
     return this.connectionState.getMetrics();
   }
-  getVoiceMetrics() {
-    return this.voiceMetrics.getCurrent();
-  }
   async getAvailableDevices() {
     return this.audioService.getAvailableDevices();
-  }
-  setLogLevel(level) {
-    this.logger.setLevel(level);
   }
   getConfig() {
     return { ...this.config };
@@ -2857,17 +2451,16 @@ var ModoVoiceClient = class {
       throw new Error("Cannot update config while connected");
     }
     this.config = this.mergeWithDefaults({ ...this.config, ...updates });
-    if (updates.logging) {
-      this.logger.updateConfig(updates.logging);
-    }
   }
 };
 
-function initVoiceAgentLayout(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-voice-agent-overlay"),n=t?.querySelector(".mc-voice-close-btn"),c=t?.querySelector(".mc-voice-disconnect-btn"),o=e?.container?.querySelector(".mc-voice-call-btn");o&&(o.classList.remove("mc-hidden"),o.classList.add("mc-visible"));const i=t?.querySelector(".mc-voice-agent-logo");i&&e?.publicData?.image&&(i.src=e.publicData.image,i.alt=e.publicData.name||"چت بات");const a=t?.querySelector(".mc-voice-agent-title");a&&(a.textContent=e?.publicData?.name||"تماس صوتی"),o?.addEventListener("click",()=>{t&&(t.classList.remove("mc-hidden"),t.classList.add("mc-active"),e?.voiceAgent?.connect());}),n?.addEventListener("click",()=>{t&&(t.classList.remove("mc-active"),t.classList.add("mc-hidden"),e?.voiceAgent?.disconnect());}),c?.addEventListener("click",()=>{t&&(t.classList.remove("mc-active"),t.classList.add("mc-hidden"),e?.voiceAgent?.disconnect());});}function updateVoiceAgentStatus(e,t){const n=window.modoChatInstance?.(),c=n?.container?.querySelector(".mc-voice-agent-status");c&&(c.textContent=e,t&&(c.style.color=t));}function handleVoiceConnected(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-voice-agent-logo"),n=e?.container?.querySelector(".mc-voice-agent-status");t&&(t.style.animation="mc-voice-pulse 2s ease-in-out infinite"),n&&(n.style.animation="mc-pulse 1.5s ease-in-out infinite"),updateVoiceAgentStatus("متصل ✓","#68d391");}function handleVoiceDisconnected(e){const t=window.modoChatInstance?.(),n=t?.container?.querySelector(".mc-voice-agent-logo"),c=t?.container?.querySelector(".mc-voice-agent-status");n&&(n.style.animation="none"),c&&(c.style.animation="none");updateVoiceAgentStatus(e?`قطع شد: ${e}`:"قطع شد","#fc8181");}function handleVoiceConnectionError(e){updateVoiceAgentStatus(`خطا: ${e}`,"#fbb040"),console.error("🔴 Voice Connection Error:",e);}function handleMicrophonePaused(){updateVoiceAgentStatus("⏸ میکروفن متوقف شد","#fbb040");}function handleMicrophoneResumed(){updateVoiceAgentStatus("🎤 میکروفن فعال","#68d391");}
+function initVoiceAgentLayout(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-voice-agent-overlay"),n=t?.querySelector(".mc-voice-close-btn"),o=t?.querySelector(".mc-voice-disconnect-btn"),c=e?.container?.querySelector(".mc-voice-call-btn");c&&(c.classList.remove("mc-hidden"),c.classList.add("mc-visible"));const i=t?.querySelector(".mc-voice-agent-logo");i&&e?.chatbot?.image&&(i.src=e.chatbot.image,i.alt=e.chatbot.name||"چت بات");const a=t?.querySelector(".mc-voice-agent-title");a&&(a.textContent=e?.chatbot?.name||"تماس صوتی"),c?.addEventListener("click",()=>{t&&(t.classList.remove("mc-hidden"),t.classList.add("mc-active"),e?.voiceAgent?.connect());}),n?.addEventListener("click",()=>{t&&(t.classList.remove("mc-active"),t.classList.add("mc-hidden"),e?.voiceAgent?.disconnect());}),o?.addEventListener("click",()=>{t&&(t.classList.remove("mc-active"),t.classList.add("mc-hidden"),e?.voiceAgent?.disconnect());});}function updateVoiceAgentStatus(e,t){const n=window.modoChatInstance?.(),o=n?.container?.querySelector(".mc-voice-agent-status");o&&(o.textContent=e,t&&(o.style.color=t));}function handleVoiceConnected(){const e=window.modoChatInstance?.(),t=e?.container?.querySelector(".mc-voice-agent-logo"),n=e?.container?.querySelector(".mc-voice-agent-status");t&&(t.style.animation="mc-voice-pulse 2s ease-in-out infinite"),n&&(n.style.animation="mc-pulse 1.5s ease-in-out infinite"),updateVoiceAgentStatus("متصل ✓","#68d391");}function handleVoiceDisconnected(e){const t=window.modoChatInstance?.(),n=t?.container?.querySelector(".mc-voice-agent-logo"),o=t?.container?.querySelector(".mc-voice-agent-status");n&&(n.style.animation="none"),o&&(o.style.animation="none");updateVoiceAgentStatus(e?`قطع شد: ${e}`:"قطع شد","#fc8181");}function handleVoiceConnectionError(e){updateVoiceAgentStatus(`خطا: ${e}`,"#fbb040"),console.error("🔴 Voice Connection Error:",e);}function handleMicrophonePaused(){updateVoiceAgentStatus("⏸ میکروفن متوقف شد","#fbb040");}function handleMicrophoneResumed(){updateVoiceAgentStatus("🎤 میکروفن فعال","#68d391");}
 
-class VoiceAgent{instance;holdMusicAudio;constructor(){const e=window.modoChatInstance?.();this.holdMusicAudio=new Audio("https://modochats.s3.ir-thr-at1.arvanstorage.ir/on-hold.mp3"),this.holdMusicAudio.loop=true,this.instance=new ModoVoiceClient({apiBase:"https://live.modochats.com",chatbotUuid:e?.publicData?.setting.uuid,userUniqueId:e?.customerData.uniqueId,logging:{level:LogLevel.DEBUG,enableConsole:true,enableEvents:true,includeTimestamp:true,includeContext:true},audio:{constraints:{sampleRate:16e3,channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true},processor:{voiceThreshold:.08,silenceThreshold:.05,minSilenceFrames:8,maxPreRollBuffers:5,sampleRate:16e3},processorPath:"https://modochats.s3.ir-thr-at1.arvanstorage.ir/audio-processor.js",minBufferSize:32e3,targetChunks:16,resumeDelay:150}}),this.instance.on(EventType.CONNECTED,e=>{handleVoiceConnected();}),this.instance.on(EventType.DISCONNECTED,e=>{e.reason,handleVoiceDisconnected(e.reason);}),this.instance.on(EventType.CONNECTION_ERROR,e=>{handleVoiceConnectionError(e.message);}),this.instance.on(EventType.AI_PLAYBACK_STARTED,()=>{handleMicrophonePaused();}),this.instance.on(EventType.AI_PLAYBACK_COMPLETED,()=>{handleMicrophoneResumed();}),this.instance.on(EventType.VOICE_DETECTED,e=>{}),this.instance.on(EventType.VOICE_METRICS,e=>{}),this.instance.on(EventType.VOICE_ENDED,e=>{}),this.instance.on(EventType.TRANSCRIPT_RECEIVED,e=>{}),this.instance.on(EventType.AI_RESPONSE_RECEIVED,e=>{}),this.instance.on(EventType.MICROPHONE_PAUSED,()=>{handleMicrophonePaused();}),this.instance.on(EventType.MICROPHONE_RESUMED,()=>{handleMicrophoneResumed();}),this.instance.on(EventType.ON_HOLD_STARTED,()=>{this.holdMusicAudio?.play().catch(e=>{});}),this.instance.on(EventType.ON_HOLD_STOPPED,()=>{this.holdMusicAudio&&(this.holdMusicAudio.pause(),this.holdMusicAudio.currentTime=0);}),this.initHtml();}async connect(){try{await(this.instance?.connect());}catch(e){}}async disconnect(){await(this.instance?.disconnect());}initHtml(){initVoiceAgentLayout();}toggleLayout(){this.toggleLayout();}}
+class VoiceAgent{instance;holdMusicAudio;isFirstInSession=true;constructor(){const e=window.modoChatInstance?.();this.holdMusicAudio=new Audio(`${BASE_STORAGE_URL}/on-hold.mp3`),this.holdMusicAudio.loop=true,this.instance=new ModoVoiceClient({apiBase:"https://live.modochats.com",chatbotUuid:e?.chatbot?.uuid,userUniqueId:e?.customerData.uniqueId}),this.instance.on(EventType.CONNECTED,e=>{handleVoiceConnected();}),this.instance.on(EventType.DISCONNECTED,e=>{e.reason,handleVoiceDisconnected(e.reason);}),this.instance.on(EventType.CONNECTION_ERROR,e=>{handleVoiceConnectionError(e.message);}),this.instance.on(EventType.MICROPHONE_PAUSED,()=>{handleMicrophonePaused();}),this.instance.on(EventType.MICROPHONE_RESUMED,()=>{handleMicrophoneResumed();}),this.initHtml();"true"===sessionStorage.getItem("modochats:voice-agent-seen")?this.isFirstInSession=false:sessionStorage.setItem("modochats:voice-agent-seen","true"),this.isFirstInSession&&this.showTooltip();}async connect(){try{await(this.instance?.connect());}catch(e){}}async disconnect(){await(this.instance?.disconnect());}initHtml(){initVoiceAgentLayout();}toggleLayout(){this.toggleLayout();}showTooltip(){const e=document.querySelector(".mc-voice-call-tooltip");e?.classList.remove("mc-hidden"),setTimeout(()=>{e?.classList.add("mc-hidden");},6e3);}}
 
-class ModoChat{container;publicKey;publicData;customerData;conversation;socket;options={};openedCount=0;version;isInitialized=false;isOpen=false;voiceAgent;constructor(t,o){this.publicKey=t,this.customerData=new CustomerData(this,o?.userData),this.version=VERSION,this.options={position:o?.position||"right",theme:o?.theme,primaryColor:o?.primaryColor,title:o?.title||"",userData:o?.userData,foregroundColor:o?.foregroundColor,fullScreen:"boolean"==typeof o?.fullScreen&&o?.fullScreen},o?.autoInit&&this.init();}async init(){if(this.isInitialized)throw new Error("ModoChat already initialized");const t=await fetchModoPublicData(this.publicKey);if(this.publicData=new ModoPublicData(t),this.options={...this.options,theme:this.options?.theme||this.publicData?.uiConfig?.theme||"dark",primaryColor:this.options?.primaryColor||this.publicData?.uiConfig?.primaryColor||"#667eea",foregroundColor:this.options?.foregroundColor||this.publicData?.uiConfig?.foregroundColor||"#fff"},!checkIfHostIsAllowed(this))throw new Error("host not allowed");if(await loadCss(),window.modoChatInstance=()=>this,createChatContainer(this),applyModoOptions(),loadStarters(),updateChatToggleImage(),updateChatTitle(),this.isInitialized=true,this.options.fullScreen){const t=this.container?.querySelector(".mc-chat-body");t&&(t.classList.remove("mc-hidden"),t.classList.add("mc-active"));try{await loadConversation(this);}finally{this.onOpen();}}else loadConversation(this);}async onOpen(){this.isOpen=true,this.openedCount++,this.conversation?.hideTooltip(),this.conversation?.markAsRead(),this.conversation?.scrollToBottom(),1===this.openedCount&&(this.conversation&&(await(this.conversation?.loadMessages()),await initSocket()),this.publicData?.voiceAgent&&(this.voiceAgent=new VoiceAgent),await this.customerData.fetchUpdate());}onClose(){this.isOpen=false;}async updateUserData(t){await this.customerData.updateUserData(t);}}window.ModoChat=ModoChat;
+class ConversationMaster{conversation;fileMaster;replyMaster;constructor(){this.fileMaster=new CMFileMaster,this.replyMaster=new CMReplyMaster;}get replyingTo(){return this.replyMaster.replyingTo}}class CMFileMaster{file;clearFile(){this.file=void 0,this.toggleUiState();}setFile(e){this.file=e,this.toggleUiState();}toggleUiState(){const e=window.modoChatInstance?.().container,t=e?.querySelector(".mc-file-upload-btn"),s=e?.querySelector(".mc-file-input"),i=e?.querySelector(".mc-file-upload-icon"),l=e?.querySelector(".mc-file-remove-icon");this.file?(i.classList.add("mc-hidden"),l.classList.remove("mc-hidden"),t.classList.add("mc-file-uploaded")):(s.value="",i.classList.remove("mc-hidden"),l.classList.add("mc-hidden"),t.classList.remove("mc-file-uploaded"));}}class CMReplyMaster{replyingTo;setReply(e){this.replyingTo=e,this.updateReplyUI();}clearReply(){this.replyingTo=void 0,this.updateReplyUI();}updateReplyUI(){const e=window.modoChatInstance?.().container,t=e?.querySelector(".mc-reply-preview"),s=e?.querySelector(".mc-reply-preview-text"),i=e?.querySelector(".mc-chat-messages-con");if(this.replyingTo){if(t&&s){const e=this.replyingTo.content.length>50?this.replyingTo.content.substring(0,50)+"...":this.replyingTo.content;s.textContent=e,t.classList.remove("mc-hidden"),i&&i.classList.add("mc-reply-active");}}else t&&(t.classList.add("mc-hidden"),i&&i.classList.remove("mc-reply-active"));}}
+
+class ModoChat{container;publicKey;chatbot;customerData;conversationMaster;socket;options={};openedCount=0;version;isInitialized=false;isOpen=false;voiceAgent;constructor(t,o){this.publicKey=t,this.customerData=new CustomerData(this,o?.userData),this.conversationMaster=new ConversationMaster,this.version=VERSION,this.options={position:o?.position||"right",theme:o?.theme,primaryColor:o?.primaryColor,title:o?.title||"",userData:o?.userData,foregroundColor:o?.foregroundColor,fullScreen:"boolean"==typeof o?.fullScreen&&o?.fullScreen},o?.autoInit&&this.init();}async init(){if(this.isInitialized)throw new Error("ModoChat already initialized");const t=await fetchModoChatbot(this.publicKey);if(this.chatbot=new ModoChatbot(t),this.options={...this.options,theme:this.options?.theme||this.chatbot?.uiConfig?.theme||"dark",primaryColor:this.options?.primaryColor||this.chatbot?.uiConfig?.primaryColor||"#667eea",foregroundColor:this.options?.foregroundColor||this.chatbot?.uiConfig?.foregroundColor||"#fff"},!checkIfHostIsAllowed(this))throw new Error("host not allowed");if(await loadCss(),window.modoChatInstance=()=>this,createChatContainer(this),applyModoOptions(),loadStarters(),updateChatToggleImage(),updateChatTitle(),this.isInitialized=true,this.chatbot.showTooltip(),this.options.fullScreen){const t=this.container?.querySelector(".mc-chat-body");t&&(t.classList.remove("mc-hidden"),t.classList.add("mc-active"));try{await loadConversation(this);}finally{this.onOpen();}}else loadConversation(this);}async onOpen(){this.isOpen=true,this.openedCount++,this.conversation?.hideTooltip(),this.chatbot?.hideTooltip(),this.conversation?.markAsRead(),this.conversation?.scrollToBottom(),1===this.openedCount&&(this.conversation&&(await(this.conversation?.loadMessages()),await initSocket()),this.chatbot?.voiceAgent&&(this.voiceAgent=new VoiceAgent),await this.customerData.fetchUpdate());}onClose(){this.isOpen=false;}async updateUserData(t){await this.customerData.updateUserData(t);}get conversation(){return this.conversationMaster.conversation}set conversation(t){this.conversationMaster.conversation=t;}}window.ModoChat=ModoChat;
 
   
   // Return the ModoChat class for UMD usage

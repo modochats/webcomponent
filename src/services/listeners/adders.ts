@@ -32,6 +32,9 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
   registerSendMessageListener(modoContainer);
   registerPhoneNumberFormListeners(modoContainer);
   registerNewConversationListener(modoContainer);
+  registerFileUploadListener(modoContainer);
+  registerReplyPreviewListener(modoContainer);
+  registerTooltipCloseListener(modoContainer);
 };
 
 const registerSendMessageListener = (modoContainer: HTMLDivElement) => {
@@ -96,6 +99,82 @@ const registerNewConversationListener = (modoContainer: HTMLDivElement) => {
       modoInstance.socket = undefined;
     }
   });
+};
+
+const registerFileUploadListener = (modoContainer: HTMLDivElement) => {
+  const fileUploadBtn = modoContainer.querySelector(".mc-file-upload-btn") as HTMLButtonElement;
+  const fileInput = modoContainer.querySelector(".mc-file-input") as HTMLInputElement;
+  const modoIns = window?.modoChatInstance?.();
+
+  // Trigger file input when button is clicked
+  fileUploadBtn.addEventListener("click", () => {
+    if (modoIns?.conversationMaster.fileMaster.file) {
+      // If a file is selected, remove it
+      modoIns?.conversationMaster.fileMaster.clearFile();
+    } else {
+      // Otherwise, open file picker
+      fileInput.click();
+    }
+  });
+
+  // Handle file selection
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files && fileInput.files.length > 0) {
+      modoIns?.conversationMaster.fileMaster.setFile(fileInput.files[0]);
+    }
+  });
+};
+
+const registerReplyPreviewListener = (modoContainer: HTMLDivElement) => {
+  const replyPreview = modoContainer.querySelector(".mc-reply-preview") as HTMLDivElement;
+  const replyPreviewClose = modoContainer.querySelector(".mc-reply-preview-close") as HTMLButtonElement;
+  const replyPreviewInfo = modoContainer.querySelector(".mc-reply-preview-info") as HTMLDivElement;
+
+  if (!replyPreview || !replyPreviewClose || !replyPreviewInfo) return;
+
+  // Close button - clear reply
+  replyPreviewClose.addEventListener("click", e => {
+    e.stopPropagation();
+    const modoInstance = window.modoChatInstance?.();
+    if (modoInstance?.conversationMaster) {
+      modoInstance.conversationMaster.replyMaster.clearReply();
+    }
+  });
+
+  // Click on preview info - scroll to message
+  replyPreviewInfo.addEventListener("click", () => {
+    const modoInstance = window.modoChatInstance?.();
+    const replyingTo = modoInstance?.conversationMaster.replyMaster.replyingTo;
+
+    if (replyingTo?.element) {
+      // Scroll to the message
+      const messagesContainer = modoContainer.querySelector(".mc-chat-messages-con") as HTMLDivElement;
+      if (messagesContainer) {
+        replyingTo.element.scrollIntoView({behavior: "smooth", block: "center"});
+
+        // Add a highlight effect
+        replyingTo.element.classList.add("mc-message-highlight");
+        setTimeout(() => {
+          replyingTo.element?.classList.remove("mc-message-highlight");
+        }, 2000);
+      }
+    }
+  });
+};
+
+const registerTooltipCloseListener = (modoContainer: HTMLDivElement) => {
+  const modoInstance = window.modoChatInstance?.();
+  const tooltipCloseBtn = modoContainer.querySelector(".mc-toggle-tooltip-close") as HTMLButtonElement;
+  const tooltip = modoContainer.querySelector(".mc-toggle-tooltip") as HTMLDivElement;
+  if (tooltipCloseBtn) {
+    tooltipCloseBtn.addEventListener("click", e => {
+      localStorage.setItem(`modochats:${modoInstance?.publicKey}-has-seen-greeting-message`, "true");
+      e.stopPropagation();
+      if (tooltip) {
+        tooltip.classList.add("mc-hidden");
+      }
+    });
+  }
 };
 
 export {registerListeners, registerNewConversationListener};

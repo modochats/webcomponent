@@ -89,7 +89,7 @@ const initSocket = async () => {
     if (savedAccessToken) accessToken = savedAccessToken;
     if (!savedAccessToken) {
       const accessTokenRes = await fetchGetAccessTokenForSocket(
-        modoInstance.publicData?.setting.uuid as string,
+        modoInstance.chatbot?.uuid as string,
         modoInstance.conversation?.uuid as string,
         modoInstance.customerData.uniqueId
       );

@@ -7,7 +7,7 @@ import {loadStarters, switchToStarterLayout} from "./ui/fn.js";
 
 const checkIfHostIsAllowed = (modo: ModoChat) => {
   const currentHost = parse(window.location.origin).hostname;
-  const allowedHosts = modo.publicData?.setting.allowedHosts || [];
+  const allowedHosts = modo.chatbot?.allowedHosts || [];
   if (currentHost) return allowedHosts.includes(currentHost);
 };
 
@@ -17,7 +17,7 @@ const loadConversation = async (modo: ModoChat) => {
     const res = await fetchConversations(savedUUid, modo.customerData.uniqueId);
     if (res.results.length > 0) {
       modo.conversation = new Conversation(res.results[0]);
-      modo.conversation.addBadge();
+      modo.conversation?.addBadge();
     }
   }
   // modo.conversation = new Conversation(res.conversation);

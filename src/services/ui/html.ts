@@ -40,8 +40,11 @@ const createChatContainer = (modo: ModoChat) => {
           <button class="mc-new-conversation-btn mc-hidden">
             +
           </button>
-          <button class="mc-voice-call-btn mc-hidden" title="تماس صوتی">
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Google Material Icons by Material Design Authors - https://github.com/material-icons/material-icons/blob/master/LICENSE --><path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02z"/></svg>
+          <button class="mc-voice-call-btn mc-hidden">
+           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Google Material Icons by Material Design Authors - https://github.com/material-icons/material-icons/blob/master/LICENSE --><path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02z"/></svg>
+           <div class="mc-voice-call-tooltip mc-hidden">
+             <div class="mc-voice-call-tooltip-text">مکالمه با هوش مصنوعی</div>
+            </div>
           </button>
         </div>
       </div>
@@ -57,8 +60,27 @@ const createChatContainer = (modo: ModoChat) => {
         </div>
       </div>
 
+      <div class="mc-reply-preview mc-hidden">
+        <div class="mc-reply-preview-content">
+          <div class="mc-reply-preview-info">
+            <span class="mc-reply-preview-label">پاسخ به:</span>
+            <span class="mc-reply-preview-text"></span>
+          </div>
+          <button class="mc-reply-preview-close" title="لغو پاسخ">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <div class="mc-chat-input-area">
         <input type="text" placeholder="پیام خود را تایپ کنید..." class="mc-chat-input">
+        <button class="mc-file-upload-btn" title="آپلود فایل">
+          <input type="file" class="mc-file-input" hidden />
+          <svg class="mc-file-upload-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols Light by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M16.346 11.385V6.769h1v4.616zm-5.538 5.457q-.452-.269-.726-.734q-.274-.466-.274-1.031V6.769h1zM11.96 21q-2.271 0-3.846-1.595t-1.575-3.867v-8.73q0-1.587 1.09-2.697Q8.722 3 10.309 3t2.678 1.11t1.091 2.698V14h-1V6.789q-.006-1.166-.802-1.977T10.308 4q-1.163 0-1.966.821q-.804.821-.804 1.987v8.73q-.005 1.853 1.283 3.157Q10.11 20 11.961 20q.556 0 1.056-.124t.945-.372v1.11q-.468.2-.972.293q-.505.093-1.03.093m4.386-1v-2.616h-2.615v-1h2.615V13.77h1v2.615h2.616v1h-2.616V20z"/></svg>
+          <svg class="mc-file-remove-icon mc-hidden" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols Light by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M11.962 21q-2.273 0-3.848-1.594t-1.575-3.867V7.954L2.091 3.508L2.8 2.8l18.4 18.4l-.708.708l-3.805-3.806q-.664 1.298-1.913 2.098t-2.812.8M7.539 8.954v6.584q-.006 1.852 1.282 3.157T11.961 20q1.356 0 2.413-.727t1.574-1.91l-1.98-1.98q-.087.742-.656 1.295q-.568.553-1.35.553q-.881 0-1.518-.627q-.636-.627-.636-1.527v-3.854zm3.269 3.269v2.854q0 .479.328.816q.328.338.806.338q.474 0 .801-.335t.334-.808v-.596zm5.538 1.33V6.77h1v7.804zm-3.269-3.307V6.79q-.006-1.166-.805-1.977T10.308 4q-.708 0-1.281.32q-.573.319-.961.857l-.714-.713q.529-.68 1.285-1.072T10.307 3q1.587 0 2.679 1.11t1.091 2.698v4.458zm-2.27-3.477v1.189l-1-1.02V6.77z"/></svg>
+        </button>
         <button class="mc-send-message-btn" data-is-loading="false">
           <svg class="mc-send-icon" viewBox="0 0 24 24">
             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -123,20 +145,43 @@ const createChatContainer = (modo: ModoChat) => {
   ${
     !modo.options.fullScreen
       ? `
-  <button class="mc-toggle-chat-btn">
-    <img class="mc-chat-toggle-image" src="" alt="شروع گفتگو" />
-    <svg class="mc-chat-toggle-close" viewBox="0 0 24 24" width="24" height="24">
-      <path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>
-    </svg>
-    <!-- Badge for unread messages -->
-    <div class="mc-badge mc-hidden">
-      <span class="mc-badge-text">0</span>
-    </div>
-    <!-- Tooltip for toggle button -->
-    <div class="mc-toggle-tooltip mc-hidden">
-      <span class="mc-toggle-tooltip-text">شروع گفتگو</span>
-    </div>
-  </button>
+    <button class="mc-toggle-chat-btn">
+      <img
+        class="mc-chat-toggle-image"
+        src=""
+        alt="شروع گفتگو" />
+      <svg
+        class="mc-chat-toggle-close"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24">
+        <path
+          fill="currentColor"
+          d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" />
+      </svg>
+      <!-- Badge for unread messages -->
+      <div class="mc-badge mc-hidden">
+        <span class="mc-badge-text">0</span>
+      </div>
+      <!-- Tooltip for toggle button -->
+      <div class="mc-toggle-tooltip mc-hidden">
+        <div class="mc-tooltip-inner">
+          <div
+            class="mc-toggle-tooltip-close"
+            title="بستن">
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16">
+              <path
+                fill="currentColor"
+                d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" />
+            </svg>
+          </div>
+          <span class="mc-toggle-tooltip-text">شروع گفتگو</span>
+        </div>
+      </div>
+    </button>
   `
       : ""
   }

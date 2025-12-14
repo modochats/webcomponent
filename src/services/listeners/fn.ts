@@ -9,17 +9,33 @@ const sendMessage = async (message: string) => {
     if (checkIfUserHasPhoneNumber()) {
       const modoInstance = window.modoChatInstance?.();
       if (modoInstance) {
+        const savedFile = modoInstance.conversationMaster.fileMaster.file;
+        const savedReply = modoInstance.conversationMaster.replyMaster.replyingTo?.id;
+        const fileSrc = savedFile ? URL.createObjectURL(savedFile) : undefined;
         if (modoInstance?.conversation?.uuid) {
-          modoInstance.conversation.addMessage({id: "temp", content: message, message_type: 0, created_at: new Date().toISOString()});
+          modoInstance.conversation.addMessage({
+            id: "temp",
+            content: message,
+            message_type: 0,
+            created_at: new Date().toISOString(),
+            response_to: savedReply,
+            file: fileSrc
+          });
           const chatInput = modoInstance.container?.querySelector(".mc-chat-input") as HTMLInputElement;
           if (chatInput) chatInput.value = "";
         }
+        modoInstance.conversationMaster.fileMaster.clearFile();
+        modoInstance.conversationMaster.replyMaster.clearReply();
         const sendMsgRes = await fetchSendMessage(
-          modoInstance?.publicData?.setting.chatbot as number,
+          modoInstance?.chatbot?.id as number,
           message,
           modoInstance?.customerData.uniqueId,
           modoInstance?.conversation?.uuid,
-          modoInstance?.customerData.phoneNumber
+          modoInstance?.customerData.phoneNumber,
+          {
+            file: savedFile,
+            replyTo: savedReply
+          }
         );
 
         if (!modoInstance?.conversation?.uuid) {

@@ -23,15 +23,15 @@ function initVoiceAgentLayout() {
 
   // Set logo from chatbot data
   const logoImg = voiceOverlay?.querySelector(".mc-voice-agent-logo") as HTMLImageElement;
-  if (logoImg && modoInstance?.publicData?.image) {
-    logoImg.src = modoInstance.publicData.image;
-    logoImg.alt = modoInstance.publicData.name || "چت بات";
+  if (logoImg && modoInstance?.chatbot?.image) {
+    logoImg.src = modoInstance.chatbot.image;
+    logoImg.alt = modoInstance.chatbot.name || "چت بات";
   }
 
   // Set title
   const titleEl = voiceOverlay?.querySelector(".mc-voice-agent-title") as HTMLElement;
   if (titleEl) {
-    titleEl.textContent = modoInstance?.publicData?.name || "تماس صوتی";
+    titleEl.textContent = modoInstance?.chatbot?.name || "تماس صوتی";
   }
 
   // Call button click handler

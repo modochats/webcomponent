@@ -8,7 +8,7 @@
     "dev": "tsx watch src/app.ts",
     "dev:ts": "tsc --watch --noCheck",
     "dev:rollup": "rollup --config rollup.dev.config.js --watch",
-    "dev:server": "live-server temp --port=3000 --host=localhost --open=/dev.html",
+    "dev:server": "live-server temp --port=3000 --host=0.0.0.0 --open=/dev.html",
     "dev:full": "concurrently \"yarn dev:ts\" \"yarn dev:rollup\" \"yarn dev:server\" --names \"tsc,rollup,server\" --prefix name ",
     "static": "tsx src/app.ts",
     "compile": "npx tsc --noCheck",
@@ -22,7 +22,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@modochats/voice-client": "^0.1.0",
+    "@modochats/voice-client": "^0.2.0",
     "marked": "^16.3.0",
     "ofetch": "^1.5.1",
     "tldts": "^7.0.17"

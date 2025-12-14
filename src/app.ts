@@ -1,6 +1,6 @@
 import {ModoChatOptions} from "./types/app.js";
-import {ModoPublicData} from "./models/modo-public-data.js";
-import {fetchModoPublicData} from "./utils/fetch.js";
+import {ModoChatbot} from "./models/chatbot.js";
+import {fetchModoChatbot} from "./utils/fetch.js";
 import {checkIfHostIsAllowed, loadConversation} from "./services/checker.js";
 import {createChatContainer} from "./services/ui/html.js";
 import {CustomerData} from "./models/customer-data.js";
@@ -10,13 +10,15 @@ import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, 
 import {preloadAudio} from "./utils/audio.js";
 import {VERSION} from "./constants/index.js";
 import {VoiceAgent} from "./services/voice-agent/model.js";
+import {ConversationMaster} from "./models/conversation-master.js";
 
 class ModoChat {
   container?: HTMLDivElement;
   publicKey: string;
-  publicData?: ModoPublicData;
+  chatbot?: ModoChatbot;
   customerData: CustomerData;
-  conversation?: Conversation;
+
+  conversationMaster: ConversationMaster;
   socket?: Socket;
   options: Partial<ModoChatOptions> = {};
   openedCount: number = 0;
@@ -27,6 +29,7 @@ class ModoChat {
   constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
     this.publicKey = publicKey;
     this.customerData = new CustomerData(this, options?.userData);
+    this.conversationMaster = new ConversationMaster();
     this.version = VERSION;
     this.options = {
       position: options?.position || "right",
@@ -41,13 +44,13 @@ class ModoChat {
   }
   async init() {
     if (this.isInitialized) throw new Error("ModoChat already initialized");
-    const publicDataRes = await fetchModoPublicData(this.publicKey);
-    this.publicData = new ModoPublicData(publicDataRes);
+    const chatbotRes = await fetchModoChatbot(this.publicKey);
+    this.chatbot = new ModoChatbot(chatbotRes);
     this.options = {
       ...this.options,
-      theme: this.options?.theme || this.publicData?.uiConfig?.theme || "dark",
-      primaryColor: this.options?.primaryColor || this.publicData?.uiConfig?.primaryColor || "#667eea",
-      foregroundColor: this.options?.foregroundColor || this.publicData?.uiConfig?.foregroundColor || "#fff"
+      theme: this.options?.theme || this.chatbot?.uiConfig?.theme || "dark",
+      primaryColor: this.options?.primaryColor || this.chatbot?.uiConfig?.primaryColor || "#667eea",
+      foregroundColor: this.options?.foregroundColor || this.chatbot?.uiConfig?.foregroundColor || "#fff"
     };
     if (checkIfHostIsAllowed(this)) {
       await loadCss();
@@ -59,6 +62,7 @@ class ModoChat {
       updateChatTitle();
 
       this.isInitialized = true;
+      this.chatbot.showTooltip();
 
       // In fullscreen mode, automatically open the chat
       if (this.options.fullScreen) {
@@ -82,6 +86,7 @@ class ModoChat {
 
     // Hide tooltip when chat is opened
     this.conversation?.hideTooltip();
+    this.chatbot?.hideTooltip();
     this.conversation?.markAsRead();
     this.conversation?.scrollToBottom();
     if (this.openedCount === 1) {
@@ -89,7 +94,7 @@ class ModoChat {
         await this.conversation?.loadMessages();
         await initSocket();
       }
-      if (this.publicData?.voiceAgent) this.voiceAgent = new VoiceAgent();
+      if (this.chatbot?.voiceAgent) this.voiceAgent = new VoiceAgent();
       await this.customerData.fetchUpdate();
     }
   }
@@ -103,6 +108,12 @@ class ModoChat {
    */
   async updateUserData(newUserData: Record<string, any>) {
     await this.customerData.updateUserData(newUserData);
+  }
+  get conversation() {
+    return this.conversationMaster.conversation;
+  }
+  set conversation(conversation: Conversation | undefined) {
+    this.conversationMaster.conversation = conversation;
   }
 }
 

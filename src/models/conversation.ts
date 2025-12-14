@@ -155,6 +155,8 @@ class ConversationMessage {
   isRead: boolean = false;
   element?: HTMLDivElement;
   hasFeedback: boolean = false;
+  repliedToId?: number;
+  fileSrc?: string;
   constructor(init: Record<string, any>) {
     this.id = init.id;
     this.content = init.content;
@@ -176,6 +178,8 @@ class ConversationMessage {
         this.type = "UNKNOWN";
     }
     this.createdAt = init.created_at;
+    if (init.response_to) this.repliedToId = init.response_to;
+    if (init.file) this.fileSrc = init.file;
   }
 
   fetchRead() {
@@ -199,8 +203,41 @@ class ConversationMessage {
       hour12: false
     });
 
+    // Build the HTML with replied-to message preview if exists
+    let repliedToHtml = "";
+    if (this.repliedTo) {
+      const repliedContent = this.repliedTo.content.length > 40 ? this.repliedTo.content.substring(0, 40) + "..." : this.repliedTo.content;
+      repliedToHtml = `
+        <div class="mc-replied-to-preview" data-reply-message-id="${this.repliedTo.id}">
+          <div class="mc-replied-to-header">
+            <span class="mc-replied-to-sender">${this.repliedTo.type === "USER" ? "شما" : "پشتیبان"}</span>
+          </div>
+          <div class="mc-replied-to-content">${repliedContent}</div>
+        </div>
+      `;
+    }
+
+    // Build file preview HTML if file exists
+    let filePreviewHtml = "";
+    if (this.fileSrc) {
+      const displayFileName = this.fileSrc.length > 20 ? this.fileSrc.substring(0, 17) + "..." : this.fileSrc;
+      filePreviewHtml = `
+        <a href="${this.fileSrc}" target="_blank" rel="noopener noreferrer" class="mc-file-preview" title="دانلود فایل">
+          <div class="mc-file-preview-icon">
+            ${'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-8-6m4 18H6V4h7v5h5v11z"/></svg>'}
+          </div>
+          <div class="mc-file-preview-info">
+            <div class="mc-file-preview-name">${displayFileName}</div>
+            <div class="mc-file-preview-type">${"file"}</div>
+          </div>
+        </a>
+      `;
+    }
+
     this.element.innerHTML = `
-      <div class="mc-chat-message ${this.type === "USER" ? "mc-chat-message-user" : "mc-chat-message-supporter"}">
+    <div class="mc-chat-message ${this.type === "USER" ? "mc-chat-message-user" : "mc-chat-message-supporter"}">
+    ${repliedToHtml}
+    ${filePreviewHtml}
         <div class="mc-message-content">${marked.parse(this.content) as string}</div>
       </div>
       <div class="mc-message-footer">
@@ -225,9 +262,32 @@ class ConversationMessage {
     this.element.className = `mc-message-wrapper ${this.type === "USER" ? "mc-message-wrapper-user" : "mc-message-wrapper-supporter"}`;
     this.containerElement?.appendChild(this.element);
 
+    this.addElementListeners();
+
     // Add feedback event listeners for non-user messages
     if (this.type !== "USER") {
       this.addFeedbackListeners();
+    }
+
+    // Add clicked listener for replied-to preview
+    if (this.repliedTo) {
+      this.addRepliedToListener();
+    }
+  }
+
+  addRepliedToListener() {
+    const repliedToPreview = this.element?.querySelector(".mc-replied-to-preview") as HTMLDivElement;
+    if (repliedToPreview && this.repliedTo?.element) {
+      repliedToPreview.addEventListener("click", () => {
+        // Scroll to the replied message
+        this.repliedTo?.element?.scrollIntoView({behavior: "smooth", block: "center"});
+
+        // Add highlight effect
+        this.repliedTo?.element?.classList.add("mc-message-highlight");
+        setTimeout(() => {
+          this.repliedTo?.element?.classList.remove("mc-message-highlight");
+        }, 2000);
+      });
     }
   }
   showTooltip() {
@@ -320,6 +380,18 @@ class ConversationMessage {
       dislikeBtn.disabled = false;
       dislikeBtn.classList.remove("mc-feedback-disabled");
     }
+  }
+  addElementListeners() {
+    const modoInstance = window.modoChatInstance?.();
+
+    this.element?.addEventListener("dblclick", () => {
+      modoInstance?.conversationMaster.replyMaster.setReply(this);
+    });
+  }
+  get repliedTo() {
+    const modoInstance = window.modoChatInstance?.();
+    const message = modoInstance?.conversation?.messages.find(({id}) => id === this.repliedToId);
+    return message;
   }
 }
 export {Conversation, ConversationMessage};

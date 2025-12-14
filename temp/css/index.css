@@ -365,12 +365,16 @@
 }
 
 .mc-chat-title {
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 600;
   margin: 0;
   z-index: 1;
   position: relative;
   color: var(--foreground-color);
+  max-width: 80%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 /* Connection status indicator */
@@ -517,8 +521,8 @@
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: var(--foreground-color);
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -563,12 +567,12 @@
 
 /* Adjust height when reply preview is shown */
 .mc-chat-messages-con.mc-reply-active {
-  height: calc(100% - 241px);
+  height: calc(100% - 245px);
 }
 
 /* Fullscreen mode messages container */
 .modo-chat-widget.mc-fullscreen .mc-chat-messages-con {
-  height: calc(100% - 165px);
+  height: calc(100% - 170px);
 }
 
 .modo-chat-widget.mc-fullscreen .mc-chat-messages-con.mc-reply-active {
@@ -1222,7 +1226,7 @@
 /* File upload button */
 .mc-file-upload-btn {
   min-width: 44px;
-  height: 44px;
+  height: 40px;
   padding: 0;
   margin: 0;
   background: var(--bg-secondary);
@@ -1243,7 +1247,6 @@
 .mc-file-upload-btn:hover {
   border-color: var(--primary-color);
   background: var(--bg-tertiary);
-  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
@@ -1315,7 +1318,6 @@
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  transform: translateY(-2px);
 }
 
 .mc-chat-input::placeholder {
@@ -1359,7 +1361,6 @@
 }
 
 .mc-send-message-btn:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
 
@@ -1575,10 +1576,6 @@
 .mc-toggle-chat-btn:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
-}
-
-.mc-toggle-chat-btn:active {
-  transform: translateY(-2px);
 }
 
 .mc-chat-toggle-image {

@@ -1,4 +1,4 @@
-import {isDev} from "#src/constants/index.js";
+import {BASE_STORAGE_URL, isDev} from "#src/constants/index.js";
 import {ConversationStatus} from "#src/types/conversation.js";
 
 function switchToConversationLayout() {
@@ -230,7 +230,7 @@ function adjustColorBrightness(hex: string, percent: number): string {
 async function loadCss() {
   return await new Promise(resolve => {
     const link = document.createElement("link");
-    const source = isDev ? "/css/index.css" : "https://modochats.s3.ir-thr-at1.arvanstorage.ir/index.css";
+    const source = isDev ? "/css/index.css" : `${BASE_STORAGE_URL}/index.css`;
     link.rel = "stylesheet";
     link.href = source;
     document.head.appendChild(link);

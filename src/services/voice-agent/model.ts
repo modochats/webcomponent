@@ -8,16 +8,12 @@ import {
   handleMicrophonePaused,
   handleMicrophoneResumed
 } from "./utils.js";
-import {BASE_STORAGE_URL} from "#src/constants/index.js";
 
 class VoiceAgent {
   instance?: ModoVoiceClient;
-  holdMusicAudio?: HTMLAudioElement;
   isFirstInSession: boolean = true;
   constructor() {
     const modoInstance = window.modoChatInstance?.();
-    this.holdMusicAudio = new Audio(`${BASE_STORAGE_URL}/on-hold.mp3`);
-    this.holdMusicAudio.loop = true;
     this.instance = new ModoVoiceClient({
       apiBase: "https://live.modochats.com",
       // apiBase: "http://localhost:8000",

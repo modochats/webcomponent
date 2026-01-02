@@ -1,22 +1,22 @@
-import {ModoChat} from "#src/app.js";
+import {ModochatWidget} from "#src/app.js";
 import {registerListeners} from "../listeners/adders.js";
 
-const createChatContainer = (modo: ModoChat) => {
-  modo.container = document.createElement("div");
-  modo.container.textContent = "Start Chat";
-  modo.container.classList.add("modo-chat-widget");
+const createChatContainer = (widget: ModochatWidget) => {
+  widget.container = document.createElement("div");
+  widget.container.textContent = "Start Chat";
+  widget.container.classList.add("modo-chat");
 
   // Add fullscreen class if fullscreen mode is enabled
-  if (modo.options.fullScreen) {
-    modo.container.classList.add("mc-fullscreen");
+  if (widget.options.fullScreen) {
+    widget.container.classList.add("mc-fullscreen");
   }
 
-  document.body.appendChild(modo.container);
+  document.body.appendChild(widget.container);
   let conBody = document.createElement("div");
-  modo.container.appendChild(conBody);
-  modo.container.innerHTML = `
+  widget.container.appendChild(conBody);
+  widget.container.innerHTML = `
   <div dir="rtl" class="mc-chat-inner">
-  <div class="mc-chat-body ${modo.options.fullScreen ? "mc-active" : "mc-hidden"}">
+  <div class="mc-chat-body ${widget.options.fullScreen ? "mc-active" : "mc-hidden"}">
     <div class="mc-chat-container">
       <!-- Chat Header -->
       <div class="mc-chat-header">
@@ -143,7 +143,7 @@ const createChatContainer = (modo: ModoChat) => {
     </div> 
   </div>
   ${
-    !modo.options.fullScreen
+    !widget.options.fullScreen
       ? `
     <button class="mc-toggle-chat-btn">
       <img
@@ -187,6 +187,6 @@ const createChatContainer = (modo: ModoChat) => {
   }
   </div>
   `;
-  registerListeners(modo.container);
+  registerListeners(widget.container);
 };
 export {createChatContainer};

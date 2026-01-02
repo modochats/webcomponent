@@ -7,12 +7,11 @@ import {CustomerData} from "./models/customer-data.js";
 import {Conversation} from "./models/conversation.js";
 import {initSocket, Socket} from "./services/socket/socket.js";
 import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, loadCss} from "./services/ui/fn.js";
-import {preloadAudio} from "./utils/audio.js";
 import {VERSION} from "./constants/index.js";
-import {VoiceAgent} from "./services/voice-agent/model.js";
+import {VoiceChat} from "./services/voice-chat/model.js";
 import {ConversationMaster} from "./models/conversation-master.js";
 
-class ModoChat {
+class ModochatWidget {
   container?: HTMLDivElement;
   publicKey: string;
   chatbot?: ModoChatbot;
@@ -25,7 +24,8 @@ class ModoChat {
   version: string;
   isInitialized: boolean = false;
   isOpen: boolean = false;
-  voiceAgent?: VoiceAgent;
+  voiceChat?: VoiceChat;
+
   constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
     this.publicKey = publicKey;
     this.customerData = new CustomerData(this, options?.userData);
@@ -54,7 +54,7 @@ class ModoChat {
     };
     if (checkIfHostIsAllowed(this)) {
       await loadCss();
-      window.modoChatInstance = () => this;
+      window.getMWidget = () => this;
       createChatContainer(this);
       applyModoOptions();
       loadStarters();
@@ -94,7 +94,7 @@ class ModoChat {
         await this.conversation?.loadMessages();
         await initSocket();
       }
-      if (this.chatbot?.voiceAgent) this.voiceAgent = new VoiceAgent();
+      if (this.chatbot?.voiceChat) this.voiceChat = new VoiceChat();
       await this.customerData.fetchUpdate();
     }
   }
@@ -117,6 +117,7 @@ class ModoChat {
   }
 }
 
-window.ModoChat = ModoChat;
+window.ModoChat = ModochatWidget;
+window.ModochatWidget = ModochatWidget;
 
-export type {ModoChat};
+export type {ModochatWidget};

@@ -1,9 +1,10 @@
-import {ModoChat} from "../app.js";
+import {ModochatWidget} from "../app.js";
 
 declare global {
   interface Window {
-    ModoChat: typeof ModoChat;
-    modoChatInstance?: () => ModoChat;
+    ModoChat: typeof ModochatWidget;
+    ModochatWidget: typeof ModochatWidget;
+    getMWidget?: () => ModochatWidget;
   }
 }
 

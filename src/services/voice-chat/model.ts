@@ -1,7 +1,7 @@
 import {EventType} from "@modochats/voice-client";
 import {ModoVoiceClient} from "@modochats/voice-client";
 import {
-  initVoiceAgentLayout,
+  initVoiceChatLayout,
   handleVoiceConnected,
   handleVoiceDisconnected,
   handleVoiceConnectionError,
@@ -9,16 +9,16 @@ import {
   handleMicrophoneResumed
 } from "./utils.js";
 
-class VoiceAgent {
+class VoiceChat {
   instance?: ModoVoiceClient;
   isFirstInSession: boolean = true;
   constructor() {
-    const modoInstance = window.modoChatInstance?.();
+    const widget = window.getMWidget?.();
     this.instance = new ModoVoiceClient({
       apiBase: "https://live.modochats.com",
       // apiBase: "http://localhost:8000",
-      chatbotUuid: modoInstance?.chatbot?.uuid as string,
-      userUniqueId: modoInstance?.customerData.uniqueId as string
+      chatbotUuid: widget?.chatbot?.uuid as string,
+      userUniqueId: widget?.customerData.uniqueId as string
     });
     this.instance.on(EventType.CONNECTED, (event: any) => {
       handleVoiceConnected();
@@ -62,7 +62,7 @@ class VoiceAgent {
     await this.instance?.disconnect();
   }
   initHtml() {
-    initVoiceAgentLayout();
+    initVoiceChatLayout();
   }
   toggleLayout() {
     this.toggleLayout();
@@ -76,4 +76,4 @@ class VoiceAgent {
     }, 6000);
   }
 }
-export {VoiceAgent};
+export {VoiceChat};

@@ -12,8 +12,8 @@ class Socket {
   }
   private forceClosed: boolean = false;
   connect(isReconnect: boolean = false) {
-    const modoInstance = window.modoChatInstance?.();
-    const wsUrl = `${BASE_WEBSOCKET_URL}/conversations/${modoInstance?.conversation?.uuid}/messages/?token=${this.token}`;
+    const widget = window.getMWidget?.();
+    const wsUrl = `${BASE_WEBSOCKET_URL}/conversations/${widget?.conversation?.uuid}/messages/?token=${this.token}`;
     this.socket = new WebSocket(wsUrl);
     this.socket.addEventListener("open", () => {
       this.isConnected = true;
@@ -23,7 +23,7 @@ class Socket {
           type: "join_messages"
         })
       );
-      if (isReconnect) modoInstance?.conversation?.loadMessages();
+      if (isReconnect) widget?.conversation?.loadMessages();
     });
     this.socket.onmessage = event => {
       const message: SocketMessage = JSON.parse(event.data);
@@ -33,8 +33,8 @@ class Socket {
   }
 
   updateConnectionStatus(connected: boolean) {
-    const modoInstance = window.modoChatInstance?.();
-    const connectionIndicator = modoInstance?.container?.querySelector(".mc-connection-status");
+    const widget = window.getMWidget?.();
+    const connectionIndicator = widget?.container?.querySelector(".mc-connection-status");
 
     if (connectionIndicator) {
       connectionIndicator.className = `mc-connection-status ${connected ? "mc-connected" : "mc-disconnected"}`;
@@ -42,33 +42,33 @@ class Socket {
   }
 
   onMessage(message: SocketMessage) {
-    const modoInstance = window.modoChatInstance?.();
+    const widget = window.getMWidget?.();
     switch (message.type) {
       case "new_message":
         const newMessage = new ConversationMessage(message.message);
         if (newMessage.type === "USER") return;
         else {
-          modoInstance?.conversation?.addMessage(message.message, {incoming: true});
+          widget?.conversation?.addMessage(message.message, {incoming: true});
         }
         break;
       case "ai_response":
-        modoInstance?.conversation?.addMessage(message.message, {incoming: true});
+        widget?.conversation?.addMessage(message.message, {incoming: true});
         break;
       case "conversation_status_change":
-        modoInstance?.conversation?.setStatus(message.status);
-        modoInstance?.conversation?.addSystemMessage(message.message);
+        widget?.conversation?.setStatus(message.status);
+        widget?.conversation?.addSystemMessage(message.message);
         break;
       default:
         console.info("modo chat : unknown message type :", message);
     }
   }
   close() {
-    const modoInstance = window.modoChatInstance?.();
+    const widget = window.getMWidget?.();
     this.forceClosed = true;
     this.isConnected = false;
     this.updateConnectionStatus(false);
     this.socket?.close();
-    localStorage.removeItem(`modo-chat:${modoInstance?.publicKey}-conversation-access-token`);
+    localStorage.removeItem(`modo-chat:${widget?.publicKey}-conversation-access-token`);
   }
   onclose() {
     this.isConnected = false;
@@ -82,21 +82,21 @@ class Socket {
   }
 }
 const initSocket = async () => {
-  const modoInstance = window.modoChatInstance?.();
-  if (modoInstance) {
-    const savedAccessToken = localStorage.getItem(`modo-chat:${modoInstance.publicKey}-conversation-access-token`);
+  const widget = window.getMWidget?.();
+  if (widget) {
+    const savedAccessToken = localStorage.getItem(`modo-chat:${widget.publicKey}-conversation-access-token`);
     let accessToken = "";
     if (savedAccessToken) accessToken = savedAccessToken;
     if (!savedAccessToken) {
       const accessTokenRes = await fetchGetAccessTokenForSocket(
-        modoInstance.chatbot?.uuid as string,
-        modoInstance.conversation?.uuid as string,
-        modoInstance.customerData.uniqueId
+        widget.chatbot?.uuid as string,
+        widget.conversation?.uuid as string,
+        widget.customerData.uniqueId
       );
-      localStorage.setItem(`modo-chat:${modoInstance.publicKey}-conversation-access-token`, accessTokenRes.access_token);
+      localStorage.setItem(`modo-chat:${widget.publicKey}-conversation-access-token`, accessTokenRes.access_token);
       accessToken = accessTokenRes.access_token;
     }
-    modoInstance.socket = new Socket(accessToken);
+    widget.socket = new Socket(accessToken);
   }
 };
 export {Socket, initSocket};

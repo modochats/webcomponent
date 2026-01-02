@@ -69,8 +69,10 @@ async function createUMDBundle() {
 });`;
 
   // Write UMD bundle
-  const umdPath = path.join(outputDir, "modo-web-component.js");
+  const umdPath = path.join(outputDir, "modochat-widget.js");
+  const legacyUmdPath = path.join(outputDir, "modo-web-component.js");
   await fs.writeFile(umdPath, umdCode);
+  await fs.writeFile(legacyUmdPath, umdCode);
   console.log("Created UMD bundle:", umdPath);
 
   // Create minified version using Terser
@@ -89,19 +91,25 @@ async function createUMDBundle() {
     }
 
     if (result.code) {
-      const minPath = path.join(outputDir, "modo-web-component.min.js");
+      const minPath = path.join(outputDir, "modochat-widget.min.js");
+      const legacyMinPath = path.join(outputDir, "modo-web-component.min.js");
       await fs.writeFile(minPath, result.code);
+      await fs.writeFile(legacyMinPath, result.code);
       console.log("Created minified bundle:", minPath);
     } else {
       console.warn("No minified code generated. Using original code.");
-      const minPath = path.join(outputDir, "modo-web-component.min.js");
+      const minPath = path.join(outputDir, "modochat-widget.min.js");
+      const legacyMinPath = path.join(outputDir, "modo-web-component.min.js");
       await fs.writeFile(minPath, umdCode);
+      await fs.writeFile(legacyMinPath, umdCode);
     }
   } catch (error) {
     console.error("Error during minification:", error);
     console.log("Falling back to original code for minified version...");
-    const minPath = path.join(outputDir, "modo-web-component.min.js");
+    const minPath = path.join(outputDir, "modochat-widget.min.js");
+    const legacyMinPath = path.join(outputDir, "modo-web-component.min.js");
     await fs.writeFile(minPath, umdCode);
+    await fs.writeFile(legacyMinPath, umdCode);
   }
 
   // Copy dist folder
@@ -109,21 +117,21 @@ async function createUMDBundle() {
 
   // Create package.json for CDN
   const packageJson = {
-    name: "modo-web-component",
+    name: "modochat-widget",
     version: "1.0.0",
     description: "Modo Web Component - A lightweight web component library",
-    main: "modo-web-component.js",
-    files: ["modo-web-component.js", "modo-web-component.min.js", "dist/"],
+    main: "modochat-widget.js",
+    files: ["modochat-widget.js", "modochat-widget.min.js", "dist/"],
     keywords: ["web-component", "modo", "javascript", "umd"],
     author: "",
     license: "ISC",
     repository: {
       type: "git",
-      url: "https://github.com/your-username/modo-web-component.git"
+      url: "https://github.com/your-username/modochat-widget.git"
     },
-    homepage: "https://github.com/your-username/modo-web-component#readme",
+    homepage: "https://github.com/your-username/modochat-widget#readme",
     bugs: {
-      url: "https://github.com/your-username/modo-web-component/issues"
+      url: "https://github.com/your-username/modochat-widget/issues"
     }
   };
 
@@ -138,12 +146,12 @@ A lightweight web component library.
 
 ### jsDelivr
 \`\`\`html
-<script src="https://cdn.jsdelivr.net/gh/your-username/modo-web-component@main/cdn-dist/modo-web-component.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/your-username/modochat-widget@main/cdn-dist/modochat-widget.min.js"></script>
 \`\`\`
 
 ### GitHub Raw
 \`\`\`html
-<script src="https://raw.githubusercontent.com/your-username/modo-web-component/main/cdn-dist/modo-web-component.min.js"></script>
+<script src="https://raw.githubusercontent.com/your-username/modochat-widget/main/cdn-dist/modochat-widget.min.js"></script>
 \`\`\`
 
 ## Usage
@@ -169,8 +177,8 @@ const chat = new ModoChat('your-public-key', {
 
 ## Files
 
-- \`modo-web-component.js\` - Development version
-- \`modo-web-component.min.js\` - Production version (minified)
+- \`modochat-widget.js\` - Development version
+- \`modochat-widget.min.js\` - Production version (minified)
 - \`dist/\` - Full distribution files
 `;
 
@@ -178,8 +186,8 @@ const chat = new ModoChat('your-public-key', {
 
   console.log("UMD bundle created successfully!");
   console.log("Files created:");
-  console.log("- modo-web-component.js");
-  console.log("- modo-web-component.min.js");
+  console.log("- modochat-widget.js");
+  console.log("- modochat-widget.min.js");
   console.log("- dist/ (copied from build)");
   console.log("- package.json");
   console.log("- README.md");

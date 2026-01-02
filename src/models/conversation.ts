@@ -21,13 +21,13 @@ class Conversation {
     this.onInit();
   }
   addMessage(init: Record<string, any>, options?: {incoming: boolean}) {
-    const modoInstance = window.modoChatInstance?.();
+    const widget = window.getMWidget?.();
     const message = new ConversationMessage(init);
     message.initElement();
     this.messages.push(message);
     if (options?.incoming) {
       this.unreadCount++;
-      if (modoInstance?.isOpen) this.markAsRead();
+      if (widget?.isOpen) this.markAsRead();
       else {
         this.addBadge();
         message.showTooltip();
@@ -60,8 +60,8 @@ class Conversation {
 
   clear() {
     this.messages = [];
-    const modoInstance = window.modoChatInstance?.();
-    localStorage.removeItem(`modo-chat:${modoInstance?.publicKey}-conversation-uuid`);
+    const widget = window.getMWidget?.();
+    localStorage.removeItem(`modo-chat:${widget?.publicKey}-conversation-uuid`);
     const chatMessagesContainer = document.querySelector(".mc-chat-messages-con");
     if (chatMessagesContainer) {
       chatMessagesContainer.innerHTML = "";
@@ -91,19 +91,19 @@ class Conversation {
     }
   }
   async loadMessages() {
-    const modoInstance = window.modoChatInstance?.();
-    const res = await fetchConversationMessages(this.uuid, modoInstance?.publicKey as string);
+    const widget = window.getMWidget?.();
+    const res = await fetchConversationMessages(this.uuid, widget?.publicKey as string);
     this.messages = [];
-    const chatMessagesContainer = modoInstance?.container?.querySelector(".mc-chat-messages-con");
+    const chatMessagesContainer = widget?.container?.querySelector(".mc-chat-messages-con");
     if (chatMessagesContainer) chatMessagesContainer.innerHTML = "";
     for (const message of res.results) this.addMessage(message);
   }
 
   addBadge() {
-    const modoInstance = window.modoChatInstance?.();
-    if (!modoInstance?.isOpen && this.unreadCount > 0 && modoInstance) {
-      const badge = modoInstance.container?.querySelector(".mc-badge");
-      const badgeText = modoInstance.container?.querySelector(".mc-badge-text");
+    const widget = window.getMWidget?.();
+    if (!widget?.isOpen && this.unreadCount > 0 && widget) {
+      const badge = widget.container?.querySelector(".mc-badge");
+      const badgeText = widget.container?.querySelector(".mc-badge-text");
 
       if (badge && badgeText) {
         // Show the badge
@@ -124,24 +124,24 @@ class Conversation {
   }
 
   hideBadge() {
-    const modoInstance = window.modoChatInstance?.();
-    const badge = modoInstance?.container?.querySelector(".mc-badge");
+    const widget = window.getMWidget?.();
+    const badge = widget?.container?.querySelector(".mc-badge");
     if (badge) {
       badge.classList.add("mc-hidden");
     }
   }
 
   hideTooltip() {
-    const modoInstance = window.modoChatInstance?.();
-    const tooltip = modoInstance?.container?.querySelector(".mc-toggle-tooltip");
+    const widget = window.getMWidget?.();
+    const tooltip = widget?.container?.querySelector(".mc-toggle-tooltip");
     if (tooltip) {
       tooltip.classList.add("mc-hidden");
     }
   }
 
   markAsRead() {
-    const modoInstance = window.modoChatInstance?.();
-    fetchMarkConversationAsRead(this.uuid, modoInstance?.customerData.uniqueId as string).then(() => {
+    const widget = window.getMWidget?.();
+    fetchMarkConversationAsRead(this.uuid, widget?.customerData.uniqueId as string).then(() => {
       this.unreadCount = 0;
       this.hideBadge();
     });
@@ -291,9 +291,9 @@ class ConversationMessage {
     }
   }
   showTooltip() {
-    const modoInstance = window.modoChatInstance?.();
-    const tooltip = modoInstance?.container?.querySelector(".mc-toggle-tooltip");
-    const tooltipText = modoInstance?.container?.querySelector(".mc-toggle-tooltip-text");
+    const widget = window.getMWidget?.();
+    const tooltip = widget?.container?.querySelector(".mc-toggle-tooltip");
+    const tooltipText = widget?.container?.querySelector(".mc-toggle-tooltip-text");
     if (tooltip && tooltipText) {
       // Show the tooltip
       tooltip.classList.remove("mc-hidden");
@@ -327,13 +327,13 @@ class ConversationMessage {
   }
 
   sendFeedBack(liked: boolean) {
-    const modoInstance = window.modoChatInstance?.();
+    const widget = window.getMWidget?.();
     if (this.hasFeedback) return; // Prevent multiple feedback submissions
 
     this.hasFeedback = true;
     this.disableFeedbackButtons();
 
-    fetchMessageFeedback(this.id, modoInstance?.customerData.uniqueId as string, modoInstance?.conversation?.uuid as string, liked)
+    fetchMessageFeedback(this.id, widget?.customerData.uniqueId as string, widget?.conversation?.uuid as string, liked)
       .then(() => {
         // Mark the selected button as active
         const likeBtn = this.element?.querySelector(".mc-feedback-like") as HTMLButtonElement;
@@ -382,15 +382,15 @@ class ConversationMessage {
     }
   }
   addElementListeners() {
-    const modoInstance = window.modoChatInstance?.();
+    const widget = window.getMWidget?.();
 
     this.element?.addEventListener("dblclick", () => {
-      modoInstance?.conversationMaster.replyMaster.setReply(this);
+      widget?.conversationMaster.replyMaster.setReply(this);
     });
   }
   get repliedTo() {
-    const modoInstance = window.modoChatInstance?.();
-    const message = modoInstance?.conversation?.messages.find(({id}) => id === this.repliedToId);
+    const widget = window.getMWidget?.();
+    const message = widget?.conversation?.messages.find(({id}) => id === this.repliedToId);
     return message;
   }
 }

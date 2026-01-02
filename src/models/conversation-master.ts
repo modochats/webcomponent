@@ -24,11 +24,11 @@ class CMFileMaster {
     this.toggleUiState();
   }
   toggleUiState() {
-    const modoContainer = window.modoChatInstance?.().container;
-    const fileUploadBtn = modoContainer?.querySelector(".mc-file-upload-btn") as HTMLButtonElement;
-    const fileInput = modoContainer?.querySelector(".mc-file-input") as HTMLInputElement;
-    const uploadIcon = modoContainer?.querySelector(".mc-file-upload-icon") as SVGElement;
-    const removeIcon = modoContainer?.querySelector(".mc-file-remove-icon") as SVGElement;
+    const container = window.getMWidget?.().container;
+    const fileUploadBtn = container?.querySelector(".mc-file-upload-btn") as HTMLButtonElement;
+    const fileInput = container?.querySelector(".mc-file-input") as HTMLInputElement;
+    const uploadIcon = container?.querySelector(".mc-file-upload-icon") as SVGElement;
+    const removeIcon = container?.querySelector(".mc-file-remove-icon") as SVGElement;
 
     if (this.file) {
       uploadIcon.classList.add("mc-hidden");
@@ -57,10 +57,10 @@ class CMReplyMaster {
   }
 
   private updateReplyUI() {
-    const modoContainer = window.modoChatInstance?.().container;
-    const replyPreview = modoContainer?.querySelector(".mc-reply-preview") as HTMLDivElement;
-    const replyText = modoContainer?.querySelector(".mc-reply-preview-text") as HTMLElement;
-    const chatMessagesContainer = modoContainer?.querySelector(".mc-chat-messages-con") as HTMLDivElement;
+    const container = window.getMWidget?.().container;
+    const replyPreview = container?.querySelector(".mc-reply-preview") as HTMLDivElement;
+    const replyText = container?.querySelector(".mc-reply-preview-text") as HTMLElement;
+    const chatMessagesContainer = container?.querySelector(".mc-chat-messages-con") as HTMLDivElement;
 
     if (this.replyingTo) {
       // Show reply preview

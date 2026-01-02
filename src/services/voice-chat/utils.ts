@@ -1,6 +1,6 @@
-function toggleVoiceAgentLayout() {
-  const modoInstance = window.modoChatInstance?.();
-  const voiceOverlay = modoInstance?.container?.querySelector(".mc-voice-agent-overlay");
+function toggleVoiceChatLayout() {
+  const widget = window.getMWidget?.();
+  const voiceOverlay = widget?.container?.querySelector(".mc-voice-agent-overlay");
 
   if (voiceOverlay) {
     voiceOverlay.classList.toggle("mc-active");
@@ -8,12 +8,12 @@ function toggleVoiceAgentLayout() {
   }
 }
 
-function initVoiceAgentLayout() {
-  const modoInstance = window.modoChatInstance?.();
-  const voiceOverlay = modoInstance?.container?.querySelector(".mc-voice-agent-overlay");
+function initVoiceChatLayout() {
+  const widget = window.getMWidget?.();
+  const voiceOverlay = widget?.container?.querySelector(".mc-voice-agent-overlay");
   const voiceCloseBtn = voiceOverlay?.querySelector(".mc-voice-close-btn");
   const voiceDisconnectBtn = voiceOverlay?.querySelector(".mc-voice-disconnect-btn");
-  const voiceCallBtn = modoInstance?.container?.querySelector(".mc-voice-call-btn");
+  const voiceCallBtn = widget?.container?.querySelector(".mc-voice-call-btn");
 
   // Show voice call button
   if (voiceCallBtn) {
@@ -23,15 +23,15 @@ function initVoiceAgentLayout() {
 
   // Set logo from chatbot data
   const logoImg = voiceOverlay?.querySelector(".mc-voice-agent-logo") as HTMLImageElement;
-  if (logoImg && modoInstance?.chatbot?.image) {
-    logoImg.src = modoInstance.chatbot.image;
-    logoImg.alt = modoInstance.chatbot.name || "چت بات";
+  if (logoImg && widget?.chatbot?.image) {
+    logoImg.src = widget.chatbot.image;
+    logoImg.alt = widget.chatbot.name || "چت بات";
   }
 
   // Set title
   const titleEl = voiceOverlay?.querySelector(".mc-voice-agent-title") as HTMLElement;
   if (titleEl) {
-    titleEl.textContent = modoInstance?.chatbot?.name || "تماس صوتی";
+    titleEl.textContent = widget?.chatbot?.name || "تماس صوتی";
   }
 
   // Call button click handler
@@ -40,7 +40,7 @@ function initVoiceAgentLayout() {
       voiceOverlay.classList.remove("mc-hidden");
       voiceOverlay.classList.add("mc-active");
       // Connect to voice instance
-      modoInstance?.voiceAgent?.connect();
+      widget?.voiceChat?.connect();
     }
   });
 
@@ -50,7 +50,7 @@ function initVoiceAgentLayout() {
       voiceOverlay.classList.remove("mc-active");
       voiceOverlay.classList.add("mc-hidden");
       // Disconnect from voice instance
-      modoInstance?.voiceAgent?.disconnect();
+      widget?.voiceChat?.disconnect();
     }
   });
 
@@ -60,14 +60,14 @@ function initVoiceAgentLayout() {
       voiceOverlay.classList.remove("mc-active");
       voiceOverlay.classList.add("mc-hidden");
       // Disconnect from voice instance
-      modoInstance?.voiceAgent?.disconnect();
+      widget?.voiceChat?.disconnect();
     }
   });
 }
 
-function updateVoiceAgentStatus(status: string, color?: string) {
-  const modoInstance = window.modoChatInstance?.();
-  const statusEl = modoInstance?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
+function updateVoiceChatStatus(status: string, color?: string) {
+  const widget = window.getMWidget?.();
+  const statusEl = widget?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
 
   if (statusEl) {
     statusEl.textContent = status;
@@ -78,9 +78,9 @@ function updateVoiceAgentStatus(status: string, color?: string) {
 }
 
 function handleVoiceConnected() {
-  const modoInstance = window.modoChatInstance?.();
-  const logoEl = modoInstance?.container?.querySelector(".mc-voice-agent-logo") as HTMLElement;
-  const statusEl = modoInstance?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
+  const widget = window.getMWidget?.();
+  const logoEl = widget?.container?.querySelector(".mc-voice-agent-logo") as HTMLElement;
+  const statusEl = widget?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
 
   // Add animation classes when connected
   if (logoEl) {
@@ -90,13 +90,13 @@ function handleVoiceConnected() {
     statusEl.style.animation = "mc-pulse 1.5s ease-in-out infinite";
   }
 
-  updateVoiceAgentStatus("متصل ✓", "#68d391"); // Green
+  updateVoiceChatStatus("متصل ✓", "#68d391"); // Green
 }
 
 function handleVoiceDisconnected(reason?: string) {
-  const modoInstance = window.modoChatInstance?.();
-  const logoEl = modoInstance?.container?.querySelector(".mc-voice-agent-logo") as HTMLElement;
-  const statusEl = modoInstance?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
+  const widget = window.getMWidget?.();
+  const logoEl = widget?.container?.querySelector(".mc-voice-agent-logo") as HTMLElement;
+  const statusEl = widget?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
 
   // Remove animations when disconnected
   if (logoEl) {
@@ -107,28 +107,28 @@ function handleVoiceDisconnected(reason?: string) {
   }
 
   const statusText = reason ? `قطع شد: ${reason}` : "قطع شد";
-  updateVoiceAgentStatus(statusText, "#fc8181"); // Red
+  updateVoiceChatStatus(statusText, "#fc8181"); // Red
 }
 
 function handleVoiceConnectionError(message: string) {
-  updateVoiceAgentStatus(`خطا: ${message}`, "#fbb040"); // Warning/Orange
+  updateVoiceChatStatus(`خطا: ${message}`, "#fbb040"); // Warning/Orange
 
   // Also show error in console with better visibility
   console.error("🔴 Voice Connection Error:", message);
 }
 
 function handleMicrophonePaused() {
-  updateVoiceAgentStatus("⏸ میکروفن متوقف شد", "#fbb040"); // Orange
+  updateVoiceChatStatus("⏸ میکروفن متوقف شد", "#fbb040"); // Orange
 }
 
 function handleMicrophoneResumed() {
-  updateVoiceAgentStatus("🎤 میکروفن فعال", "#68d391"); // Green
+  updateVoiceChatStatus("🎤 میکروفن فعال", "#68d391"); // Green
 }
 
 export {
-  toggleVoiceAgentLayout,
-  initVoiceAgentLayout,
-  updateVoiceAgentStatus,
+  toggleVoiceChatLayout,
+  initVoiceChatLayout,
+  updateVoiceChatStatus,
   handleVoiceConnected,
   handleVoiceDisconnected,
   handleVoiceConnectionError,

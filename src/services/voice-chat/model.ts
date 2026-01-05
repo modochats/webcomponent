@@ -1,5 +1,5 @@
 import {EventType} from "@modochats/voice-client";
-import {ModoVoiceClient} from "@modochats/voice-client";
+import {VoiceClient} from "@modochats/voice-client";
 import {
   initVoiceChatLayout,
   handleVoiceConnected,
@@ -10,11 +10,11 @@ import {
 } from "./utils.js";
 
 class VoiceChat {
-  instance?: ModoVoiceClient;
+  instance?: VoiceClient;
   isFirstInSession: boolean = true;
   constructor() {
     const widget = window.getMWidget?.();
-    this.instance = new ModoVoiceClient({
+    this.instance = new VoiceClient({
       apiBase: "https://live.modochats.com",
       // apiBase: "http://localhost:8000",
       chatbotUuid: widget?.chatbot?.uuid as string,

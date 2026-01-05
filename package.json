@@ -22,7 +22,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@modochats/voice-client": "^0.2.0",
+    "@modochats/chat-client": "^0.2.2",
+    "@modochats/voice-client": "^0.2.1",
     "marked": "^16.3.0",
     "ofetch": "^1.5.1",
     "tldts": "^7.0.17"

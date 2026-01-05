@@ -21,7 +21,7 @@ const sendMessage = async (message: string) => {
             response_to: savedReply,
             file: fileSrc
           });
-          const chatInput = widget.container?.querySelector(".mc-chat-input") as HTMLInputElement;
+          const chatInput = widget.container?.querySelector(".mw-chat-input") as HTMLInputElement;
           if (chatInput) chatInput.value = "";
         }
         widget.conversationMaster.fileMaster.clearFile();
@@ -67,7 +67,7 @@ const checkIfUserHasPhoneNumber = () => {
 };
 
 const switchToPhoneNumberFormView = () => {
-  const formOverlay = window.getMWidget?.().container?.querySelector(".mc-form-overlay");
+  const formOverlay = window.getMWidget?.().container?.querySelector(".mw-form-overlay");
   if (formOverlay) {
     formOverlay.classList.remove("mc-hidden");
     formOverlay.classList.add("mc-active");
@@ -89,13 +89,13 @@ const submitPhoneNumberForm = (phoneNumber: string) => {
       // Update the phone number
       widget.customerData.savePhoneNumber(phoneNumber.trim() || undefined);
 
-      const formOverlay = widget.container?.querySelector(".mc-form-overlay");
+      const formOverlay = widget.container?.querySelector(".mw-form-overlay");
       if (formOverlay) {
         formOverlay.classList.remove("mc-active");
         formOverlay.classList.add("mc-hidden");
       }
 
-      (widget.container?.querySelector(".mc-send-message-btn") as HTMLButtonElement)?.click();
+      (widget.container?.querySelector(".mw-send-message-btn") as HTMLButtonElement)?.click();
     } else {
       console.error("ModoChat instance not found");
     }

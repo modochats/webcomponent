@@ -1,4 +1,4 @@
-class ModoChatbot {
+class Chatbot {
   name: string;
   image: string;
   shortDescription: string;
@@ -38,8 +38,8 @@ class ModoChatbot {
   }
   showTooltip() {
     const widget = window.getMWidget?.();
-    const tooltip = widget?.container?.querySelector(".mc-toggle-tooltip");
-    const tooltipText = widget?.container?.querySelector(".mc-toggle-tooltip-text");
+    const tooltip = widget?.container?.querySelector(".mw-toggle-tooltip");
+    const tooltipText = widget?.container?.querySelector(".mw-toggle-tooltip-text");
     const hasSeen = localStorage.getItem(`modochats:${widget?.publicKey}-has-seen-greeting-message`) === "true";
 
     if (tooltip && tooltipText && this.greetingMessage && !hasSeen) {
@@ -57,10 +57,10 @@ class ModoChatbot {
   }
   hideTooltip() {
     const widget = window.getMWidget?.();
-    const tooltip = widget?.container?.querySelector(".mc-toggle-tooltip");
+    const tooltip = widget?.container?.querySelector(".mw-toggle-tooltip");
     if (tooltip) {
       tooltip.classList.add("mc-hidden");
     }
   }
 }
-export {ModoChatbot};
+export {Chatbot};

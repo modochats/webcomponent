@@ -6,7 +6,7 @@ export default {
   output: {
     file: "temp/app.dev.js",
     format: "iife", // Better for browser development
-    name: "ModoChat", // Global name for IIFE
+    name: "ModoWidget", // Global name for IIFE
     sourcemap: true // Enable source maps for debugging
   },
   plugins: [

@@ -38,7 +38,7 @@ class Conversation {
   }
 
   addSystemMessage(message: string) {
-    const chatMessagesContainer = document.querySelector(".mc-chat-messages-con");
+    const chatMessagesContainer = document.querySelector(".mw-chat-messages-con");
     if (chatMessagesContainer) {
       const systemMessageElement = document.createElement("div");
       systemMessageElement.className = "mc-system-message";
@@ -52,7 +52,7 @@ class Conversation {
     }
   }
   scrollToBottom() {
-    const chatMessagesContainer = document.querySelector(".mc-chat-messages-con");
+    const chatMessagesContainer = document.querySelector(".mw-chat-messages-con");
     if (chatMessagesContainer) {
       chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
@@ -62,7 +62,7 @@ class Conversation {
     this.messages = [];
     const widget = window.getMWidget?.();
     localStorage.removeItem(`modo-chat:${widget?.publicKey}-conversation-uuid`);
-    const chatMessagesContainer = document.querySelector(".mc-chat-messages-con");
+    const chatMessagesContainer = document.querySelector(".mw-chat-messages-con");
     if (chatMessagesContainer) {
       chatMessagesContainer.innerHTML = "";
     }
@@ -94,7 +94,7 @@ class Conversation {
     const widget = window.getMWidget?.();
     const res = await fetchConversationMessages(this.uuid, widget?.publicKey as string);
     this.messages = [];
-    const chatMessagesContainer = widget?.container?.querySelector(".mc-chat-messages-con");
+    const chatMessagesContainer = widget?.container?.querySelector(".mw-chat-messages-con");
     if (chatMessagesContainer) chatMessagesContainer.innerHTML = "";
     for (const message of res.results) this.addMessage(message);
   }
@@ -102,8 +102,8 @@ class Conversation {
   addBadge() {
     const widget = window.getMWidget?.();
     if (!widget?.isOpen && this.unreadCount > 0 && widget) {
-      const badge = widget.container?.querySelector(".mc-badge");
-      const badgeText = widget.container?.querySelector(".mc-badge-text");
+      const badge = widget.container?.querySelector(".mw-badge");
+      const badgeText = widget.container?.querySelector(".mw-badge-text");
 
       if (badge && badgeText) {
         // Show the badge
@@ -125,7 +125,7 @@ class Conversation {
 
   hideBadge() {
     const widget = window.getMWidget?.();
-    const badge = widget?.container?.querySelector(".mc-badge");
+    const badge = widget?.container?.querySelector(".mw-badge");
     if (badge) {
       badge.classList.add("mc-hidden");
     }
@@ -133,7 +133,7 @@ class Conversation {
 
   hideTooltip() {
     const widget = window.getMWidget?.();
-    const tooltip = widget?.container?.querySelector(".mc-toggle-tooltip");
+    const tooltip = widget?.container?.querySelector(".mw-toggle-tooltip");
     if (tooltip) {
       tooltip.classList.add("mc-hidden");
     }
@@ -189,7 +189,7 @@ class ConversationMessage {
     }
   }
   get containerElement(): HTMLDivElement | null {
-    return document.querySelector(".mc-chat-messages-con");
+    return document.querySelector(".mw-chat-messages-con");
   }
 
   initElement() {
@@ -276,7 +276,7 @@ class ConversationMessage {
   }
 
   addRepliedToListener() {
-    const repliedToPreview = this.element?.querySelector(".mc-replied-to-preview") as HTMLDivElement;
+    const repliedToPreview = this.element?.querySelector(".mw-replied-to-preview") as HTMLDivElement;
     if (repliedToPreview && this.repliedTo?.element) {
       repliedToPreview.addEventListener("click", () => {
         // Scroll to the replied message
@@ -292,8 +292,8 @@ class ConversationMessage {
   }
   showTooltip() {
     const widget = window.getMWidget?.();
-    const tooltip = widget?.container?.querySelector(".mc-toggle-tooltip");
-    const tooltipText = widget?.container?.querySelector(".mc-toggle-tooltip-text");
+    const tooltip = widget?.container?.querySelector(".mw-toggle-tooltip");
+    const tooltipText = widget?.container?.querySelector(".mw-toggle-tooltip-text");
     if (tooltip && tooltipText) {
       // Show the tooltip
       tooltip.classList.remove("mc-hidden");
@@ -310,8 +310,8 @@ class ConversationMessage {
   }
 
   addFeedbackListeners() {
-    const likeBtn = this.element?.querySelector(".mc-feedback-like") as HTMLButtonElement;
-    const dislikeBtn = this.element?.querySelector(".mc-feedback-dislike") as HTMLButtonElement;
+    const likeBtn = this.element?.querySelector(".mw-feedback-like") as HTMLButtonElement;
+    const dislikeBtn = this.element?.querySelector(".mw-feedback-dislike") as HTMLButtonElement;
 
     if (likeBtn) {
       likeBtn.addEventListener("click", () => {
@@ -336,8 +336,8 @@ class ConversationMessage {
     fetchMessageFeedback(this.id, widget?.customerData.uniqueId as string, widget?.conversation?.uuid as string, liked)
       .then(() => {
         // Mark the selected button as active
-        const likeBtn = this.element?.querySelector(".mc-feedback-like") as HTMLButtonElement;
-        const dislikeBtn = this.element?.querySelector(".mc-feedback-dislike") as HTMLButtonElement;
+        const likeBtn = this.element?.querySelector(".mw-feedback-like") as HTMLButtonElement;
+        const dislikeBtn = this.element?.querySelector(".mw-feedback-dislike") as HTMLButtonElement;
 
         if (liked && likeBtn) {
           likeBtn.classList.add("mc-feedback-active");
@@ -353,8 +353,8 @@ class ConversationMessage {
   }
 
   disableFeedbackButtons() {
-    const likeBtn = this.element?.querySelector(".mc-feedback-like") as HTMLButtonElement;
-    const dislikeBtn = this.element?.querySelector(".mc-feedback-dislike") as HTMLButtonElement;
+    const likeBtn = this.element?.querySelector(".mw-feedback-like") as HTMLButtonElement;
+    const dislikeBtn = this.element?.querySelector(".mw-feedback-dislike") as HTMLButtonElement;
 
     if (likeBtn) {
       likeBtn.disabled = true;
@@ -368,8 +368,8 @@ class ConversationMessage {
   }
 
   enableFeedbackButtons() {
-    const likeBtn = this.element?.querySelector(".mc-feedback-like") as HTMLButtonElement;
-    const dislikeBtn = this.element?.querySelector(".mc-feedback-dislike") as HTMLButtonElement;
+    const likeBtn = this.element?.querySelector(".mw-feedback-like") as HTMLButtonElement;
+    const dislikeBtn = this.element?.querySelector(".mw-feedback-dislike") as HTMLButtonElement;
 
     if (likeBtn) {
       likeBtn.disabled = false;

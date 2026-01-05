@@ -101,14 +101,14 @@ jobs:
 
             ### Files included:
             - modo-web-component.js - Legacy UMD bundle
-            --modochat-widget.js - UMD bundle
-            --modochat-widget.min.js - Minified UMD bundle
+            --modo-widget.js - UMD bundle
+            --modo-widget.min.js - Minified UMD bundle
             - modo-web-component.min.js - Legacy Minified UMD bundle
             - dist/ - Full distribution files
 
             ### CDN Usage:
             jsDelivr (Recommended):
-            <script src="https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/cdn-dist/modochat-widget.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/cdn-dist/modo-widget.min.js"></script>
             <script src="https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/cdn-dist/modo-web-component.min.js"></script> (legacy)
 
             GitHub Raw:
@@ -124,8 +124,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/modochat-widget.js
-          asset_name: modochat-widget.js
+          asset_path: ./build-artifacts/cdn-dist/modo-widget.js
+          asset_name: modo-widget.js
           asset_content_type: application/javascript
 
       - name: Upload Release Assets Legacy
@@ -144,8 +144,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/modochat-widget.min.js
-          asset_name: modochat-widget.min.js
+          asset_path: ./build-artifacts/cdn-dist/modo-widget.min.js
+          asset_name: modo-widget.min.js
           asset_content_type: application/javascript
 
       - name: Upload Minified Release Asset Legacy

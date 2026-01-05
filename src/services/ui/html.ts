@@ -1,7 +1,7 @@
-import {ModochatWidget} from "#src/app.js";
+import {Widget} from "#src/app.js";
 import {registerListeners} from "../listeners/adders.js";
 
-const createChatContainer = (widget: ModochatWidget) => {
+const createChatContainer = (widget: Widget) => {
   widget.container = document.createElement("div");
   widget.container.textContent = "Start Chat";
   widget.container.classList.add("modo-chat");

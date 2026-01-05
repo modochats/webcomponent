@@ -1,15 +1,15 @@
-import {ModochatWidget} from "#src/app.js";
+import {Widget} from "#src/app.js";
 import {Conversation} from "#src/models/conversation.js";
 import {fetchConversations} from "#src/utils/fetch.js";
 import {parse} from "tldts";
 
-const checkIfHostIsAllowed = (widget: ModochatWidget) => {
+const checkIfHostIsAllowed = (widget: Widget) => {
   const currentHost = parse(window.location.origin).hostname;
   const allowedHosts = widget.chatbot?.allowedHosts || [];
   if (currentHost) return allowedHosts.includes(currentHost);
 };
 
-const loadConversation = async (widget: ModochatWidget) => {
+const loadConversation = async (widget: Widget) => {
   const savedUUid = localStorage.getItem(`widget-chat:${widget.publicKey}-conversation-uuid`);
   if (savedUUid) {
     const res = await fetchConversations(savedUUid, widget.customerData.uniqueId);

@@ -69,7 +69,7 @@ class VoiceChat {
   }
 
   showTooltip() {
-    const tooltip = document.querySelector(".mc-voice-call-tooltip");
+    const tooltip = document.querySelector(".mw-voice-call-tooltip");
     tooltip?.classList.remove("mc-hidden");
     setTimeout(() => {
       tooltip?.classList.add("mc-hidden");

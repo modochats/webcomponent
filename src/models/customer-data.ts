@@ -1,14 +1,14 @@
-import {ModochatWidget} from "#src/app.js";
+import {Widget} from "#src/app.js";
 import {fetchUpdateUserData} from "#src/utils/fetch.js";
 import {generateUUID} from "#src/utils/uuid.js";
 
 class CustomerData {
   private _uniqueId?: string;
   private _userData?: Record<string, any>;
-  private widget: ModochatWidget;
+  private widget: Widget;
   phoneNumber?: string;
 
-  constructor(widget: ModochatWidget, userData?: Record<string, any>) {
+  constructor(widget: Widget, userData?: Record<string, any>) {
     this.widget = widget;
     this.initializeUniqueId();
     this.updateUserData(userData);

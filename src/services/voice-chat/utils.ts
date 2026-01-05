@@ -1,6 +1,6 @@
 function toggleVoiceChatLayout() {
   const widget = window.getMWidget?.();
-  const voiceOverlay = widget?.container?.querySelector(".mc-voice-agent-overlay");
+  const voiceOverlay = widget?.container?.querySelector(".mw-voice-agent-overlay");
 
   if (voiceOverlay) {
     voiceOverlay.classList.toggle("mc-active");
@@ -10,10 +10,10 @@ function toggleVoiceChatLayout() {
 
 function initVoiceChatLayout() {
   const widget = window.getMWidget?.();
-  const voiceOverlay = widget?.container?.querySelector(".mc-voice-agent-overlay");
-  const voiceCloseBtn = voiceOverlay?.querySelector(".mc-voice-close-btn");
-  const voiceDisconnectBtn = voiceOverlay?.querySelector(".mc-voice-disconnect-btn");
-  const voiceCallBtn = widget?.container?.querySelector(".mc-voice-call-btn");
+  const voiceOverlay = widget?.container?.querySelector(".mw-voice-agent-overlay");
+  const voiceCloseBtn = voiceOverlay?.querySelector(".mw-voice-close-btn");
+  const voiceDisconnectBtn = voiceOverlay?.querySelector(".mw-voice-disconnect-btn");
+  const voiceCallBtn = widget?.container?.querySelector(".mw-voice-call-btn");
 
   // Show voice call button
   if (voiceCallBtn) {
@@ -22,14 +22,14 @@ function initVoiceChatLayout() {
   }
 
   // Set logo from chatbot data
-  const logoImg = voiceOverlay?.querySelector(".mc-voice-agent-logo") as HTMLImageElement;
+  const logoImg = voiceOverlay?.querySelector(".mw-voice-agent-logo") as HTMLImageElement;
   if (logoImg && widget?.chatbot?.image) {
     logoImg.src = widget.chatbot.image;
     logoImg.alt = widget.chatbot.name || "چت بات";
   }
 
   // Set title
-  const titleEl = voiceOverlay?.querySelector(".mc-voice-agent-title") as HTMLElement;
+  const titleEl = voiceOverlay?.querySelector(".mw-voice-agent-title") as HTMLElement;
   if (titleEl) {
     titleEl.textContent = widget?.chatbot?.name || "تماس صوتی";
   }
@@ -67,7 +67,7 @@ function initVoiceChatLayout() {
 
 function updateVoiceChatStatus(status: string, color?: string) {
   const widget = window.getMWidget?.();
-  const statusEl = widget?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
+  const statusEl = widget?.container?.querySelector(".mw-voice-agent-status") as HTMLElement;
 
   if (statusEl) {
     statusEl.textContent = status;
@@ -79,8 +79,8 @@ function updateVoiceChatStatus(status: string, color?: string) {
 
 function handleVoiceConnected() {
   const widget = window.getMWidget?.();
-  const logoEl = widget?.container?.querySelector(".mc-voice-agent-logo") as HTMLElement;
-  const statusEl = widget?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
+  const logoEl = widget?.container?.querySelector(".mw-voice-agent-logo") as HTMLElement;
+  const statusEl = widget?.container?.querySelector(".mw-voice-agent-status") as HTMLElement;
 
   // Add animation classes when connected
   if (logoEl) {
@@ -95,8 +95,8 @@ function handleVoiceConnected() {
 
 function handleVoiceDisconnected(reason?: string) {
   const widget = window.getMWidget?.();
-  const logoEl = widget?.container?.querySelector(".mc-voice-agent-logo") as HTMLElement;
-  const statusEl = widget?.container?.querySelector(".mc-voice-agent-status") as HTMLElement;
+  const logoEl = widget?.container?.querySelector(".mw-voice-agent-logo") as HTMLElement;
+  const statusEl = widget?.container?.querySelector(".mw-voice-agent-status") as HTMLElement;
 
   // Remove animations when disconnected
   if (logoEl) {

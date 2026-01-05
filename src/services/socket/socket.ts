@@ -34,7 +34,7 @@ class Socket {
 
   updateConnectionStatus(connected: boolean) {
     const widget = window.getMWidget?.();
-    const connectionIndicator = widget?.container?.querySelector(".mc-connection-status");
+    const connectionIndicator = widget?.container?.querySelector(".mw-connection-status");
 
     if (connectionIndicator) {
       connectionIndicator.className = `mc-connection-status ${connected ? "mc-connected" : "mc-disconnected"}`;

@@ -1,12 +1,12 @@
 import {sendMessage, submitPhoneNumberForm} from "./fn.js";
 
 const registerListeners = (widgetContainer: HTMLDivElement) => {
-  let chatBody = widgetContainer.querySelector(".mc-chat-body");
-  const toggleChatBtn = widgetContainer.querySelector(".mc-toggle-chat-btn") as HTMLButtonElement;
+  let chatBody = widgetContainer.querySelector(".mw-chat-body");
+  const toggleChatBtn = widgetContainer.querySelector(".mw-toggle-chat-btn") as HTMLButtonElement;
   let isBodyOpen = false;
 
   // Set footer link URL with origin parameter and version title
-  const footerLink = widgetContainer.querySelector(".mc-footer-link") as HTMLAnchorElement;
+  const footerLink = widgetContainer.querySelector(".mw-footer-link") as HTMLAnchorElement;
   if (footerLink) {
     const widget = window.getMWidget?.();
     footerLink.href = `https://modochats.com?utm_source=${encodeURIComponent(window.location.origin)}`;
@@ -38,8 +38,8 @@ const registerListeners = (widgetContainer: HTMLDivElement) => {
 };
 
 const registerSendMessageListener = (widgetContainer: HTMLDivElement) => {
-  const chatInput = widgetContainer.querySelector(".mc-chat-input") as HTMLInputElement;
-  const sendMessageBtn = widgetContainer.querySelector(".mc-send-message-btn") as HTMLButtonElement;
+  const chatInput = widgetContainer.querySelector(".mw-chat-input") as HTMLInputElement;
+  const sendMessageBtn = widgetContainer.querySelector(".mw-send-message-btn") as HTMLButtonElement;
 
   let isDisabled = false;
   function toggleLoading() {
@@ -74,10 +74,10 @@ const registerSendMessageListener = (widgetContainer: HTMLDivElement) => {
 };
 
 const registerPhoneNumberFormListeners = (widgetContainer: HTMLDivElement) => {
-  const formOverlay = widgetContainer.querySelector(".mc-form-overlay") as HTMLDivElement;
-  const phoneInput = widgetContainer.querySelector(".mc-phone-input") as HTMLInputElement;
-  const formSubmitBtn = widgetContainer.querySelector(".mc-form-submit-btn") as HTMLButtonElement;
-  const formCancelBtn = widgetContainer.querySelector(".mc-form-cancel-btn") as HTMLButtonElement;
+  const formOverlay = widgetContainer.querySelector(".mw-form-overlay") as HTMLDivElement;
+  const phoneInput = widgetContainer.querySelector(".mw-phone-input") as HTMLInputElement;
+  const formSubmitBtn = widgetContainer.querySelector(".mw-form-submit-btn") as HTMLButtonElement;
+  const formCancelBtn = widgetContainer.querySelector(".mw-form-cancel-btn") as HTMLButtonElement;
   formSubmitBtn.addEventListener("click", () => {
     const phoneNumber = phoneInput.value;
     submitPhoneNumberForm(phoneNumber);
@@ -88,7 +88,7 @@ const registerPhoneNumberFormListeners = (widgetContainer: HTMLDivElement) => {
 };
 
 const registerNewConversationListener = (widgetContainer: HTMLDivElement) => {
-  const newBtn = widgetContainer.querySelector(".mc-new-conversation-btn") as HTMLButtonElement;
+  const newBtn = widgetContainer.querySelector(".mw-new-conversation-btn") as HTMLButtonElement;
 
   newBtn.addEventListener("click", () => {
     const widget = window.getMWidget?.();
@@ -102,8 +102,8 @@ const registerNewConversationListener = (widgetContainer: HTMLDivElement) => {
 };
 
 const registerFileUploadListener = (widgetContainer: HTMLDivElement) => {
-  const fileUploadBtn = widgetContainer.querySelector(".mc-file-upload-btn") as HTMLButtonElement;
-  const fileInput = widgetContainer.querySelector(".mc-file-input") as HTMLInputElement;
+  const fileUploadBtn = widgetContainer.querySelector(".mw-file-upload-btn") as HTMLButtonElement;
+  const fileInput = widgetContainer.querySelector(".mw-file-input") as HTMLInputElement;
   const widget = window?.getMWidget?.();
 
   // Trigger file input when button is clicked
@@ -126,9 +126,9 @@ const registerFileUploadListener = (widgetContainer: HTMLDivElement) => {
 };
 
 const registerReplyPreviewListener = (widgetContainer: HTMLDivElement) => {
-  const replyPreview = widgetContainer.querySelector(".mc-reply-preview") as HTMLDivElement;
-  const replyPreviewClose = widgetContainer.querySelector(".mc-reply-preview-close") as HTMLButtonElement;
-  const replyPreviewInfo = widgetContainer.querySelector(".mc-reply-preview-info") as HTMLDivElement;
+  const replyPreview = widgetContainer.querySelector(".mw-reply-preview") as HTMLDivElement;
+  const replyPreviewClose = widgetContainer.querySelector(".mw-reply-preview-close") as HTMLButtonElement;
+  const replyPreviewInfo = widgetContainer.querySelector(".mw-reply-preview-info") as HTMLDivElement;
 
   if (!replyPreview || !replyPreviewClose || !replyPreviewInfo) return;
 
@@ -148,7 +148,7 @@ const registerReplyPreviewListener = (widgetContainer: HTMLDivElement) => {
 
     if (replyingTo?.element) {
       // Scroll to the message
-      const messagesContainer = widgetContainer.querySelector(".mc-chat-messages-con") as HTMLDivElement;
+      const messagesContainer = widgetContainer.querySelector(".mw-chat-messages-con") as HTMLDivElement;
       if (messagesContainer) {
         replyingTo.element.scrollIntoView({behavior: "smooth", block: "center"});
 
@@ -164,8 +164,8 @@ const registerReplyPreviewListener = (widgetContainer: HTMLDivElement) => {
 
 const registerTooltipCloseListener = (widgetContainer: HTMLDivElement) => {
   const widget = window.getMWidget?.();
-  const tooltipCloseBtn = widgetContainer.querySelector(".mc-toggle-tooltip-close") as HTMLButtonElement;
-  const tooltip = widgetContainer.querySelector(".mc-toggle-tooltip") as HTMLDivElement;
+  const tooltipCloseBtn = widgetContainer.querySelector(".mw-toggle-tooltip-close") as HTMLButtonElement;
+  const tooltip = widgetContainer.querySelector(".mw-toggle-tooltip") as HTMLDivElement;
   if (tooltipCloseBtn) {
     tooltipCloseBtn.addEventListener("click", e => {
       localStorage.setItem(`modochats:${widget?.publicKey}-has-seen-greeting-message`, "true");

@@ -1,6 +1,6 @@
-import {ModoChatOptions} from "./types/app.js";
-import {ModoChatbot} from "./models/chatbot.js";
-import {fetchModoChatbot} from "./utils/fetch.js";
+import {WidgetOptions} from "./types/app.js";
+import {Chatbot} from "./models/chatbot.js";
+import {fetchChatbot} from "./utils/fetch.js";
 import {checkIfHostIsAllowed, loadConversation} from "./services/checker.js";
 import {createChatContainer} from "./services/ui/html.js";
 import {CustomerData} from "./models/customer-data.js";
@@ -11,22 +11,22 @@ import {VERSION} from "./constants/index.js";
 import {VoiceChat} from "./services/voice-chat/model.js";
 import {ConversationMaster} from "./models/conversation-master.js";
 
-class ModochatWidget {
+class Widget {
   container?: HTMLDivElement;
   publicKey: string;
-  chatbot?: ModoChatbot;
+  chatbot?: Chatbot;
   customerData: CustomerData;
 
   conversationMaster: ConversationMaster;
   socket?: Socket;
-  options: Partial<ModoChatOptions> = {};
+  options: Partial<WidgetOptions> = {};
   openedCount: number = 0;
   version: string;
   isInitialized: boolean = false;
   isOpen: boolean = false;
   voiceChat?: VoiceChat;
 
-  constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
+  constructor(publicKey: string, options?: Partial<WidgetOptions>) {
     this.publicKey = publicKey;
     this.customerData = new CustomerData(this, options?.userData);
     this.conversationMaster = new ConversationMaster();
@@ -44,8 +44,8 @@ class ModochatWidget {
   }
   async init() {
     if (this.isInitialized) throw new Error("ModoChat already initialized");
-    const chatbotRes = await fetchModoChatbot(this.publicKey);
-    this.chatbot = new ModoChatbot(chatbotRes);
+    const chatbotRes = await fetchChatbot(this.publicKey);
+    this.chatbot = new Chatbot(chatbotRes);
     this.options = {
       ...this.options,
       theme: this.options?.theme || this.chatbot?.uiConfig?.theme || "dark",
@@ -67,7 +67,7 @@ class ModochatWidget {
       // In fullscreen mode, automatically open the chat
       if (this.options.fullScreen) {
         // Ensure chat body is visible in fullscreen mode
-        const chatBody = this.container?.querySelector(".mc-chat-body");
+        const chatBody = this.container?.querySelector(".mw-chat-body");
         if (chatBody) {
           chatBody.classList.remove("mc-hidden");
           chatBody.classList.add("mc-active");
@@ -117,7 +117,7 @@ class ModochatWidget {
   }
 }
 
-window.ModoChat = ModochatWidget;
-window.ModochatWidget = ModochatWidget;
+window.ModoChat = Widget;
+window.ModoWidget = Widget;
 
-export type {ModochatWidget};
+export type {Widget};

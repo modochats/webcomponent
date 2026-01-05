@@ -3,20 +3,20 @@ import {ConversationStatus} from "#src/types/conversation.js";
 
 function switchToConversationLayout() {
   const widget = window.getMWidget?.();
-  widget?.container?.querySelector(".mc-new-conversation-btn")?.classList.remove("mc-hidden");
-  widget?.container?.querySelector(".mc-starters-con")?.classList.add("mc-hidden");
+  widget?.container?.querySelector(".mw-new-conversation-btn")?.classList.remove("mc-hidden");
+  widget?.container?.querySelector(".mw-starters-con")?.classList.add("mc-hidden");
 }
 function switchToStarterLayout() {
   const widget = window.getMWidget?.();
-  widget?.container?.querySelector(".mc-new-conversation-btn")?.classList.add("mc-hidden");
-  widget?.container?.querySelector(".mc-starters-con")?.classList.remove("mc-hidden");
-  widget?.container?.querySelector(".mc-conversation-status-icon")?.classList.add("mc-hidden");
+  widget?.container?.querySelector(".mw-new-conversation-btn")?.classList.add("mc-hidden");
+  widget?.container?.querySelector(".mw-starters-con")?.classList.remove("mc-hidden");
+  widget?.container?.querySelector(".mw-conversation-status-icon")?.classList.add("mc-hidden");
 }
 
 function setConversationType(type: keyof typeof ConversationStatus) {
   const widget = window.getMWidget?.();
-  widget?.container?.querySelector(".mc-conversation-status-icon")?.classList.remove("mc-hidden");
-  const statusIcon = widget?.container?.querySelector(".mc-conversation-status-icon");
+  widget?.container?.querySelector(".mw-conversation-status-icon")?.classList.remove("mc-hidden");
+  const statusIcon = widget?.container?.querySelector(".mw-conversation-status-icon");
 
   if (statusIcon) {
     // Remove existing mode classes
@@ -33,8 +33,8 @@ function setConversationType(type: keyof typeof ConversationStatus) {
 
 function loadStarters() {
   const widget = window.getMWidget?.();
-  const startersContainer = widget?.container?.querySelector(".mc-starters-con");
-  const starterItemsContainer = widget?.container?.querySelector(".mc-starter-items");
+  const startersContainer = widget?.container?.querySelector(".mw-starters-con");
+  const starterItemsContainer = widget?.container?.querySelector(".mw-starter-items");
 
   startersContainer?.classList.remove("mc-hidden");
 
@@ -43,8 +43,8 @@ function loadStarters() {
     starterElement.className = "mc-starter-item";
     starterElement.textContent = starter;
     starterElement.addEventListener("click", async () => {
-      const inputEl = widget?.container?.querySelector(".mc-chat-input") as HTMLInputElement;
-      const sendMsgBtnEl = widget?.container?.querySelector(".mc-send-message-btn") as HTMLButtonElement;
+      const inputEl = widget?.container?.querySelector(".mw-chat-input") as HTMLInputElement;
+      const sendMsgBtnEl = widget?.container?.querySelector(".mw-send-message-btn") as HTMLButtonElement;
       switchToConversationLayout();
       if (inputEl) {
         inputEl.value = starter;
@@ -57,8 +57,8 @@ function loadStarters() {
 
 function updateChatToggleImage() {
   const widget = window.getMWidget?.();
-  const toggleImageEl = widget?.container?.querySelector(".mc-chat-toggle-image") as HTMLImageElement;
-  const starterLogoEl = widget?.container?.querySelector(".mc-starter-logo") as HTMLImageElement;
+  const toggleImageEl = widget?.container?.querySelector(".mw-chat-toggle-image") as HTMLImageElement;
+  const starterLogoEl = widget?.container?.querySelector(".mw-starter-logo") as HTMLImageElement;
 
   const defaultSvg =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.1 3.9 23 5 23H11V21H5V3H13V9H21ZM23 18V16H15V18L19 22L15 26V28H23V26H19L23 22L19 18H23Z'/%3E%3C/svg%3E";
@@ -101,8 +101,8 @@ function updateChatToggleImage() {
 
 function updateChatTitle() {
   const widget = window.getMWidget?.();
-  const chatTitleEl = widget?.container?.querySelector(".mc-chat-title") as HTMLElement;
-  const starterTitleEl = widget?.container?.querySelector(".mc-starter-title") as HTMLElement;
+  const chatTitleEl = widget?.container?.querySelector(".mw-chat-title") as HTMLElement;
+  const starterTitleEl = widget?.container?.querySelector(".mw-starter-title") as HTMLElement;
 
   if (chatTitleEl || starterTitleEl) {
     // Use options title if no chatbot name is available
@@ -147,7 +147,7 @@ function applyPositionOption(container: HTMLDivElement, position: "left" | "righ
       widget.style.direction = "ltr";
 
       // Update chat body position for left alignment
-      const chatBody = widget.querySelector(".mc-chat-body") as HTMLElement;
+      const chatBody = widget.querySelector(".mw-chat-body") as HTMLElement;
       if (chatBody) {
         chatBody.style.right = "auto";
         chatBody.style.left = "0";
@@ -158,7 +158,7 @@ function applyPositionOption(container: HTMLDivElement, position: "left" | "righ
       // widget.style.direction = "rtl";
 
       // Update chat body position for right alignment
-      const chatBody = widget.querySelector(".mc-chat-body") as HTMLElement;
+      const chatBody = widget.querySelector(".mw-chat-body") as HTMLElement;
       if (chatBody) {
         chatBody.style.left = "auto";
         chatBody.style.right = "0";
@@ -169,7 +169,7 @@ function applyPositionOption(container: HTMLDivElement, position: "left" | "righ
 
 function applyThemeOption(container: HTMLDivElement, theme: "dark" | "light") {
   // Set the theme attribute on the container or document
-  const widget = document.querySelector(".modo-chat-widget");
+  const widget = document.querySelector(".modo-widget");
   if (theme === "light") {
     widget?.setAttribute("data-theme", "light");
   } else {
@@ -182,7 +182,7 @@ function applyThemeOption(container: HTMLDivElement, theme: "dark" | "light") {
 
 function applyPrimaryColorOption(container: HTMLDivElement, primaryColor: string) {
   // Create CSS custom properties for the primary color
-  const root = document.querySelector(".modo-chat-widget") as HTMLDivElement;
+  const root = document.querySelector(".modo-widget") as HTMLDivElement;
   if (root) {
     // Set the primary color
     root?.style.setProperty("--primary-color", primaryColor);
@@ -199,7 +199,7 @@ function applyPrimaryColorOption(container: HTMLDivElement, primaryColor: string
 
 function applyForegroundColorOption(container: HTMLDivElement, foregroundColor: string) {
   // Create CSS custom properties for the foreground color
-  const root = document.querySelector(".modo-chat-widget") as HTMLDivElement;
+  const root = document.querySelector(".modo-widget") as HTMLDivElement;
   if (root) {
     // Set the foreground color
     root?.style.setProperty("--foreground-color", foregroundColor);

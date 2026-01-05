@@ -44,14 +44,14 @@ class Chatbot {
 
     if (tooltip && tooltipText && this.greetingMessage && !hasSeen) {
       // Show the tooltip
-      tooltip.classList.remove("mc-hidden");
+      tooltip.classList.remove("mw-hidden");
 
       // Update tooltip text with greeting message
       tooltipText.textContent = this.greetingMessage;
 
       // Auto-hide after 5 seconds
       // setTimeout(() => {
-      //   tooltip.classList.add("mc-hidden");
+      //   tooltip.classList.add("mw-hidden");
       // }, 5000);
     }
   }
@@ -59,7 +59,7 @@ class Chatbot {
     const widget = window.getMWidget?.();
     const tooltip = widget?.container?.querySelector(".mw-toggle-tooltip");
     if (tooltip) {
-      tooltip.classList.add("mc-hidden");
+      tooltip.classList.add("mw-hidden");
     }
   }
 }

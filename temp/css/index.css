@@ -389,7 +389,7 @@
 .mw-connection-status.mw-connected {
   background: #68d391;
   box-shadow: 0 0 6px rgba(104, 211, 145, 0.6);
-  animation: mc-pulse 2s infinite;
+  animation: mw-pulse 2s infinite;
 }
 
 .mw-connection-status.mw-disconnected {
@@ -502,7 +502,7 @@
   display: block;
 }
 
-@keyframes mc-pulse {
+@keyframes mw-pulse {
   0% {
     transform: scale(1);
     opacity: 1;
@@ -602,7 +602,7 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 12px;
-  animation: mc-fadeInUp 0.3s ease-out;
+  animation: mw-fadeInUp 0.3s ease-out;
 }
 
 /* Message feedback styles */
@@ -758,10 +758,10 @@
 
 /* Message highlight animation */
 .mw-message-wrapper.mw-message-highlight .mw-chat-message {
-  animation: mc-highlight-pulse 1s ease-out;
+  animation: mw-highlight-pulse 1s ease-out;
 }
 
-@keyframes mc-highlight-pulse {
+@keyframes mw-highlight-pulse {
   0% {
     background: var(--primary-color);
   }
@@ -787,7 +787,7 @@
   display: flex;
   justify-content: center;
   margin: 6px 0;
-  animation: mc-fadeInUp 0.3s ease-out;
+  animation: mw-fadeInUp 0.3s ease-out;
 }
 
 .mw-system-message-content {
@@ -1401,7 +1401,7 @@
 .mw-loading-spinner {
   width: 20px;
   height: 20px;
-  animation: mc-spin 1s linear infinite;
+  animation: mw-spin 1s linear infinite;
 }
 
 .mw-spinner-circle {
@@ -1412,7 +1412,7 @@
   opacity: 0.75;
 }
 
-@keyframes mc-spin {
+@keyframes mw-spin {
   from {
     transform: rotate(0deg);
   }
@@ -1628,7 +1628,7 @@
   border: 2px solid var(--bg-primary);
   box-shadow: var(--shadow-sm);
   z-index: 10;
-  animation: mc-badge-pulse 2s infinite;
+  animation: mw-badge-pulse 2s infinite;
 }
 
 .mw-badge.mw-hidden {
@@ -1641,7 +1641,7 @@
 }
 
 /* Badge pulse animation */
-@keyframes mc-badge-pulse {
+@keyframes mw-badge-pulse {
   0% {
     transform: scale(1);
   }
@@ -1980,7 +1980,7 @@
 }
 
 /* Animation classes */
-@keyframes mc-fadeInUp {
+@keyframes mw-fadeInUp {
   from {
     opacity: 0;
     transform: translateY(30px);
@@ -1991,7 +1991,7 @@
   }
 }
 
-@keyframes mc-slideInRight {
+@keyframes mw-slideInRight {
   from {
     opacity: 0;
     transform: translateX(30px);
@@ -2003,11 +2003,11 @@
 }
 
 .mw-fade-in-up {
-  animation: mc-fadeInUp 0.4s ease-out;
+  animation: mw-fadeInUp 0.4s ease-out;
 }
 
 .mw-slide-in-right {
-  animation: mc-slideInRight 0.4s ease-out;
+  animation: mw-slideInRight 0.4s ease-out;
 }
 
 /* Custom scrollbar for better UX */
@@ -2208,7 +2208,7 @@
   gap: 24px;
   flex: 1;
   justify-content: center;
-  animation: mc-fadeInUp 0.6s ease-out;
+  animation: mw-fadeInUp 0.6s ease-out;
 }
 
 .mw-voice-agent-logo {
@@ -2218,10 +2218,10 @@
   object-fit: cover;
   box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
   border: 3px solid rgba(255, 255, 255, 0.2);
-  animation: mc-voice-pulse 2s ease-in-out infinite;
+  animation: mw-voice-pulse 2s ease-in-out infinite;
 }
 
-@keyframes mc-voice-pulse {
+@keyframes mw-voice-pulse {
   0%,
   100% {
     transform: scale(1);
@@ -2246,7 +2246,7 @@
   color: var(--text-secondary);
   margin: 0;
   text-align: center;
-  animation: mc-pulse 1.5s ease-in-out infinite;
+  animation: mw-pulse 1.5s ease-in-out infinite;
 }
 
 .mw-voice-agent-controls {

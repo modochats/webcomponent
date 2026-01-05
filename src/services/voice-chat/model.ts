@@ -70,9 +70,9 @@ class VoiceChat {
 
   showTooltip() {
     const tooltip = document.querySelector(".mw-voice-call-tooltip");
-    tooltip?.classList.remove("mc-hidden");
+    tooltip?.classList.remove("mw-hidden");
     setTimeout(() => {
-      tooltip?.classList.add("mc-hidden");
+      tooltip?.classList.add("mw-hidden");
     }, 6000);
   }
 }

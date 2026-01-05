@@ -1,5 +1,5 @@
 {
-  "name": "modochat-widget",
+  "name": "@modochats/widget",
   "version": "1.0.0",
   "description": "",
   "main": "dist/src/app.js",

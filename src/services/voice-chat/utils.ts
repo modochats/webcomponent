@@ -3,8 +3,8 @@ function toggleVoiceChatLayout() {
   const voiceOverlay = widget?.container?.querySelector(".mw-voice-agent-overlay");
 
   if (voiceOverlay) {
-    voiceOverlay.classList.toggle("mc-active");
-    voiceOverlay.classList.toggle("mc-hidden");
+    voiceOverlay.classList.toggle("mw-active");
+    voiceOverlay.classList.toggle("mw-hidden");
   }
 }
 
@@ -17,8 +17,8 @@ function initVoiceChatLayout() {
 
   // Show voice call button
   if (voiceCallBtn) {
-    voiceCallBtn.classList.remove("mc-hidden");
-    voiceCallBtn.classList.add("mc-visible");
+    voiceCallBtn.classList.remove("mw-hidden");
+    voiceCallBtn.classList.add("mw-visible");
   }
 
   // Set logo from chatbot data
@@ -37,8 +37,8 @@ function initVoiceChatLayout() {
   // Call button click handler
   voiceCallBtn?.addEventListener("click", () => {
     if (voiceOverlay) {
-      voiceOverlay.classList.remove("mc-hidden");
-      voiceOverlay.classList.add("mc-active");
+      voiceOverlay.classList.remove("mw-hidden");
+      voiceOverlay.classList.add("mw-active");
       // Connect to voice instance
       widget?.voiceChat?.connect();
     }
@@ -47,8 +47,8 @@ function initVoiceChatLayout() {
   // Close button click handler
   voiceCloseBtn?.addEventListener("click", () => {
     if (voiceOverlay) {
-      voiceOverlay.classList.remove("mc-active");
-      voiceOverlay.classList.add("mc-hidden");
+      voiceOverlay.classList.remove("mw-active");
+      voiceOverlay.classList.add("mw-hidden");
       // Disconnect from voice instance
       widget?.voiceChat?.disconnect();
     }
@@ -57,8 +57,8 @@ function initVoiceChatLayout() {
   // Disconnect button click handler
   voiceDisconnectBtn?.addEventListener("click", () => {
     if (voiceOverlay) {
-      voiceOverlay.classList.remove("mc-active");
-      voiceOverlay.classList.add("mc-hidden");
+      voiceOverlay.classList.remove("mw-active");
+      voiceOverlay.classList.add("mw-hidden");
       // Disconnect from voice instance
       widget?.voiceChat?.disconnect();
     }
@@ -84,10 +84,10 @@ function handleVoiceConnected() {
 
   // Add animation classes when connected
   if (logoEl) {
-    logoEl.style.animation = "mc-voice-pulse 2s ease-in-out infinite";
+    logoEl.style.animation = "mw-voice-pulse 2s ease-in-out infinite";
   }
   if (statusEl) {
-    statusEl.style.animation = "mc-pulse 1.5s ease-in-out infinite";
+    statusEl.style.animation = "mw-pulse 1.5s ease-in-out infinite";
   }
 
   updateVoiceChatStatus("متصل ✓", "#68d391"); // Green

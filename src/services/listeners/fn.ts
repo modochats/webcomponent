@@ -46,7 +46,7 @@ const sendMessage = async (message: string) => {
           if (widget.conversation.status === "AI_CHAT") await widget.conversation.loadMessages();
         }
       } else {
-        console.error("ModoChat instance not found");
+        console.error("Widget instance not found");
       }
     } else {
       throw new Error("User has not submitted the phone number form");
@@ -69,8 +69,8 @@ const checkIfUserHasPhoneNumber = () => {
 const switchToPhoneNumberFormView = () => {
   const formOverlay = window.getMWidget?.().container?.querySelector(".mw-form-overlay");
   if (formOverlay) {
-    formOverlay.classList.remove("mc-hidden");
-    formOverlay.classList.add("mc-active");
+    formOverlay.classList.remove("mw-hidden");
+    formOverlay.classList.add("mw-active");
   }
 };
 const submitPhoneNumberForm = (phoneNumber: string) => {
@@ -91,13 +91,13 @@ const submitPhoneNumberForm = (phoneNumber: string) => {
 
       const formOverlay = widget.container?.querySelector(".mw-form-overlay");
       if (formOverlay) {
-        formOverlay.classList.remove("mc-active");
-        formOverlay.classList.add("mc-hidden");
+        formOverlay.classList.remove("mw-active");
+        formOverlay.classList.add("mw-hidden");
       }
 
       (widget.container?.querySelector(".mw-send-message-btn") as HTMLButtonElement)?.click();
     } else {
-      console.error("ModoChat instance not found");
+      console.error("Widget instance not found");
     }
   } else {
     alert("لطفا شماره تلفن معتبر وارد کنید یا فیلد را خالی بگذارید.");

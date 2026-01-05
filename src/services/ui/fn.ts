@@ -3,30 +3,30 @@ import {ConversationStatus} from "#src/types/conversation.js";
 
 function switchToConversationLayout() {
   const widget = window.getMWidget?.();
-  widget?.container?.querySelector(".mw-new-conversation-btn")?.classList.remove("mc-hidden");
-  widget?.container?.querySelector(".mw-starters-con")?.classList.add("mc-hidden");
+  widget?.container?.querySelector(".mw-new-conversation-btn")?.classList.remove("mw-hidden");
+  widget?.container?.querySelector(".mw-starters-con")?.classList.add("mw-hidden");
 }
 function switchToStarterLayout() {
   const widget = window.getMWidget?.();
-  widget?.container?.querySelector(".mw-new-conversation-btn")?.classList.add("mc-hidden");
-  widget?.container?.querySelector(".mw-starters-con")?.classList.remove("mc-hidden");
-  widget?.container?.querySelector(".mw-conversation-status-icon")?.classList.add("mc-hidden");
+  widget?.container?.querySelector(".mw-new-conversation-btn")?.classList.add("mw-hidden");
+  widget?.container?.querySelector(".mw-starters-con")?.classList.remove("mw-hidden");
+  widget?.container?.querySelector(".mw-conversation-status-icon")?.classList.add("mw-hidden");
 }
 
 function setConversationType(type: keyof typeof ConversationStatus) {
   const widget = window.getMWidget?.();
-  widget?.container?.querySelector(".mw-conversation-status-icon")?.classList.remove("mc-hidden");
+  widget?.container?.querySelector(".mw-conversation-status-icon")?.classList.remove("mw-hidden");
   const statusIcon = widget?.container?.querySelector(".mw-conversation-status-icon");
 
   if (statusIcon) {
     // Remove existing mode classes
-    statusIcon.classList.remove("mc-ai-mode", "mc-human-mode");
+    statusIcon.classList.remove("mw-ai-mode", "mw-human-mode");
 
     // Add appropriate mode class
     if (type === "AI_CHAT") {
-      statusIcon.classList.add("mc-ai-mode");
+      statusIcon.classList.add("mw-ai-mode");
     } else {
-      statusIcon.classList.add("mc-human-mode");
+      statusIcon.classList.add("mw-human-mode");
     }
   }
 }
@@ -36,11 +36,11 @@ function loadStarters() {
   const startersContainer = widget?.container?.querySelector(".mw-starters-con");
   const starterItemsContainer = widget?.container?.querySelector(".mw-starter-items");
 
-  startersContainer?.classList.remove("mc-hidden");
+  startersContainer?.classList.remove("mw-hidden");
 
   for (const starter of widget?.chatbot?.starters || []) {
     const starterElement = document.createElement("div");
-    starterElement.className = "mc-starter-item";
+    starterElement.className = "mw-starter-item";
     starterElement.textContent = starter;
     starterElement.addEventListener("click", async () => {
       const inputEl = widget?.container?.querySelector(".mw-chat-input") as HTMLInputElement;

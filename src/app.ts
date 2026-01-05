@@ -43,7 +43,7 @@ class Widget {
     if (options?.autoInit) this.init();
   }
   async init() {
-    if (this.isInitialized) throw new Error("ModoChat already initialized");
+    if (this.isInitialized) throw new Error("Widget already initialized");
     const chatbotRes = await fetchChatbot(this.publicKey);
     this.chatbot = new Chatbot(chatbotRes);
     this.options = {
@@ -69,8 +69,8 @@ class Widget {
         // Ensure chat body is visible in fullscreen mode
         const chatBody = this.container?.querySelector(".mw-chat-body");
         if (chatBody) {
-          chatBody.classList.remove("mc-hidden");
-          chatBody.classList.add("mc-active");
+          chatBody.classList.remove("mw-hidden");
+          chatBody.classList.add("mw-active");
         }
         try {
           await loadConversation(this);

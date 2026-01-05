@@ -22,8 +22,8 @@ const registerListeners = (widgetContainer: HTMLDivElement) => {
         isBodyOpen = !isBodyOpen;
         if (isBodyOpen) widget?.onOpen();
         else widget?.onClose();
-        chatBody?.classList.toggle("mc-hidden");
-        toggleChatBtn.classList.toggle("mc-chat-open", isBodyOpen);
+        chatBody?.classList.toggle("mw-hidden");
+        toggleChatBtn.classList.toggle("mw-chat-open", isBodyOpen);
       },
       {capture: false}
     );
@@ -83,7 +83,7 @@ const registerPhoneNumberFormListeners = (widgetContainer: HTMLDivElement) => {
     submitPhoneNumberForm(phoneNumber);
   });
   formCancelBtn.addEventListener("click", () => {
-    formOverlay.classList.add("mc-hidden");
+    formOverlay.classList.add("mw-hidden");
   });
 };
 
@@ -153,9 +153,9 @@ const registerReplyPreviewListener = (widgetContainer: HTMLDivElement) => {
         replyingTo.element.scrollIntoView({behavior: "smooth", block: "center"});
 
         // Add a highlight effect
-        replyingTo.element.classList.add("mc-message-highlight");
+        replyingTo.element.classList.add("mw-message-highlight");
         setTimeout(() => {
-          replyingTo.element?.classList.remove("mc-message-highlight");
+          replyingTo.element?.classList.remove("mw-message-highlight");
         }, 2000);
       }
     }
@@ -171,7 +171,7 @@ const registerTooltipCloseListener = (widgetContainer: HTMLDivElement) => {
       localStorage.setItem(`modochats:${widget?.publicKey}-has-seen-greeting-message`, "true");
       e.stopPropagation();
       if (tooltip) {
-        tooltip.classList.add("mc-hidden");
+        tooltip.classList.add("mw-hidden");
       }
     });
   }

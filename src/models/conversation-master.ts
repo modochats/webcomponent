@@ -31,14 +31,14 @@ class CMFileMaster {
     const removeIcon = container?.querySelector(".mw-file-remove-icon") as SVGElement;
 
     if (this.file) {
-      uploadIcon.classList.add("mc-hidden");
-      removeIcon.classList.remove("mc-hidden");
-      fileUploadBtn.classList.add("mc-file-uploaded");
+      uploadIcon.classList.add("mw-hidden");
+      removeIcon.classList.remove("mw-hidden");
+      fileUploadBtn.classList.add("mw-file-uploaded");
     } else {
       fileInput.value = "";
-      uploadIcon.classList.remove("mc-hidden");
-      removeIcon.classList.add("mc-hidden");
-      fileUploadBtn.classList.remove("mc-file-uploaded");
+      uploadIcon.classList.remove("mw-hidden");
+      removeIcon.classList.add("mw-hidden");
+      fileUploadBtn.classList.remove("mw-file-uploaded");
     }
   }
 }
@@ -68,21 +68,21 @@ class CMReplyMaster {
         // Truncate content to 50 chars
         const content = this.replyingTo.content.length > 50 ? this.replyingTo.content.substring(0, 50) + "..." : this.replyingTo.content;
         replyText.textContent = content;
-        replyPreview.classList.remove("mc-hidden");
+        replyPreview.classList.remove("mw-hidden");
 
         // Add reply active class to messages container
         if (chatMessagesContainer) {
-          chatMessagesContainer.classList.add("mc-reply-active");
+          chatMessagesContainer.classList.add("mw-reply-active");
         }
       }
     } else {
       // Hide reply preview
       if (replyPreview) {
-        replyPreview.classList.add("mc-hidden");
+        replyPreview.classList.add("mw-hidden");
 
         // Remove reply active class from messages container
         if (chatMessagesContainer) {
-          chatMessagesContainer.classList.remove("mc-reply-active");
+          chatMessagesContainer.classList.remove("mw-reply-active");
         }
       }
     }

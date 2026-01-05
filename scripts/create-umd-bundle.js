@@ -41,12 +41,12 @@ async function createUMDBundle() {
   // Remove 'use strict' from the beginning if it exists
   cleanedAppCode = cleanedAppCode.replace(/^['"]use strict['"];\s*/, "");
 
-  // Check if ModoChat is properly defined and exported
-  const hasModoChat = cleanedAppCode.includes("class ModoChat") || cleanedAppCode.includes("function ModoChat");
-  const hasWindowExport = cleanedAppCode.includes("window.ModoChat");
+  // Check if Widget is properly defined and exported
+  const hasWidget = cleanedAppCode.includes("class Widget") || cleanedAppCode.includes("function Widget");
+  const hasWindowExport = cleanedAppCode.includes("window.Widget");
 
-  if (!hasModoChat) {
-    console.error("ModoChat class not found in the bundle!");
+  if (!hasWidget) {
+    console.error("Widget class not found in the bundle!");
     return;
   }
 

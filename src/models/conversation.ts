@@ -41,9 +41,9 @@ class Conversation {
     const chatMessagesContainer = document.querySelector(".mw-chat-messages-con");
     if (chatMessagesContainer) {
       const systemMessageElement = document.createElement("div");
-      systemMessageElement.className = "mc-system-message";
+      systemMessageElement.className = "mw-system-message";
       systemMessageElement.innerHTML = `
-        <div class="mc-system-message-content">
+        <div class="mw-system-message-content">
           ${message}
         </div>
       `;
@@ -107,7 +107,7 @@ class Conversation {
 
       if (badge && badgeText) {
         // Show the badge
-        badge.classList.remove("mc-hidden");
+        badge.classList.remove("mw-hidden");
 
         // Update badge text
         const displayCount = this.unreadCount > 99 ? "99+" : this.unreadCount.toString();
@@ -115,9 +115,9 @@ class Conversation {
 
         // Add plus class for 99+ counts
         if (this.unreadCount > 99) {
-          badge.classList.add("mc-badge-plus");
+          badge.classList.add("mw-badge-plus");
         } else {
-          badge.classList.remove("mc-badge-plus");
+          badge.classList.remove("mw-badge-plus");
         }
       }
     }
@@ -127,7 +127,7 @@ class Conversation {
     const widget = window.getMWidget?.();
     const badge = widget?.container?.querySelector(".mw-badge");
     if (badge) {
-      badge.classList.add("mc-hidden");
+      badge.classList.add("mw-hidden");
     }
   }
 
@@ -135,7 +135,7 @@ class Conversation {
     const widget = window.getMWidget?.();
     const tooltip = widget?.container?.querySelector(".mw-toggle-tooltip");
     if (tooltip) {
-      tooltip.classList.add("mc-hidden");
+      tooltip.classList.add("mw-hidden");
     }
   }
 
@@ -208,11 +208,11 @@ class ConversationMessage {
     if (this.repliedTo) {
       const repliedContent = this.repliedTo.content.length > 40 ? this.repliedTo.content.substring(0, 40) + "..." : this.repliedTo.content;
       repliedToHtml = `
-        <div class="mc-replied-to-preview" data-reply-message-id="${this.repliedTo.id}">
-          <div class="mc-replied-to-header">
-            <span class="mc-replied-to-sender">${this.repliedTo.type === "USER" ? "شما" : "پشتیبان"}</span>
+        <div class="mw-replied-to-preview" data-reply-message-id="${this.repliedTo.id}">
+          <div class="mw-replied-to-header">
+            <span class="mw-replied-to-sender">${this.repliedTo.type === "USER" ? "شما" : "پشتیبان"}</span>
           </div>
-          <div class="mc-replied-to-content">${repliedContent}</div>
+          <div class="mw-replied-to-content">${repliedContent}</div>
         </div>
       `;
     }
@@ -222,44 +222,44 @@ class ConversationMessage {
     if (this.fileSrc) {
       const displayFileName = this.fileSrc.length > 20 ? this.fileSrc.substring(0, 17) + "..." : this.fileSrc;
       filePreviewHtml = `
-        <a href="${this.fileSrc}" target="_blank" rel="noopener noreferrer" class="mc-file-preview" title="دانلود فایل">
-          <div class="mc-file-preview-icon">
+        <a href="${this.fileSrc}" target="_blank" rel="noopener noreferrer" class="mw-file-preview" title="دانلود فایل">
+          <div class="mw-file-preview-icon">
             ${'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-8-6m4 18H6V4h7v5h5v11z"/></svg>'}
           </div>
-          <div class="mc-file-preview-info">
-            <div class="mc-file-preview-name">${displayFileName}</div>
-            <div class="mc-file-preview-type">${"file"}</div>
+          <div class="mw-file-preview-info">
+            <div class="mw-file-preview-name">${displayFileName}</div>
+            <div class="mw-file-preview-type">${"file"}</div>
           </div>
         </a>
       `;
     }
 
     this.element.innerHTML = `
-    <div class="mc-chat-message ${this.type === "USER" ? "mc-chat-message-user" : "mc-chat-message-supporter"}">
+    <div class="mw-chat-message ${this.type === "USER" ? "mw-chat-message-user" : "mw-chat-message-supporter"}">
     ${repliedToHtml}
     ${filePreviewHtml}
-        <div class="mc-message-content">${marked.parse(this.content) as string}</div>
+        <div class="mw-message-content">${marked.parse(this.content) as string}</div>
       </div>
-      <div class="mc-message-footer">
+      <div class="mw-message-footer">
       ${
         this.type !== "USER"
           ? `
-        <div class="mc-message-feedback">
-        <button class="mc-feedback-btn mc-feedback-dislike" data-message-id="${this.id}" title="مفید نبود">
+        <div class="mw-message-feedback">
+        <button class="mw-feedback-btn mw-feedback-dislike" data-message-id="${this.id}" title="مفید نبود">
            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path fill="currentColor" d="m15 14l-.986.164A1 1 0 0 1 15 13zM4 14v1a1 1 0 0 1-1-1zm16.522-2.392l.98-.196zM6 3h11.36v2H6zm12.56 12H15v-2h3.56zm-2.573-1.164l.805 4.835L14.82 19l-.806-4.836zM14.82 21h-.214v-2h.214zm-3.543-1.781l-2.515-3.774l1.664-1.11l2.516 3.774zM7.93 15H4v-2h3.93zM3 14V6h2v8zm17.302-8.588l1.2 6l-1.96.392l-1.2-6zM8.762 15.445A1 1 0 0 0 7.93 15v-2a3 3 0 0 1 2.496 1.336zm8.03 3.226A2 2 0 0 1 14.82 21v-2zM18.56 13a1 1 0 0 0 .981-1.196l1.961-.392A3 3 0 0 1 18.561 15zm-1.2-10a3 3 0 0 1 2.942 2.412l-1.96.392A1 1 0 0 0 17.36 5zm-2.754 18a4 4 0 0 1-3.328-1.781l1.664-1.11a2 2 0 0 0 1.664.891zM6 5a1 1 0 0 0-1 1H3a3 3 0 0 1 3-3z"/><path stroke="currentColor" stroke-width="2" d="M8 14V4"/></g></svg>
           </button>
-        <button class="mc-feedback-btn mc-feedback-like" data-message-id="${this.id}" title="مفید بود">
+        <button class="mw-feedback-btn mw-feedback-like" data-message-id="${this.id}" title="مفید بود">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path fill="currentColor" d="m15 10l-.74-.123a.75.75 0 0 0 .74.873zM4 10v-.75a.75.75 0 0 0-.75.75zm16.522 2.392l.735.147zM6 20.75h11.36v-1.5H6zm12.56-11.5H15v1.5h3.56zm-2.82.873l.806-4.835l-1.48-.247l-.806 4.836zm-.92-6.873h-.214v1.5h.213zm-3.335 1.67L8.97 8.693l1.248.832l2.515-3.773zM7.93 9.25H4v1.5h3.93zM3.25 10v8h1.5v-8zm16.807 8.54l1.2-6l-1.47-.295l-1.2 6zM8.97 8.692a1.25 1.25 0 0 1-1.04.557v1.5c.92 0 1.778-.46 2.288-1.225zm7.576-3.405A1.75 1.75 0 0 0 14.82 3.25v1.5a.25.25 0 0 1 .246.291zm2.014 5.462c.79 0 1.38.722 1.226 1.495l1.471.294A2.75 2.75 0 0 0 18.56 9.25zm-1.2 10a2.75 2.75 0 0 0 2.697-2.21l-1.47-.295a1.25 1.25 0 0 1-1.227 1.005zm-2.754-17.5a3.75 3.75 0 0 0-3.12 1.67l1.247.832a2.25 2.25 0 0 1 1.873-1.002zM6 19.25c-.69 0-1.25-.56-1.25-1.25h-1.5A2.75 2.75 0 0 0 6 20.75z"/><path stroke="currentColor" stroke-width="1.5" d="M8 10v10"/></g></svg>
         </button>
         </div>
       `
           : ""
       }
-    <div class="mc-message-time">${timeString}</div>
+    <div class="mw-message-time">${timeString}</div>
       </div>
     `;
 
-    this.element.className = `mc-message-wrapper ${this.type === "USER" ? "mc-message-wrapper-user" : "mc-message-wrapper-supporter"}`;
+    this.element.className = `mw-message-wrapper ${this.type === "USER" ? "mw-message-wrapper-user" : "mw-message-wrapper-supporter"}`;
     this.containerElement?.appendChild(this.element);
 
     this.addElementListeners();
@@ -283,9 +283,9 @@ class ConversationMessage {
         this.repliedTo?.element?.scrollIntoView({behavior: "smooth", block: "center"});
 
         // Add highlight effect
-        this.repliedTo?.element?.classList.add("mc-message-highlight");
+        this.repliedTo?.element?.classList.add("mw-message-highlight");
         setTimeout(() => {
-          this.repliedTo?.element?.classList.remove("mc-message-highlight");
+          this.repliedTo?.element?.classList.remove("mw-message-highlight");
         }, 2000);
       });
     }
@@ -296,7 +296,7 @@ class ConversationMessage {
     const tooltipText = widget?.container?.querySelector(".mw-toggle-tooltip-text");
     if (tooltip && tooltipText) {
       // Show the tooltip
-      tooltip.classList.remove("mc-hidden");
+      tooltip.classList.remove("mw-hidden");
 
       // Update tooltip text with message preview
       const preview = this.content.length > 50 ? this.content.substring(0, 50) + "..." : this.content;
@@ -304,7 +304,7 @@ class ConversationMessage {
 
       // Auto-hide after 3 seconds
       setTimeout(() => {
-        tooltip.classList.add("mc-hidden");
+        tooltip.classList.add("mw-hidden");
       }, 3000);
     }
   }
@@ -340,9 +340,9 @@ class ConversationMessage {
         const dislikeBtn = this.element?.querySelector(".mw-feedback-dislike") as HTMLButtonElement;
 
         if (liked && likeBtn) {
-          likeBtn.classList.add("mc-feedback-active");
+          likeBtn.classList.add("mw-feedback-active");
         } else if (!liked && dislikeBtn) {
-          dislikeBtn.classList.add("mc-feedback-active");
+          dislikeBtn.classList.add("mw-feedback-active");
         }
       })
       .catch(() => {
@@ -358,12 +358,12 @@ class ConversationMessage {
 
     if (likeBtn) {
       likeBtn.disabled = true;
-      likeBtn.classList.add("mc-feedback-disabled");
+      likeBtn.classList.add("mw-feedback-disabled");
     }
 
     if (dislikeBtn) {
       dislikeBtn.disabled = true;
-      dislikeBtn.classList.add("mc-feedback-disabled");
+      dislikeBtn.classList.add("mw-feedback-disabled");
     }
   }
 
@@ -373,12 +373,12 @@ class ConversationMessage {
 
     if (likeBtn) {
       likeBtn.disabled = false;
-      likeBtn.classList.remove("mc-feedback-disabled");
+      likeBtn.classList.remove("mw-feedback-disabled");
     }
 
     if (dislikeBtn) {
       dislikeBtn.disabled = false;
-      dislikeBtn.classList.remove("mc-feedback-disabled");
+      dislikeBtn.classList.remove("mw-feedback-disabled");
     }
   }
   addElementListeners() {

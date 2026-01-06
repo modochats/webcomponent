@@ -1,5 +1,6 @@
-import {EventType} from "@modochats/voice-client";
 import {VoiceClient} from "@modochats/voice-client";
+import {EventType} from "@modochats/voice-client";
+
 import {
   initVoiceChatLayout,
   handleVoiceConnected,

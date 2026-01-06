@@ -1,3 +1,4 @@
+import {getMessageElement} from "#src/models/message-utils.js";
 import {sendMessage, submitPhoneNumberForm} from "./fn.js";
 
 const registerListeners = (widgetContainer: HTMLDivElement) => {
@@ -93,10 +94,9 @@ const registerNewConversationListener = (widgetContainer: HTMLDivElement) => {
   newBtn.addEventListener("click", () => {
     const widget = window.getMWidget?.();
     widget?.conversation?.clear();
-    widget?.socket?.close();
     if (widget) {
-      widget.conversation = undefined;
-      widget.socket = undefined;
+      widget.chat.instance!.chat.conversation = undefined;
+      widget.chat.instance?.socket.close();
     }
   });
 };
@@ -108,9 +108,9 @@ const registerFileUploadListener = (widgetContainer: HTMLDivElement) => {
 
   // Trigger file input when button is clicked
   fileUploadBtn.addEventListener("click", () => {
-    if (widget?.conversationMaster.fileMaster.file) {
+    if (widget?.chat.fileMaster.file) {
       // If a file is selected, remove it
-      widget?.conversationMaster.fileMaster.clearFile();
+      widget?.chat.fileMaster.clearFile();
     } else {
       // Otherwise, open file picker
       fileInput.click();
@@ -120,7 +120,7 @@ const registerFileUploadListener = (widgetContainer: HTMLDivElement) => {
   // Handle file selection
   fileInput.addEventListener("change", () => {
     if (fileInput.files && fileInput.files.length > 0) {
-      widget?.conversationMaster.fileMaster.setFile(fileInput.files[0]);
+      widget?.chat.fileMaster.setFile(fileInput.files[0]);
     }
   });
 };
@@ -136,26 +136,26 @@ const registerReplyPreviewListener = (widgetContainer: HTMLDivElement) => {
   replyPreviewClose.addEventListener("click", e => {
     e.stopPropagation();
     const widget = window.getMWidget?.();
-    if (widget?.conversationMaster) {
-      widget.conversationMaster.replyMaster.clearReply();
+    if (widget?.chat) {
+      widget.chat.replyMaster.clearReply();
     }
   });
 
   // Click on preview info - scroll to message
   replyPreviewInfo.addEventListener("click", () => {
     const widget = window.getMWidget?.();
-    const replyingTo = widget?.conversationMaster.replyMaster.replyingTo;
+    const replyingToEl = getMessageElement(widget?.chat.replyMaster.replyingTo! || {});
 
-    if (replyingTo?.element) {
+    if (replyingToEl) {
       // Scroll to the message
       const messagesContainer = widgetContainer.querySelector(".mw-chat-messages-con") as HTMLDivElement;
       if (messagesContainer) {
-        replyingTo.element.scrollIntoView({behavior: "smooth", block: "center"});
+        replyingToEl.scrollIntoView({behavior: "smooth", block: "center"});
 
         // Add a highlight effect
-        replyingTo.element.classList.add("mw-message-highlight");
+        replyingToEl.classList.add("mw-message-highlight");
         setTimeout(() => {
-          replyingTo.element?.classList.remove("mw-message-highlight");
+          replyingToEl?.classList.remove("mw-message-highlight");
         }, 2000);
       }
     }

@@ -1,50 +1,15 @@
 import {PhoneNumberRegex} from "#src/constants/regex.js";
-import {Conversation} from "#src/models/conversation.js";
-import {CustomerData} from "#src/models/customer-data.js";
-import {fetchSendMessage} from "#src/utils/fetch.js";
-import {initSocket} from "../socket/socket.js";
 
 const sendMessage = async (message: string) => {
   if (message.trim().length) {
     if (checkIfUserHasPhoneNumber()) {
       const widget = window.getMWidget?.();
       if (widget) {
-        const savedFile = widget.conversationMaster.fileMaster.file;
-        const savedReply = widget.conversationMaster.replyMaster.replyingTo?.id;
-        const fileSrc = savedFile ? URL.createObjectURL(savedFile) : undefined;
-        if (widget?.conversation?.uuid) {
-          widget.conversation.addMessage({
-            id: "temp",
-            content: message,
-            message_type: 0,
-            created_at: new Date().toISOString(),
-            response_to: savedReply,
-            file: fileSrc
-          });
+        if (widget?.conversation?.d?.uuid) {
           const chatInput = widget.container?.querySelector(".mw-chat-input") as HTMLInputElement;
           if (chatInput) chatInput.value = "";
         }
-        widget.conversationMaster.fileMaster.clearFile();
-        widget.conversationMaster.replyMaster.clearReply();
-        const sendMsgRes = await fetchSendMessage(
-          widget?.chatbot?.id as number,
-          message,
-          widget?.customerData.uniqueId,
-          widget?.conversation?.uuid,
-          widget?.customerData.phoneNumber,
-          {
-            file: savedFile,
-            replyTo: savedReply
-          }
-        );
-
-        if (!widget?.conversation?.uuid) {
-          widget.conversation = new Conversation(sendMsgRes.conversation);
-          widget.conversation?.addMessage(sendMsgRes);
-          localStorage.setItem(`modo-chat:${widget.publicKey}-conversation-uuid`, widget.conversation?.uuid as string);
-          await initSocket();
-          if (widget.conversation.status === "AI_CHAT") await widget.conversation.loadMessages();
-        }
+        await widget?.chat.instance?.chat.sendMessage(message);
       } else {
         console.error("Widget instance not found");
       }
@@ -107,9 +72,8 @@ const submitPhoneNumberForm = (phoneNumber: string) => {
 const clearConversation = () => {
   const widget = window.getMWidget?.();
   if (widget) {
-    widget.conversation = undefined;
-    widget.socket?.close();
-    widget.socket = undefined;
+    widget.chat.instance!.chat.conversation = undefined;
+    widget.chat.instance?.socket?.close();
 
     localStorage.removeItem(`modo-chat:${widget.publicKey}-conversation-uuid`);
   }

@@ -1,18 +1,41 @@
-import {ChatClient, ConversationMessage} from "@modochats/chat-client";
+import {Conversation} from "#src/models/conversation.js";
+import {ChatClient, ConversationMessage, EventType} from "@modochats/chat-client";
+import {onSocketConnectionUpdate} from "../socket/utils.js";
 
 class Chat {
-  instance: ChatClient;
+  instance?: ChatClient;
   fileMaster: CFileMaster;
   replyMaster: CReplyMaster;
-
+  conversation: Conversation;
   constructor() {
-    const widget = window.getMWidget?.();
-    this.instance = new ChatClient({
-      chatbotUuid: widget?.chatbot?.uuid as string,
-      userUniqueId: widget?.customerData.uniqueId as string
-    });
     this.fileMaster = new CFileMaster();
     this.replyMaster = new CReplyMaster();
+    this.conversation = new Conversation();
+  }
+  initInstance() {
+    const widget = window.getMWidget?.();
+    const savedUUid = localStorage.getItem(`widget-chat:${widget?.chatbot?.uuid}-conversation-uuid`);
+
+    this.instance = new ChatClient({
+      chatbotUuid: widget?.chatbot?.uuid as string,
+      userUniqueId: widget?.customerData.uniqueId as string,
+      conversationUUid: savedUUid
+    });
+    this.instance.on(EventType.CONVERSATION_SYSTEM_MESSAGE, ev => {
+      this.conversation.addSystemMessage(ev.message);
+    });
+    this.instance.on(EventType.CONVERSATION_MESSAGE, ev => {
+      this.conversation.addMessage(ev.message, {incoming: ev.incoming});
+    });
+    this.instance.on(EventType.SOCKET_CONNECTED, ev => {
+      onSocketConnectionUpdate(true);
+    });
+    this.instance.on(EventType.SOCKET_DISCONNECTED, ev => {
+      onSocketConnectionUpdate(false);
+    });
+    this.instance.on(EventType.CONVERSATION_LOAD, ev => {
+      localStorage.setItem(`modo-chat:${widget?.chatbot?.uuid}-conversation-uuid`, this.instance?.conversation?.uuid as string);
+    });
   }
 }
 class CFileMaster {

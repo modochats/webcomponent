@@ -1,24 +1,21 @@
 import {WidgetOptions} from "./types/app.js";
 import {Chatbot} from "./models/chatbot.js";
 import {fetchChatbot} from "./utils/fetch.js";
-import {checkIfHostIsAllowed, loadConversation} from "./services/checker.js";
+import {checkIfHostIsAllowed} from "./services/checker.js";
 import {createChatContainer} from "./services/ui/html.js";
 import {CustomerData} from "./models/customer-data.js";
-import {Conversation} from "./models/conversation.js";
-import {initSocket, Socket} from "./services/socket/socket.js";
 import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, loadCss} from "./services/ui/fn.js";
 import {VERSION} from "./constants/index.js";
 import {VoiceChat} from "./services/voice-chat/model.js";
-import {ConversationMaster} from "./models/conversation-master.js";
+import {Chat} from "./services/chat/model.js";
 
 class Widget {
   container?: HTMLDivElement;
   publicKey: string;
   chatbot?: Chatbot;
   customerData: CustomerData;
+  chat: Chat;
 
-  conversationMaster: ConversationMaster;
-  socket?: Socket;
   options: Partial<WidgetOptions> = {};
   openedCount: number = 0;
   version: string;
@@ -29,7 +26,7 @@ class Widget {
   constructor(publicKey: string, options?: Partial<WidgetOptions>) {
     this.publicKey = publicKey;
     this.customerData = new CustomerData(this, options?.userData);
-    this.conversationMaster = new ConversationMaster();
+    this.chat = new Chat();
     this.version = VERSION;
     this.options = {
       position: options?.position || "right",
@@ -73,11 +70,11 @@ class Widget {
           chatBody.classList.add("mw-active");
         }
         try {
-          await loadConversation(this);
+          this.chat.initInstance();
         } finally {
           this.onOpen();
         }
-      } else loadConversation(this);
+      } else this.chat.initInstance();
     } else throw new Error("host not allowed");
   }
   async onOpen() {
@@ -92,7 +89,7 @@ class Widget {
     if (this.openedCount === 1) {
       if (this.conversation) {
         await this.conversation?.loadMessages();
-        await initSocket();
+        await this.chat.instance?.socket.connect();
       }
       if (this.chatbot?.voiceChat) this.voiceChat = new VoiceChat();
       await this.customerData.fetchUpdate();
@@ -110,10 +107,7 @@ class Widget {
     await this.customerData.updateUserData(newUserData);
   }
   get conversation() {
-    return this.conversationMaster.conversation;
-  }
-  set conversation(conversation: Conversation | undefined) {
-    this.conversationMaster.conversation = conversation;
+    return this.chat.conversation;
   }
 }
 

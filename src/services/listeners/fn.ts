@@ -4,12 +4,17 @@ const sendMessage = async (message: string) => {
   if (message.trim().length) {
     if (checkIfUserHasPhoneNumber()) {
       const widget = window.getMWidget?.();
+
       if (widget) {
+        const savedFile = widget.chat.fileMaster.file;
+        const savedReply = widget.chat.replyMaster.replyingTo?.id;
         if (widget?.conversation?.d?.uuid) {
           const chatInput = widget.container?.querySelector(".mw-chat-input") as HTMLInputElement;
           if (chatInput) chatInput.value = "";
         }
-        await widget?.chat.instance?.chat.sendMessage(message);
+        widget.chat.fileMaster.clearFile();
+        widget.chat.replyMaster.clearReply();
+        await widget?.chat.sendMessage(message, {file: savedFile, replyTo: savedReply});
       } else {
         console.error("Widget instance not found");
       }
@@ -69,14 +74,4 @@ const submitPhoneNumberForm = (phoneNumber: string) => {
   }
 };
 
-const clearConversation = () => {
-  const widget = window.getMWidget?.();
-  if (widget) {
-    widget.chat.instance!.chat.conversation = undefined;
-    widget.chat.instance?.socket?.close();
-
-    localStorage.removeItem(`modo-chat:${widget.publicKey}-conversation-uuid`);
-  }
-};
-
-export {sendMessage, submitPhoneNumberForm, clearConversation};
+export {sendMessage, submitPhoneNumberForm};

@@ -87,9 +87,9 @@ class Widget {
     this.conversation?.markAsRead();
     this.conversation?.scrollToBottom();
     if (this.openedCount === 1) {
-      if (this.conversation) {
+      if (this.chat.conversationD) {
         await this.conversation?.loadMessages();
-        await this.chat.instance?.socket.connect();
+        await this.chat?.socket?.connect();
       }
       if (this.chatbot?.voiceChat) this.voiceChat = new VoiceChat();
       await this.customerData.fetchUpdate();

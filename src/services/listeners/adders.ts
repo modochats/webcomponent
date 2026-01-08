@@ -93,10 +93,8 @@ const registerNewConversationListener = (widgetContainer: HTMLDivElement) => {
 
   newBtn.addEventListener("click", () => {
     const widget = window.getMWidget?.();
-    widget?.conversation?.clear();
     if (widget) {
-      widget.chat.instance!.chat.conversation = undefined;
-      widget.chat.instance?.socket.close();
+      widget.chat!.clear();
     }
   });
 };

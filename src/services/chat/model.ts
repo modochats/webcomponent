@@ -3,7 +3,7 @@ import {ChatClient, ConversationMessage, EventType} from "@modochats/chat-client
 import {onSocketConnectionUpdate} from "../socket/utils.js";
 
 class Chat {
-  instance?: ChatClient;
+  private instance?: ChatClient;
   fileMaster: CFileMaster;
   replyMaster: CReplyMaster;
   conversation: Conversation;
@@ -14,12 +14,11 @@ class Chat {
   }
   initInstance() {
     const widget = window.getMWidget?.();
-    const savedUUid = localStorage.getItem(`widget-chat:${widget?.chatbot?.uuid}-conversation-uuid`);
-
+    const savedUUid = localStorage.getItem(`modo-chat:${widget?.chatbot?.uuid}-conversation-uuid`);
     this.instance = new ChatClient({
       chatbotUuid: widget?.chatbot?.uuid as string,
-      userUniqueId: widget?.customerData.uniqueId as string,
-      conversationUUid: savedUUid
+      userData: {uuid: widget?.customerData.uniqueId as string, phoneNumber: widget?.customerData.phoneNumber},
+      conversationUUid: savedUUid || undefined
     });
     this.instance.on(EventType.CONVERSATION_SYSTEM_MESSAGE, ev => {
       this.conversation.addSystemMessage(ev.message);
@@ -34,8 +33,30 @@ class Chat {
       onSocketConnectionUpdate(false);
     });
     this.instance.on(EventType.CONVERSATION_LOAD, ev => {
+      this.conversation.clearContainerEl();
+      this.conversation.setStatus();
+      this.conversation.onInit();
+
       localStorage.setItem(`modo-chat:${widget?.chatbot?.uuid}-conversation-uuid`, this.instance?.conversation?.uuid as string);
     });
+    this.instance.on(EventType.CONVERSATION_MESSAGES_CLEAR, () => {
+      this.conversation.clearContainerEl();
+    });
+  }
+  get socket() {
+    return this.instance?.socket;
+  }
+  // conversation data , since the instance only stores and handles data ^^
+  get conversationD() {
+    return this.instance?.conversation;
+  }
+  clear() {
+    this.conversation.clear();
+    this.instance?.clearConversation();
+  }
+
+  sendMessage(...args: Parameters<ChatClient["sendMessage"]>) {
+    return this.instance?.sendMessage(...args);
   }
 }
 class CFileMaster {
@@ -70,19 +91,15 @@ class CFileMaster {
 }
 
 class CReplyMaster {
-  get instance() {
-    return window.getMWidget?.().chat.instance;
-  }
-  get replyingTo() {
-    return this.instance!.chat!.replyingTo;
-  }
+  replyingTo?: ConversationMessage;
+
   setReply(message: ConversationMessage) {
-    this.instance!.chat!.replyMaster.setReply(message);
+    this.replyingTo = message;
     this.updateReplyUI();
   }
 
   clearReply() {
-    this.instance!.chat!.replyMaster.clearReply();
+    this.replyingTo = undefined;
 
     this.updateReplyUI();
   }

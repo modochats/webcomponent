@@ -5,19 +5,15 @@ import {initMessageElement, showMessageTooltip} from "./message-utils.js";
 import {ConversationMessage} from "@modochats/chat-client";
 
 class Conversation {
-  constructor() {
-    this.setStatus();
-    this.onInit();
-  }
+  constructor() {}
   // d = data
   get d() {
-    return window.getMWidget?.().chat.instance?.conversation;
+    return window.getMWidget?.().chat?.conversationD;
   }
   addMessage(message: ConversationMessage, options?: {incoming: boolean}) {
     const widget = window.getMWidget?.();
     initMessageElement(message);
     if (options?.incoming) {
-      this.d!.unreadCount++;
       if (widget?.isOpen) this.markAsRead();
       else {
         this.addBadge();
@@ -27,7 +23,12 @@ class Conversation {
     }
     this.scrollToBottom();
   }
-
+  clearContainerEl() {
+    const chatMessagesContainer = document.querySelector(".mw-chat-messages-con");
+    if (chatMessagesContainer) {
+      chatMessagesContainer.innerHTML = "";
+    }
+  }
   addSystemMessage(message: string) {
     const chatMessagesContainer = document.querySelector(".mw-chat-messages-con");
     if (chatMessagesContainer) {
@@ -55,10 +56,7 @@ class Conversation {
     this.d!.messages = [];
     const widget = window.getMWidget?.();
     localStorage.removeItem(`modo-chat:${widget?.publicKey}-conversation-uuid`);
-    const chatMessagesContainer = document.querySelector(".mw-chat-messages-con");
-    if (chatMessagesContainer) {
-      chatMessagesContainer.innerHTML = "";
-    }
+    this.clearContainerEl();
     switchToStarterLayout();
   }
 

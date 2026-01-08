@@ -2,6 +2,34 @@
 
 A responsive web chat widget for customer support.
 
+## Installation
+
+### NPM
+
+Install the package via npm:
+
+```bash
+npm install @modochats/widget
+```
+
+Then, import and use in your JavaScript/TypeScript code:
+
+```javascript
+import {Widget} from "@modochats/widget";
+
+const widget = new Widget("your-public-key", {
+  // options
+});
+```
+
+### CDN
+
+Alternatively, include the script directly from CDN:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/modochats/webcomponent@main/cdn-dist/modo-web-component.min.js"></script>
+```
+
 ## Features
 
 - 🌙 Dark/Light theme support with customizable colors

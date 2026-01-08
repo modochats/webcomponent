@@ -1,5 +1,5 @@
 // Main exports
-export {Widget as ModoChat} from "./app.js";
+export {Widget} from "./app.js";
 export type {WidgetOptions, FetchPaginationRes} from "./types/app.js";
 
 // Models

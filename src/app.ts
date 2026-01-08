@@ -1,9 +1,9 @@
 import {WidgetOptions} from "./types/app.js";
-import {Chatbot} from "./models/chatbot.js";
+import {Chatbot} from "./services/chatbot/chatbot.js";
 import {fetchChatbot} from "./utils/fetch.js";
 import {checkIfHostIsAllowed} from "./services/checker.js";
 import {createChatContainer} from "./services/ui/html.js";
-import {CustomerData} from "./models/customer-data.js";
+import {CustomerData} from "./services/user/customer-data.js";
 import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, loadCss} from "./services/ui/fn.js";
 import {VERSION} from "./constants/index.js";
 import {VoiceChat} from "./services/voice-chat/model.js";

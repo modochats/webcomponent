@@ -1,4 +1,4 @@
-import {getMessageElement} from "#src/models/message-utils.js";
+import {getMessageElement} from "#src/services/chat/message-utils.js";
 import {sendMessage, submitPhoneNumberForm} from "./fn.js";
 
 const registerListeners = (widgetContainer: HTMLDivElement) => {

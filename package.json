@@ -1,6 +1,6 @@
 {
   "name": "@modochats/widget",
-  "version": "1.0.0",
+  "version": "0.1.3",
   "description": "",
   "main": "dist/src/app.js",
   "type": "module",
@@ -10,6 +10,7 @@
     "dev:rollup": "rollup --config rollup.dev.config.js --watch",
     "dev:server": "live-server temp --port=3000 --host=localhost --open=/dev.html",
     "dev:full": "concurrently \"yarn dev:ts\" \"yarn dev:rollup\" \"yarn dev:server\" --names \"tsc,rollup,server\" --prefix name ",
+    "build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist/types",
     "static": "tsx src/app.ts",
     "compile": "npx tsc --noCheck",
     "minify": "node scripts/terser-minify.js",
@@ -18,9 +19,6 @@
     "build:cdn": "npm run build && node scripts/create-umd-bundle.js",
     "render": "npm install && npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@modochats/chat-client": "^0.3.0",
     "@modochats/voice-client": "^0.2.2",
@@ -43,5 +41,36 @@
   "imports": {
     "#src/*": "./dist/src/*",
     "#root/*": "./dist/*"
-  }
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/modochats/webcomponent#readme",
+  "keywords": [
+    "modo",
+    "chat",
+    "ai",
+    "chatbot",
+    "websocket",
+    "real-time"
+  ],
+  "author": "Modo Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/modochats/chat-client"
+  },
+  "bugs": {
+    "url": "https://github.com/modochats/chat-client/issues"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "types": "dist/types/src/index.d.ts"
 }

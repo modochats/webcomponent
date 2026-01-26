@@ -135,45 +135,29 @@ jobs:
             core.setOutput('tag_name', release.data.tag_name);
             core.setOutput('name', release.data.name);
 
-      - name: Upload Release Assets
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release_info.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/modo-widget.js
-          asset_name: modo-widget.js
-          asset_content_type: application/javascript
+      - name: Debug Release Info & files
+        run: |
+          echo "release_tag=${{ steps.release_info.outputs.tag_name }}"
+          echo "upload_url=${{ steps.release_info.outputs.upload_url }}"
+          ls -la build-artifacts/cdn-dist || true
+          du -sh build-artifacts/cdn-dist/* || true
 
-      - name: Upload Release Assets Legacy
-        uses: actions/upload-release-asset@v1
+      - name: Authenticate GitHub CLI
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release_info.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/modo-web-component.js
-          asset_name: modo-web-component.js
-          asset_content_type: application/javascript
+        run: |
+          echo "Authenticating gh CLI"
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
 
-      - name: Upload Minified Release Asset
-        uses: actions/upload-release-asset@v1
+      - name: Upload release assets (gh)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release_info.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/modo-widget.min.js
-          asset_name: modo-widget.min.js
-          asset_content_type: application/javascript
-
-      - name: Upload Minified Release Asset Legacy
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release_info.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/modo-web-component.min.js
-          asset_name: modo-web-component.min.js
-          asset_content_type: application/javascript
+        run: |
+          echo "Uploading assets to release ${{ steps.release_info.outputs.tag_name }}"
+          gh release upload "${{ steps.release_info.outputs.tag_name }}" build-artifacts/cdn-dist/modo-widget.js --clobber || echo "upload failed: modo-widget.js"
+          gh release upload "${{ steps.release_info.outputs.tag_name }}" build-artifacts/cdn-dist/modo-web-component.js --clobber || echo "upload failed: modo-web-component.js"
+          gh release upload "${{ steps.release_info.outputs.tag_name }}" build-artifacts/cdn-dist/modo-widget.min.js --clobber || echo "upload failed: modo-widget.min.js"
+          gh release upload "${{ steps.release_info.outputs.tag_name }}" build-artifacts/cdn-dist/modo-web-component.min.js --clobber || echo "upload failed: modo-web-component.min.js"
 
       - name: Upload Dist Folder
         run: |

@@ -1,9 +1,9 @@
-class ModoChatbot {
+class Chatbot {
   name: string;
   image: string;
   shortDescription: string;
   starters: string[] = [];
-  voiceAgent: boolean;
+  voiceChat: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -21,7 +21,7 @@ class ModoChatbot {
     this.image = data.image;
     this.shortDescription = data.short_description;
     this.starters = data.starters;
-    this.voiceAgent = data.voice_agent;
+    this.voiceChat = data.voice_agent;
     this.createdAt = data.setting.created_at;
     this.updatedAt = data.setting.updated_at;
     this.deletedAt = data.setting.deleted_at;
@@ -37,30 +37,30 @@ class ModoChatbot {
     this.greetingMessage = data.greeting_message;
   }
   showTooltip() {
-    const modoInstance = window.modoChatInstance?.();
-    const tooltip = modoInstance?.container?.querySelector(".mc-toggle-tooltip");
-    const tooltipText = modoInstance?.container?.querySelector(".mc-toggle-tooltip-text");
-    const hasSeen = localStorage.getItem(`modochats:${modoInstance?.publicKey}-has-seen-greeting-message`) === "true";
+    const widget = window.getMWidget?.();
+    const tooltip = widget?.container?.querySelector(".mw-toggle-tooltip");
+    const tooltipText = widget?.container?.querySelector(".mw-toggle-tooltip-text");
+    const hasSeen = localStorage.getItem(`modochats:${widget?.publicKey}-has-seen-greeting-message`) === "true";
 
     if (tooltip && tooltipText && this.greetingMessage && !hasSeen) {
       // Show the tooltip
-      tooltip.classList.remove("mc-hidden");
+      tooltip.classList.remove("mw-hidden");
 
       // Update tooltip text with greeting message
       tooltipText.textContent = this.greetingMessage;
 
       // Auto-hide after 5 seconds
       // setTimeout(() => {
-      //   tooltip.classList.add("mc-hidden");
+      //   tooltip.classList.add("mw-hidden");
       // }, 5000);
     }
   }
   hideTooltip() {
-    const modoInstance = window.modoChatInstance?.();
-    const tooltip = modoInstance?.container?.querySelector(".mc-toggle-tooltip");
+    const widget = window.getMWidget?.();
+    const tooltip = widget?.container?.querySelector(".mw-toggle-tooltip");
     if (tooltip) {
-      tooltip.classList.add("mc-hidden");
+      tooltip.classList.add("mw-hidden");
     }
   }
 }
-export {ModoChatbot};
+export {Chatbot};

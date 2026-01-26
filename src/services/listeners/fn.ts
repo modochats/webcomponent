@@ -1,52 +1,22 @@
 import {PhoneNumberRegex} from "#src/constants/regex.js";
-import {Conversation} from "#src/models/conversation.js";
-import {CustomerData} from "#src/models/customer-data.js";
-import {fetchSendMessage} from "#src/utils/fetch.js";
-import {initSocket} from "../socket/socket.js";
 
 const sendMessage = async (message: string) => {
   if (message.trim().length) {
     if (checkIfUserHasPhoneNumber()) {
-      const modoInstance = window.modoChatInstance?.();
-      if (modoInstance) {
-        const savedFile = modoInstance.conversationMaster.fileMaster.file;
-        const savedReply = modoInstance.conversationMaster.replyMaster.replyingTo?.id;
-        const fileSrc = savedFile ? URL.createObjectURL(savedFile) : undefined;
-        if (modoInstance?.conversation?.uuid) {
-          modoInstance.conversation.addMessage({
-            id: "temp",
-            content: message,
-            message_type: 0,
-            created_at: new Date().toISOString(),
-            response_to: savedReply,
-            file: fileSrc
-          });
-          const chatInput = modoInstance.container?.querySelector(".mc-chat-input") as HTMLInputElement;
+      const widget = window.getMWidget?.();
+
+      if (widget) {
+        const savedFile = widget.chat.fileMaster.file;
+        const savedReply = widget.chat.replyMaster.replyingTo?.id;
+        if (widget?.conversation?.d?.uuid) {
+          const chatInput = widget.container?.querySelector(".mw-chat-input") as HTMLInputElement;
           if (chatInput) chatInput.value = "";
         }
-        modoInstance.conversationMaster.fileMaster.clearFile();
-        modoInstance.conversationMaster.replyMaster.clearReply();
-        const sendMsgRes = await fetchSendMessage(
-          modoInstance?.chatbot?.id as number,
-          message,
-          modoInstance?.customerData.uniqueId,
-          modoInstance?.conversation?.uuid,
-          modoInstance?.customerData.phoneNumber,
-          {
-            file: savedFile,
-            replyTo: savedReply
-          }
-        );
-
-        if (!modoInstance?.conversation?.uuid) {
-          modoInstance.conversation = new Conversation(sendMsgRes.conversation);
-          modoInstance.conversation?.addMessage(sendMsgRes);
-          localStorage.setItem(`modo-chat:${modoInstance.publicKey}-conversation-uuid`, modoInstance.conversation?.uuid as string);
-          await initSocket();
-          if (modoInstance.conversation.status === "AI_CHAT") await modoInstance.conversation.loadMessages();
-        }
+        widget.chat.fileMaster.clearFile();
+        widget.chat.replyMaster.clearReply();
+        await widget?.chat.sendMessage(message, {file: savedFile, replyTo: savedReply});
       } else {
-        console.error("ModoChat instance not found");
+        console.error("Widget instance not found");
       }
     } else {
       throw new Error("User has not submitted the phone number form");
@@ -55,8 +25,8 @@ const sendMessage = async (message: string) => {
 };
 
 const checkIfUserHasPhoneNumber = () => {
-  const modoInstance = window.modoChatInstance?.();
-  if (modoInstance?.customerData?.hasSubmittedPhoneForm()) {
+  const widget = window.getMWidget?.();
+  if (widget?.customerData?.hasSubmittedPhoneForm()) {
     // User has already submitted the phone number form (whether empty or with phone number)
     return true;
   } else {
@@ -67,10 +37,10 @@ const checkIfUserHasPhoneNumber = () => {
 };
 
 const switchToPhoneNumberFormView = () => {
-  const formOverlay = window.modoChatInstance?.().container?.querySelector(".mc-form-overlay");
+  const formOverlay = window.getMWidget?.().container?.querySelector(".mw-form-overlay");
   if (formOverlay) {
-    formOverlay.classList.remove("mc-hidden");
-    formOverlay.classList.add("mc-active");
+    formOverlay.classList.remove("mw-hidden");
+    formOverlay.classList.add("mw-active");
   }
 };
 const submitPhoneNumberForm = (phoneNumber: string) => {
@@ -84,35 +54,24 @@ const submitPhoneNumberForm = (phoneNumber: string) => {
   });
 
   if (parsedPhoneNumber.trim() === "" || PhoneNumberRegex.test(parsedPhoneNumber)) {
-    const modoChat = window.modoChatInstance?.();
-    if (modoChat) {
+    const widget = window.getMWidget?.();
+    if (widget) {
       // Update the phone number
-      modoChat.customerData.savePhoneNumber(phoneNumber.trim() || undefined);
+      widget.customerData.savePhoneNumber(phoneNumber.trim() || undefined);
 
-      const formOverlay = modoChat.container?.querySelector(".mc-form-overlay");
+      const formOverlay = widget.container?.querySelector(".mw-form-overlay");
       if (formOverlay) {
-        formOverlay.classList.remove("mc-active");
-        formOverlay.classList.add("mc-hidden");
+        formOverlay.classList.remove("mw-active");
+        formOverlay.classList.add("mw-hidden");
       }
 
-      (modoChat.container?.querySelector(".mc-send-message-btn") as HTMLButtonElement)?.click();
+      (widget.container?.querySelector(".mw-send-message-btn") as HTMLButtonElement)?.click();
     } else {
-      console.error("ModoChat instance not found");
+      console.error("Widget instance not found");
     }
   } else {
     alert("لطفا شماره تلفن معتبر وارد کنید یا فیلد را خالی بگذارید.");
   }
 };
 
-const clearConversation = () => {
-  const modoInstance = window.modoChatInstance?.();
-  if (modoInstance) {
-    modoInstance.conversation = undefined;
-    modoInstance.socket?.close();
-    modoInstance.socket = undefined;
-
-    localStorage.removeItem(`modo-chat:${modoInstance.publicKey}-conversation-uuid`);
-  }
-};
-
-export {sendMessage, submitPhoneNumberForm, clearConversation};
+export {sendMessage, submitPhoneNumberForm};

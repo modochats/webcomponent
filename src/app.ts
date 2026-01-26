@@ -1,35 +1,32 @@
-import {ModoChatOptions} from "./types/app.js";
-import {ModoChatbot} from "./models/chatbot.js";
-import {fetchModoChatbot} from "./utils/fetch.js";
-import {checkIfHostIsAllowed, loadConversation} from "./services/checker.js";
+import {WidgetOptions} from "./types/app.js";
+import {Chatbot} from "./services/chatbot/chatbot.js";
+import {fetchChatbot} from "./utils/fetch.js";
+import {checkIfHostIsAllowed} from "./services/checker.js";
 import {createChatContainer} from "./services/ui/html.js";
-import {CustomerData} from "./models/customer-data.js";
-import {Conversation} from "./models/conversation.js";
-import {initSocket, Socket} from "./services/socket/socket.js";
+import {CustomerData} from "./services/user/customer-data.js";
 import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, loadCss} from "./services/ui/fn.js";
-import {preloadAudio} from "./utils/audio.js";
 import {VERSION} from "./constants/index.js";
-import {VoiceAgent} from "./services/voice-agent/model.js";
-import {ConversationMaster} from "./models/conversation-master.js";
+import {VoiceChat} from "./services/voice-chat/model.js";
+import {Chat} from "./services/chat/model.js";
 
-class ModoChat {
+class Widget {
   container?: HTMLDivElement;
   publicKey: string;
-  chatbot?: ModoChatbot;
+  chatbot?: Chatbot;
   customerData: CustomerData;
+  chat: Chat;
 
-  conversationMaster: ConversationMaster;
-  socket?: Socket;
-  options: Partial<ModoChatOptions> = {};
+  options: Partial<WidgetOptions> = {};
   openedCount: number = 0;
   version: string;
   isInitialized: boolean = false;
   isOpen: boolean = false;
-  voiceAgent?: VoiceAgent;
-  constructor(publicKey: string, options?: Partial<ModoChatOptions>) {
+  voiceChat?: VoiceChat;
+
+  constructor(publicKey: string, options?: Partial<WidgetOptions>) {
     this.publicKey = publicKey;
     this.customerData = new CustomerData(this, options?.userData);
-    this.conversationMaster = new ConversationMaster();
+    this.chat = new Chat();
     this.version = VERSION;
     this.options = {
       position: options?.position || "right",
@@ -43,9 +40,9 @@ class ModoChat {
     if (options?.autoInit) this.init();
   }
   async init() {
-    if (this.isInitialized) throw new Error("ModoChat already initialized");
-    const chatbotRes = await fetchModoChatbot(this.publicKey);
-    this.chatbot = new ModoChatbot(chatbotRes);
+    if (this.isInitialized) throw new Error("Widget already initialized");
+    const chatbotRes = await fetchChatbot(this.publicKey);
+    this.chatbot = new Chatbot(chatbotRes);
     this.options = {
       ...this.options,
       theme: this.options?.theme || this.chatbot?.uiConfig?.theme || "dark",
@@ -54,7 +51,7 @@ class ModoChat {
     };
     if (checkIfHostIsAllowed(this)) {
       await loadCss();
-      window.modoChatInstance = () => this;
+      window.getMWidget = () => this;
       createChatContainer(this);
       applyModoOptions();
       loadStarters();
@@ -67,17 +64,17 @@ class ModoChat {
       // In fullscreen mode, automatically open the chat
       if (this.options.fullScreen) {
         // Ensure chat body is visible in fullscreen mode
-        const chatBody = this.container?.querySelector(".mc-chat-body");
+        const chatBody = this.container?.querySelector(".mw-chat-body");
         if (chatBody) {
-          chatBody.classList.remove("mc-hidden");
-          chatBody.classList.add("mc-active");
+          chatBody.classList.remove("mw-hidden");
+          chatBody.classList.add("mw-active");
         }
         try {
-          await loadConversation(this);
+          this.chat.initInstance();
         } finally {
           this.onOpen();
         }
-      } else loadConversation(this);
+      } else this.chat.initInstance();
     } else throw new Error("host not allowed");
   }
   async onOpen() {
@@ -90,11 +87,11 @@ class ModoChat {
     this.conversation?.markAsRead();
     this.conversation?.scrollToBottom();
     if (this.openedCount === 1) {
-      if (this.conversation) {
+      if (this.chat.conversationD) {
         await this.conversation?.loadMessages();
-        await initSocket();
+        await this.chat?.socket?.connect();
       }
-      if (this.chatbot?.voiceAgent) this.voiceAgent = new VoiceAgent();
+      if (this.chatbot?.voiceChat) this.voiceChat = new VoiceChat();
       await this.customerData.fetchUpdate();
     }
   }
@@ -110,13 +107,11 @@ class ModoChat {
     await this.customerData.updateUserData(newUserData);
   }
   get conversation() {
-    return this.conversationMaster.conversation;
-  }
-  set conversation(conversation: Conversation | undefined) {
-    this.conversationMaster.conversation = conversation;
+    return this.chat.conversation;
   }
 }
 
-window.ModoChat = ModoChat;
+window.ModoChat = Widget;
+window.ModoWidget = Widget;
 
-export type {ModoChat};
+export type {Widget};

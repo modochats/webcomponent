@@ -1,7 +1,7 @@
-import {EventType} from "@modochats/voice-client";
-import {ModoVoiceClient} from "@modochats/voice-client";
+import {VoiceClient, EventType} from "@modochats/voice-client";
+
 import {
-  initVoiceAgentLayout,
+  initVoiceChatLayout,
   handleVoiceConnected,
   handleVoiceDisconnected,
   handleVoiceConnectionError,
@@ -9,16 +9,16 @@ import {
   handleMicrophoneResumed
 } from "./utils.js";
 
-class VoiceAgent {
-  instance?: ModoVoiceClient;
+class VoiceChat {
+  instance?: VoiceClient;
   isFirstInSession: boolean = true;
   constructor() {
-    const modoInstance = window.modoChatInstance?.();
-    this.instance = new ModoVoiceClient({
+    const widget = window.getMWidget?.();
+    this.instance = new VoiceClient({
       apiBase: "https://live.modochats.com",
       // apiBase: "http://localhost:8000",
-      chatbotUuid: modoInstance?.chatbot?.uuid as string,
-      userUniqueId: modoInstance?.customerData.uniqueId as string
+      chatbotUuid: widget?.chatbot?.uuid as string,
+      userUniqueId: widget?.customerData.uniqueId as string
     });
     this.instance.on(EventType.CONNECTED, (event: any) => {
       handleVoiceConnected();
@@ -62,18 +62,18 @@ class VoiceAgent {
     await this.instance?.disconnect();
   }
   initHtml() {
-    initVoiceAgentLayout();
+    initVoiceChatLayout();
   }
   toggleLayout() {
     this.toggleLayout();
   }
 
   showTooltip() {
-    const tooltip = document.querySelector(".mc-voice-call-tooltip");
-    tooltip?.classList.remove("mc-hidden");
+    const tooltip = document.querySelector(".mw-voice-call-tooltip");
+    tooltip?.classList.remove("mw-hidden");
     setTimeout(() => {
-      tooltip?.classList.add("mc-hidden");
+      tooltip?.classList.add("mw-hidden");
     }, 6000);
   }
 }
-export {VoiceAgent};
+export {VoiceChat};

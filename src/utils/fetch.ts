@@ -1,7 +1,7 @@
 import {$fetch} from "#src/tools/fetch.js";
 import {FetchPaginationRes} from "#src/types/app.js";
 
-const fetchModoChatbot = async (publicKey: string) => {
+const fetchChatbot = async (publicKey: string) => {
   return await $fetch<Record<string, any>>(`/v1/chatbot/public/${publicKey}`);
 };
 
@@ -86,7 +86,7 @@ const fetchConversations = async (conversationUuid: string, uniqueId: string) =>
   return await $fetch<FetchPaginationRes>(`/v2/conversations/website/conversations/${conversationUuid}/customer/${uniqueId}`);
 };
 export {
-  fetchModoChatbot,
+  fetchChatbot,
   fetchSendMessage,
   fetchGetAccessTokenForSocket,
   fetchConversationMessages,

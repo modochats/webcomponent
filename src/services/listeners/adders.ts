@@ -1,16 +1,17 @@
+import {getMessageElement} from "#src/services/chat/message-utils.js";
 import {sendMessage, submitPhoneNumberForm} from "./fn.js";
 
-const registerListeners = (modoContainer: HTMLDivElement) => {
-  let chatBody = modoContainer.querySelector(".mc-chat-body");
-  const toggleChatBtn = modoContainer.querySelector(".mc-toggle-chat-btn") as HTMLButtonElement;
+const registerListeners = (widgetContainer: HTMLDivElement) => {
+  let chatBody = widgetContainer.querySelector(".mw-chat-body");
+  const toggleChatBtn = widgetContainer.querySelector(".mw-toggle-chat-btn") as HTMLButtonElement;
   let isBodyOpen = false;
 
   // Set footer link URL with origin parameter and version title
-  const footerLink = modoContainer.querySelector(".mc-footer-link") as HTMLAnchorElement;
+  const footerLink = widgetContainer.querySelector(".mw-footer-link") as HTMLAnchorElement;
   if (footerLink) {
-    const modoInstance = window.modoChatInstance?.();
+    const widget = window.getMWidget?.();
     footerLink.href = `https://modochats.com?utm_source=${encodeURIComponent(window.location.origin)}`;
-    footerLink.title = `مودوچت v${modoInstance?.version || "0.1"}`;
+    footerLink.title = `مودوچت v${widget?.version || "0.1"}`;
   }
 
   // toggle chat body visibility (only if not in fullscreen mode)
@@ -18,28 +19,28 @@ const registerListeners = (modoContainer: HTMLDivElement) => {
     toggleChatBtn.addEventListener(
       "click",
       () => {
-        const modoInstance = window.modoChatInstance?.();
+        const widget = window.getMWidget?.();
         isBodyOpen = !isBodyOpen;
-        if (isBodyOpen) modoInstance?.onOpen();
-        else modoInstance?.onClose();
-        chatBody?.classList.toggle("mc-hidden");
-        toggleChatBtn.classList.toggle("mc-chat-open", isBodyOpen);
+        if (isBodyOpen) widget?.onOpen();
+        else widget?.onClose();
+        chatBody?.classList.toggle("mw-hidden");
+        toggleChatBtn.classList.toggle("mw-chat-open", isBodyOpen);
       },
       {capture: false}
     );
   }
 
-  registerSendMessageListener(modoContainer);
-  registerPhoneNumberFormListeners(modoContainer);
-  registerNewConversationListener(modoContainer);
-  registerFileUploadListener(modoContainer);
-  registerReplyPreviewListener(modoContainer);
-  registerTooltipCloseListener(modoContainer);
+  registerSendMessageListener(widgetContainer);
+  registerPhoneNumberFormListeners(widgetContainer);
+  registerNewConversationListener(widgetContainer);
+  registerFileUploadListener(widgetContainer);
+  registerReplyPreviewListener(widgetContainer);
+  registerTooltipCloseListener(widgetContainer);
 };
 
-const registerSendMessageListener = (modoContainer: HTMLDivElement) => {
-  const chatInput = modoContainer.querySelector(".mc-chat-input") as HTMLInputElement;
-  const sendMessageBtn = modoContainer.querySelector(".mc-send-message-btn") as HTMLButtonElement;
+const registerSendMessageListener = (widgetContainer: HTMLDivElement) => {
+  const chatInput = widgetContainer.querySelector(".mw-chat-input") as HTMLInputElement;
+  const sendMessageBtn = widgetContainer.querySelector(".mw-send-message-btn") as HTMLButtonElement;
 
   let isDisabled = false;
   function toggleLoading() {
@@ -73,44 +74,41 @@ const registerSendMessageListener = (modoContainer: HTMLDivElement) => {
   });
 };
 
-const registerPhoneNumberFormListeners = (modoContainer: HTMLDivElement) => {
-  const formOverlay = modoContainer.querySelector(".mc-form-overlay") as HTMLDivElement;
-  const phoneInput = modoContainer.querySelector(".mc-phone-input") as HTMLInputElement;
-  const formSubmitBtn = modoContainer.querySelector(".mc-form-submit-btn") as HTMLButtonElement;
-  const formCancelBtn = modoContainer.querySelector(".mc-form-cancel-btn") as HTMLButtonElement;
+const registerPhoneNumberFormListeners = (widgetContainer: HTMLDivElement) => {
+  const formOverlay = widgetContainer.querySelector(".mw-form-overlay") as HTMLDivElement;
+  const phoneInput = widgetContainer.querySelector(".mw-phone-input") as HTMLInputElement;
+  const formSubmitBtn = widgetContainer.querySelector(".mw-form-submit-btn") as HTMLButtonElement;
+  const formCancelBtn = widgetContainer.querySelector(".mw-form-cancel-btn") as HTMLButtonElement;
   formSubmitBtn.addEventListener("click", () => {
     const phoneNumber = phoneInput.value;
     submitPhoneNumberForm(phoneNumber);
   });
   formCancelBtn.addEventListener("click", () => {
-    formOverlay.classList.add("mc-hidden");
+    formOverlay.classList.add("mw-hidden");
   });
 };
 
-const registerNewConversationListener = (modoContainer: HTMLDivElement) => {
-  const newBtn = modoContainer.querySelector(".mc-new-conversation-btn") as HTMLButtonElement;
+const registerNewConversationListener = (widgetContainer: HTMLDivElement) => {
+  const newBtn = widgetContainer.querySelector(".mw-new-conversation-btn") as HTMLButtonElement;
 
   newBtn.addEventListener("click", () => {
-    const modoInstance = window.modoChatInstance?.();
-    modoInstance?.conversation?.clear();
-    modoInstance?.socket?.close();
-    if (modoInstance) {
-      modoInstance.conversation = undefined;
-      modoInstance.socket = undefined;
+    const widget = window.getMWidget?.();
+    if (widget) {
+      widget.chat!.clear();
     }
   });
 };
 
-const registerFileUploadListener = (modoContainer: HTMLDivElement) => {
-  const fileUploadBtn = modoContainer.querySelector(".mc-file-upload-btn") as HTMLButtonElement;
-  const fileInput = modoContainer.querySelector(".mc-file-input") as HTMLInputElement;
-  const modoIns = window?.modoChatInstance?.();
+const registerFileUploadListener = (widgetContainer: HTMLDivElement) => {
+  const fileUploadBtn = widgetContainer.querySelector(".mw-file-upload-btn") as HTMLButtonElement;
+  const fileInput = widgetContainer.querySelector(".mw-file-input") as HTMLInputElement;
+  const widget = window?.getMWidget?.();
 
   // Trigger file input when button is clicked
   fileUploadBtn.addEventListener("click", () => {
-    if (modoIns?.conversationMaster.fileMaster.file) {
+    if (widget?.chat.fileMaster.file) {
       // If a file is selected, remove it
-      modoIns?.conversationMaster.fileMaster.clearFile();
+      widget?.chat.fileMaster.clearFile();
     } else {
       // Otherwise, open file picker
       fileInput.click();
@@ -120,58 +118,58 @@ const registerFileUploadListener = (modoContainer: HTMLDivElement) => {
   // Handle file selection
   fileInput.addEventListener("change", () => {
     if (fileInput.files && fileInput.files.length > 0) {
-      modoIns?.conversationMaster.fileMaster.setFile(fileInput.files[0]);
+      widget?.chat.fileMaster.setFile(fileInput.files[0]);
     }
   });
 };
 
-const registerReplyPreviewListener = (modoContainer: HTMLDivElement) => {
-  const replyPreview = modoContainer.querySelector(".mc-reply-preview") as HTMLDivElement;
-  const replyPreviewClose = modoContainer.querySelector(".mc-reply-preview-close") as HTMLButtonElement;
-  const replyPreviewInfo = modoContainer.querySelector(".mc-reply-preview-info") as HTMLDivElement;
+const registerReplyPreviewListener = (widgetContainer: HTMLDivElement) => {
+  const replyPreview = widgetContainer.querySelector(".mw-reply-preview") as HTMLDivElement;
+  const replyPreviewClose = widgetContainer.querySelector(".mw-reply-preview-close") as HTMLButtonElement;
+  const replyPreviewInfo = widgetContainer.querySelector(".mw-reply-preview-info") as HTMLDivElement;
 
   if (!replyPreview || !replyPreviewClose || !replyPreviewInfo) return;
 
   // Close button - clear reply
   replyPreviewClose.addEventListener("click", e => {
     e.stopPropagation();
-    const modoInstance = window.modoChatInstance?.();
-    if (modoInstance?.conversationMaster) {
-      modoInstance.conversationMaster.replyMaster.clearReply();
+    const widget = window.getMWidget?.();
+    if (widget?.chat) {
+      widget.chat.replyMaster.clearReply();
     }
   });
 
   // Click on preview info - scroll to message
   replyPreviewInfo.addEventListener("click", () => {
-    const modoInstance = window.modoChatInstance?.();
-    const replyingTo = modoInstance?.conversationMaster.replyMaster.replyingTo;
+    const widget = window.getMWidget?.();
+    const replyingToEl = getMessageElement(widget?.chat.replyMaster.replyingTo! || {});
 
-    if (replyingTo?.element) {
+    if (replyingToEl) {
       // Scroll to the message
-      const messagesContainer = modoContainer.querySelector(".mc-chat-messages-con") as HTMLDivElement;
+      const messagesContainer = widgetContainer.querySelector(".mw-chat-messages-con") as HTMLDivElement;
       if (messagesContainer) {
-        replyingTo.element.scrollIntoView({behavior: "smooth", block: "center"});
+        replyingToEl.scrollIntoView({behavior: "smooth", block: "center"});
 
         // Add a highlight effect
-        replyingTo.element.classList.add("mc-message-highlight");
+        replyingToEl.classList.add("mw-message-highlight");
         setTimeout(() => {
-          replyingTo.element?.classList.remove("mc-message-highlight");
+          replyingToEl?.classList.remove("mw-message-highlight");
         }, 2000);
       }
     }
   });
 };
 
-const registerTooltipCloseListener = (modoContainer: HTMLDivElement) => {
-  const modoInstance = window.modoChatInstance?.();
-  const tooltipCloseBtn = modoContainer.querySelector(".mc-toggle-tooltip-close") as HTMLButtonElement;
-  const tooltip = modoContainer.querySelector(".mc-toggle-tooltip") as HTMLDivElement;
+const registerTooltipCloseListener = (widgetContainer: HTMLDivElement) => {
+  const widget = window.getMWidget?.();
+  const tooltipCloseBtn = widgetContainer.querySelector(".mw-toggle-tooltip-close") as HTMLButtonElement;
+  const tooltip = widgetContainer.querySelector(".mw-toggle-tooltip") as HTMLDivElement;
   if (tooltipCloseBtn) {
     tooltipCloseBtn.addEventListener("click", e => {
-      localStorage.setItem(`modochats:${modoInstance?.publicKey}-has-seen-greeting-message`, "true");
+      localStorage.setItem(`modochats:${widget?.publicKey}-has-seen-greeting-message`, "true");
       e.stopPropagation();
       if (tooltip) {
-        tooltip.classList.add("mc-hidden");
+        tooltip.classList.add("mw-hidden");
       }
     });
   }

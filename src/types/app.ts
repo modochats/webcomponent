@@ -1,4 +1,4 @@
-interface ModoChatOptions {
+interface WidgetOptions {
   position: "left" | "right";
   theme: "dark" | "light";
   primaryColor: string;
@@ -14,4 +14,4 @@ interface FetchPaginationRes<T = any> {
   prev: string | null;
   count: number;
 }
-export {ModoChatOptions, FetchPaginationRes};
+export {WidgetOptions, FetchPaginationRes};

@@ -1,16 +1,64 @@
-# Modo Chat Widget
+# Modo Widget
 
-A responsive Persian/Farsi chat widget web component for customer support.
+A responsive web chat widget for customer support.
+
+## Installation
+
+### NPM
+
+Install the package via npm:
+
+```bash
+npm install @modochats/widget
+```
+
+Then, import and use in your JavaScript/TypeScript code:
+
+```javascript
+import {Widget} from "@modochats/widget";
+
+const widget = new Widget("your-public-key", {
+  // options
+});
+```
+
+### CDN
+
+Alternatively, include the script directly from CDN:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/modochats/webcomponent@main/cdn-dist/modo-web-component.min.js"></script>
+```
 
 ## Features
 
-- 🌙 Dark/Light theme support
+- 🌙 Dark/Light theme support with customizable colors
 - 🌐 RTL (Persian/Farsi) language support
 - 📱 Mobile responsive design
-- 💬 Real-time chat functionality
-- 🔗 WebSocket connection status
+- 💬 Real-time chat functionality with WebSocket connections
+- 🔗 WebSocket connection status indicator
 - 📝 Markdown message support
+- 🎤 Voice chat capabilities
+- 🖥️ Fullscreen mode option
+- 🎨 Customizable position (left/right), primary and foreground colors
+- 👤 User data management and updates
 - ⚡ TypeScript + Modern JavaScript
+- 🔄 Auto-initialization support
+
+## Configuration Options
+
+The widget can be customized with the following options:
+
+| Option            | Type                  | Default     | Description                                    |
+| ----------------- | --------------------- | ----------- | ---------------------------------------------- |
+| `position`        | `"left" \| "right"`   | `"right"`   | Position of the chat widget on the screen      |
+| `theme`           | `"dark" \| "light"`   | `"dark"`    | Theme mode (dark or light)                     |
+| `primaryColor`    | `string`              | `"#667eea"` | Primary color for the widget                   |
+| `title`           | `string`              | `""`        | Title displayed in the chat header             |
+| `foregroundColor` | `string`              | `"#fff"`    | Foreground text color                          |
+| `userData`        | `Record<string, any>` | `undefined` | Custom user data object                        |
+| `autoInit`        | `boolean`             | `false`     | Whether to automatically initialize the widget |
+| `fullScreen`      | `boolean`             | `false`     | Enable fullscreen mode                         |
 
 ## Quick Start
 
@@ -78,14 +126,60 @@ This will:
 Include the widget in your HTML:
 
 ```html
-<script src="bundle.js"></script>
-<script>
-  // Initialize the chat widget
-  const chat = new ModoChat("your-public-key", {
-    // other options...
-  });
-</script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Your Website</title>
+  </head>
+  <body>
+    <!-- Your website content -->
+
+    <script src="https://cdn.jsdelivr.net/gh/modochats/webcomponent@main/cdn-dist/modo-web-component.min.js"></script>
+    <script>
+      // Initialize the chat widget
+      const widget = new ModoWidget("your-public-key", {
+        position: "right",
+        theme: "dark",
+        primaryColor: "#667eea",
+        title: "Chat with Us",
+        foregroundColor: "#ffffff",
+        userData: {name: "John Doe", email: "john@example.com"},
+        autoInit: true,
+        fullScreen: false
+      });
+    </script>
+  </body>
+</html>
 ```
+
+### Initialization Options
+
+Pass configuration options as the second parameter to the `ModoWidget` constructor. All options are optional except the public key.
+
+Example with minimal options:
+
+```javascript
+const widget = new ModoWidget("your-public-key");
+widget.init(); // Manual initialization if autoInit is false
+```
+
+## API Methods
+
+Once initialized, you can interact with the widget instance:
+
+### Update User Data
+
+Update or add custom user data dynamically:
+
+```javascript
+await widget.updateUserData({
+  name: "Jane Doe",
+  email: "jane@example.com"
+});
+```
+
+This method merges the new data with existing user data and updates it on the server.
 
 ## Requirements
 

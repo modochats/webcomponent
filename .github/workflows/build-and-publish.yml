@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
+  issues: write
 
 jobs:
   build:
@@ -88,33 +90,17 @@ jobs:
           # Push to repository
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ github.run_number }}
-          release_name: Release v${{ github.run_number }}
-          body: |
-            ## Build ${{ github.run_number }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build-artifacts/cdn-dist/modo-widget.js
+          asset_name: modo-widget.js
+          asset_content_type: application/javascript
 
-            ### Files included:
-            - modo-web-component.js - UMD bundle
-            - modo-web-component.min.js - Minified UMD bundle
-            - dist/ - Full distribution files
-
-            ### CDN Usage:
-            jsDelivr (Recommended):
-            <script src="https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/cdn-dist/modo-web-component.min.js"></script>
-
-            GitHub Raw:
-            <script src="https://raw.githubusercontent.com/${{ github.repository }}/main/cdn-dist/modo-web-component.min.js"></script>
-
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Assets
+      - name: Upload Release Assets Legacy
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -125,6 +111,16 @@ jobs:
           asset_content_type: application/javascript
 
       - name: Upload Minified Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build-artifacts/cdn-dist/modo-widget.min.js
+          asset_name: modo-widget.min.js
+          asset_content_type: application/javascript
+
+      - name: Upload Minified Release Asset Legacy
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -148,3 +144,26 @@ jobs:
           asset_path: ./build-artifacts/cdn-dist/dist.tar.gz
           asset_name: dist.tar.gz
           asset_content_type: application/gzip
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "23"
+
+      - name: Install dependencies
+        run: npm i
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release

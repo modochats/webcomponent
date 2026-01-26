@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/modochats/webcomponent/compare/v1.1.0...v1.2.0) (2026-01-26)
+
+
+### Features
+
+* enhance release workflow with semantic-release and asset uploads ([c9eba3d](https://github.com/modochats/webcomponent/commit/c9eba3d8d4188cbdcbeb21379ed12a2107b12863))
+* enhance release workflow with semantic-release and asset uploads ([625b537](https://github.com/modochats/webcomponent/commit/625b5372892a77cb510a3604f266a0eb8f43f2df))
+
 # [1.1.0](https://github.com/modochats/webcomponent/compare/v1.0.0...v1.1.0) (2026-01-26)
 
 

@@ -1,3 +1,11 @@
+# [1.4.0](https://github.com/modochats/webcomponent/compare/v1.3.0...v1.4.0) (2026-01-26)
+
+
+### Features
+
+* improve git push handling in CI workflow by adding fetch and rebase ([af6a584](https://github.com/modochats/webcomponent/commit/af6a5847f97381df068d92b3d0cb10fa17fa184d))
+* improve git push handling in CI workflow by adding fetch and rebase ([eabc772](https://github.com/modochats/webcomponent/commit/eabc77264c14eef476eefd5980b9e75e88691d52))
+
 # [1.3.0](https://github.com/modochats/webcomponent/compare/v1.2.0...v1.3.0) (2026-01-26)
 
 

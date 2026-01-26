@@ -1,23 +1,20 @@
 {
   "name": "@modochats/widget",
-  "version": "0.1.4",
+  "version": "0.51.0",
   "description": "",
   "main": "dist/src/app.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/app.ts",
     "dev:ts": "tsc --watch --noCheck",
     "dev:rollup": "rollup --config rollup.dev.config.js --watch",
     "dev:server": "live-server temp --port=3000 --host=localhost --open=/dev.html",
-    "dev:full": "concurrently \"yarn dev:ts\" \"yarn dev:rollup\" \"yarn dev:server\" --names \"tsc,rollup,server\" --prefix name ",
-    "build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist/types",
-    "static": "tsx src/app.ts",
+    "dev": "concurrently \"yarn dev:ts\" \"yarn dev:rollup\" \"yarn dev:server\" --names \"tsc,rollup,server\" --prefix name ",
     "compile": "npx tsc --noCheck",
     "minify": "node scripts/terser-minify.js",
     "rollup": "rollup --config rollup.config.js",
     "build": "npm run compile && npm run minify && npm run rollup",
     "build:cdn": "npm run build && node scripts/create-umd-bundle.js",
-    "render": "npm install && npm run build"
+    "build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist/types"
   },
   "dependencies": {
     "@modochats/chat-client": "^0.3.0",
@@ -36,7 +33,13 @@
     "rollup": "^4.53.2",
     "terser": "^5.44.1",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^9.2.6",
+    "@semantic-release/npm": "^12.0.0",
+    "semantic-release": "^23.0.0"
   },
   "imports": {
     "#src/*": "./dist/src/*",

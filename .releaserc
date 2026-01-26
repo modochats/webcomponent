@@ -2,7 +2,7 @@
   "branches": [
     "main"
   ],
-  "repositoryUrl": "https://github.com/Abolfazl2049/husky-semantic-version-starter",
+  "repositoryUrl": "https://github.com/modochats/webcomponent",
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",

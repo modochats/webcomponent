@@ -1,6 +1,6 @@
-import {Conversation} from "#src/models/conversation.js";
 import {ChatClient, ConversationMessage, EventType} from "@modochats/chat-client";
 import {onSocketConnectionUpdate} from "../socket/utils.js";
+import {Conversation} from "./conversation.js";
 
 class Chat {
   private instance?: ChatClient;

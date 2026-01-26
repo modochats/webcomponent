@@ -52,8 +52,7 @@
             "path": "cdn-dist/modo-web-component.min.js",
             "label": "modo-web-component.min.js (Legacy)"
           }
-        ],
-        "successComment": "🎉 This issue has been resolved in version ${nextRelease.version}.\n\n### CDN Links:\n- jsDelivr: https://cdn.jsdelivr.net/gh/${{ github.repository }}@${nextRelease.version}/cdn-dist/modo-widget.min.js\n- GitHub Raw: https://raw.githubusercontent.com/${{ github.repository }}/${nextRelease.version}/cdn-dist/modo-widget.min.js"
+        ]
       }
     ]
   ]

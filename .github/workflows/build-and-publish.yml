@@ -79,6 +79,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -112,8 +115,11 @@ jobs:
           git add cdn-dist/
           git commit -m "Add CDN distribution files for build ${{ github.run_number }}" || echo "No changes to commit"
 
-          # Push to repository
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
+          # Push to repository (handle remote changes by fetching and rebasing)
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git fetch origin main
+          git rebase origin/main || git pull --rebase origin main || true
+          git push origin HEAD:main
 
       - name: Get Release Info
         id: release_info

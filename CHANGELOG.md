@@ -1,3 +1,11 @@
+# [1.1.0](https://github.com/modochats/webcomponent/compare/v1.0.0...v1.1.0) (2026-01-26)
+
+
+### Features
+
+* using client packages ([de2b711](https://github.com/modochats/webcomponent/commit/de2b71111a7eda1376517170546d2ce7e2f2d93d))
+* using client packages ([4312ae6](https://github.com/modochats/webcomponent/commit/4312ae69e846f80477aa751e09d857d3db0150a7))
+
 # 1.0.0 (2026-01-26)
 
 

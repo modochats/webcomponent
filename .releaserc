@@ -1,6 +1,6 @@
 {
   "branches": [
-    "master"
+    "main"
   ],
   "repositoryUrl": "https://github.com/Abolfazl2049/husky-semantic-version-starter",
   "plugins": [

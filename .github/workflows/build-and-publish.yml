@@ -46,7 +46,7 @@ jobs:
           path: build-artifacts/
           retention-days: 30
 
-  publish-cdn:
+  create-cdn-dist:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !contains(github.event.head_commit.message, 'Add CDN distribution files for build')
@@ -90,61 +90,8 @@ jobs:
           # Push to repository
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
 
-      - name: Upload Release Assets
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/modo-widget.js
-          asset_name: modo-widget.js
-          asset_content_type: application/javascript
-
-      - name: Upload Release Assets Legacy
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/modo-web-component.js
-          asset_name: modo-web-component.js
-          asset_content_type: application/javascript
-
-      - name: Upload Minified Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/modo-widget.min.js
-          asset_name: modo-widget.min.js
-          asset_content_type: application/javascript
-
-      - name: Upload Minified Release Asset Legacy
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/modo-web-component.min.js
-          asset_name: modo-web-component.min.js
-          asset_content_type: application/javascript
-
-      - name: Upload Dist Folder
-        run: |
-          cd build-artifacts/cdn-dist
-          tar -czf dist.tar.gz dist/
-
-      - name: Upload Dist Archive
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build-artifacts/cdn-dist/dist.tar.gz
-          asset_name: dist.tar.gz
-          asset_content_type: application/gzip
   release:
+    needs: create-cdn-dist
     name: Release
     runs-on: ubuntu-latest
     steps:

@@ -1,11 +1,11 @@
 {
-  "name": "modo-web-component",
+  "name": "modochat-widget",
   "version": "1.0.0",
   "description": "Modo Web Component - A lightweight web component library",
-  "main": "modo-web-component.js",
+  "main": "modo-widget.js",
   "files": [
-    "modo-web-component.js",
-    "modo-web-component.min.js",
+    "modo-widget.js",
+    "modo-widget.min.js",
     "dist/"
   ],
   "keywords": [
@@ -18,10 +18,10 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/modo-web-component.git"
+    "url": "https://github.com/your-username/modochat-widget.git"
   },
-  "homepage": "https://github.com/your-username/modo-web-component#readme",
+  "homepage": "https://github.com/your-username/modochat-widget#readme",
   "bugs": {
-    "url": "https://github.com/your-username/modo-web-component/issues"
+    "url": "https://github.com/your-username/modochat-widget/issues"
   }
 }

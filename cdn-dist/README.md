@@ -6,12 +6,12 @@ A lightweight web component library.
 
 ### jsDelivr
 ```html
-<script src="https://cdn.jsdelivr.net/gh/your-username/modo-web-component@main/cdn-dist/modo-web-component.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/your-username/modochat-widget@main/cdn-dist/modo-widget.min.js"></script>
 ```
 
 ### GitHub Raw
 ```html
-<script src="https://raw.githubusercontent.com/your-username/modo-web-component/main/cdn-dist/modo-web-component.min.js"></script>
+<script src="https://raw.githubusercontent.com/your-username/modochat-widget/main/cdn-dist/modo-widget.min.js"></script>
 ```
 
 ## Usage
@@ -37,6 +37,6 @@ const chat = new ModoChat('your-public-key', {
 
 ## Files
 
-- `modo-web-component.js` - Development version
-- `modo-web-component.min.js` - Production version (minified)
+- `modo-widget.js` - Development version
+- `modo-widget.min.js` - Production version (minified)
 - `dist/` - Full distribution files

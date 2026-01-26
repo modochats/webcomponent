@@ -32,6 +32,29 @@
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
-    "@semantic-release/github"
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "cdn-dist/modo-widget.js",
+            "label": "modo-widget.js"
+          },
+          {
+            "path": "cdn-dist/modo-widget.min.js",
+            "label": "modo-widget.min.js"
+          },
+          {
+            "path": "cdn-dist/modo-web-component.js",
+            "label": "modo-web-component.js (Legacy)"
+          },
+          {
+            "path": "cdn-dist/modo-web-component.min.js",
+            "label": "modo-web-component.min.js (Legacy)"
+          }
+        ],
+        "successComment": "🎉 This issue has been resolved in version ${nextRelease.version}.\n\n### CDN Links:\n- jsDelivr: https://cdn.jsdelivr.net/gh/${{ github.repository }}@${nextRelease.version}/cdn-dist/modo-widget.min.js\n- GitHub Raw: https://raw.githubusercontent.com/${{ github.repository }}/${nextRelease.version}/cdn-dist/modo-widget.min.js"
+      }
+    ]
   ]
 }

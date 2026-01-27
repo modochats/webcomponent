@@ -15,6 +15,6 @@ tsconfig.esm.json
 .yarn/
 cdn-dist/
 scripts/
-temp/
+live/
 rollup.config.js
 rollup.dev.config.js

@@ -7,7 +7,7 @@
   "scripts": {
     "dev:ts": "tsc --watch --noCheck",
     "dev:rollup": "rollup --config rollup.dev.config.js --watch",
-    "dev:server": "live-server temp --port=3000 --host=localhost --open=/dev.html",
+    "dev:server": "live-server live --port=3000 --host=localhost --open=/dev.html",
     "dev": "concurrently \"yarn dev:ts\" \"yarn dev:rollup\" \"yarn dev:server\" --names \"tsc,rollup,server\" --prefix name ",
     "compile": "npx tsc --noCheck",
     "minify": "node scripts/terser-minify.js",

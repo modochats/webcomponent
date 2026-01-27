@@ -102,7 +102,7 @@ This will:
 │   ├── services/          # UI and business logic
 │   ├── utils/             # Helper utilities
 │   └── types/             # TypeScript types
-├── temp/                   # Development files
+├── live/                   # Development files
 │   ├── css/               # Compiled styles
 │   └── dev.html           # Development HTML
 ├── scripts/               # Build scripts

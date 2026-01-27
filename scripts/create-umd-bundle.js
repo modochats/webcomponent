@@ -18,14 +18,14 @@ async function createUMDBundle() {
   await fs.mkdir(outputDir, {recursive: true});
 
   // Read the main app file from rollup output
-  const appPath = path.join(distDir, "../temp/app.js");
+  const appPath = path.join(distDir, "../live/app.js");
   let appCode = "";
 
   try {
     appCode = await fs.readFile(appPath, "utf8");
   } catch (error) {
-    console.error("Error reading app.js from temp directory:", error);
-    // Fallback to dist/src/app.js if temp doesn't exist
+    console.error("Error reading app.js from live directory:", error);
+    // Fallback to dist/src/app.js if live doesn't exist
     const fallbackPath = path.join(distDir, "src/app.js");
     try {
       appCode = await fs.readFile(fallbackPath, "utf8");

@@ -4,7 +4,7 @@ import commonjs from "@rollup/plugin-commonjs";
 export default {
   input: "dist/src/app.js", // Use compiled TypeScript output
   output: {
-    file: "temp/app.dev.js",
+    file: "live/app.dev.js",
     format: "iife", // Better for browser development
     name: "ModoWidget", // Global name for IIFE
     sourcemap: true // Enable source maps for debugging

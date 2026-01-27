@@ -4,7 +4,7 @@ import commonjs from "@rollup/plugin-commonjs";
 export default {
   input: "dist/src/app.js",
   output: {
-    file: "temp/app.js",
+    file: "live/app.js",
     format: "cjs"
   },
   // external: ["ofetch"], // Uncomment this if you want to keep ofetch external

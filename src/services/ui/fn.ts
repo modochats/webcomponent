@@ -230,7 +230,7 @@ function adjustColorBrightness(hex: string, percent: number): string {
 async function loadCss() {
   return await new Promise(resolve => {
     const link = document.createElement("link");
-    const source = isDev ? "/css/index.css" : `https://cdn.jsdelivr.net/gh/modochats/webcomponent@latest/live/css/index.css`;
+    const source = isDev ? "/assets/css/index.css" : `https://cdn.jsdelivr.net/gh/modochats/webcomponent@main/live/assets/css/index.css`;
     link.rel = "stylesheet";
     link.href = source;
     document.head.appendChild(link);

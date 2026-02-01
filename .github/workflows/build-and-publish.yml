@@ -87,7 +87,11 @@ jobs:
 
           # Push to repository
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
-
+      - name: Create and push tag
+        run: |
+          TAG=v${{ github.run_number }}
+          git tag $TAG
+          git push origin $TAG
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1

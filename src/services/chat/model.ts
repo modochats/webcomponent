@@ -12,7 +12,7 @@ class Chat {
     this.replyMaster = new CReplyMaster();
     this.conversation = new Conversation();
   }
-  initInstance() {
+  async initInstance() {
     const widget = window.getMWidget?.();
     const savedUUid = localStorage.getItem(`modo-chat:${widget?.chatbot?.uuid}-conversation-uuid`);
     this.instance = new ChatClient({
@@ -20,6 +20,7 @@ class Chat {
       userData: {uuid: widget?.customerData.uniqueId as string, phoneNumber: widget?.customerData.phoneNumber},
       conversationUUid: savedUUid || undefined
     });
+
     this.instance.on(EventType.CONVERSATION_SYSTEM_MESSAGE, ev => {
       this.conversation.addSystemMessage(ev.message);
     });
@@ -32,15 +33,19 @@ class Chat {
     this.instance.on(EventType.SOCKET_DISCONNECTED, ev => {
       onSocketConnectionUpdate(false);
     });
-    this.instance.on(EventType.CONVERSATION_LOAD, ev => {
-      this.conversation.clearContainerEl();
-      this.conversation.setStatus();
-      this.conversation.onInit();
-
-      localStorage.setItem(`modo-chat:${widget?.chatbot?.uuid}-conversation-uuid`, this.instance?.conversation?.uuid as string);
-    });
     this.instance.on(EventType.CONVERSATION_MESSAGES_CLEAR, () => {
       this.conversation.clearContainerEl();
+    });
+    await new Promise((resolve, reject) => {
+      setTimeout(() => resolve(true), 10000);
+      this.instance?.on(EventType.CONVERSATION_LOAD, ev => {
+        this.conversation.clearContainerEl();
+        this.conversation.setStatus();
+        this.conversation.onInit();
+
+        localStorage.setItem(`modo-chat:${widget?.chatbot?.uuid}-conversation-uuid`, this.instance?.conversation?.uuid as string);
+        resolve(true);
+      });
     });
   }
   get socket() {

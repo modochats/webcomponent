@@ -60,7 +60,9 @@ class Widget {
 
       this.isInitialized = true;
       this.chatbot.showTooltip();
-
+      try {
+        await this.chat.initInstance();
+      } catch (e) {}
       // In fullscreen mode, automatically open the chat
       if (this.options.fullScreen) {
         // Ensure chat body is visible in fullscreen mode
@@ -69,12 +71,8 @@ class Widget {
           chatBody.classList.remove("mw-hidden");
           chatBody.classList.add("mw-active");
         }
-        try {
-          this.chat.initInstance();
-        } finally {
-          this.onOpen();
-        }
-      } else this.chat.initInstance();
+        this.onOpen();
+      }
     } else throw new Error("host not allowed");
   }
   async onOpen() {
@@ -87,6 +85,7 @@ class Widget {
     this.conversation?.markAsRead();
     this.conversation?.scrollToBottom();
     if (this.openedCount === 1) {
+      // console.log("conversationD", this.chat.conversationD);
       if (this.chat.conversationD) {
         await this.conversation?.loadMessages();
         await this.chat?.socket?.connect();

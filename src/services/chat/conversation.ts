@@ -62,7 +62,7 @@ class Conversation {
 
   onInit() {
     switchToConversationLayout();
-    preloadAudio("./audio/new-message.mp3").catch(console.warn);
+    preloadAudio(NEW_MESSAGE_AUDIO_URL).catch(console.warn);
     if (this?.d?.status) setConversationType(this.d?.status!);
   }
 

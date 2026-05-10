@@ -8,6 +8,7 @@ import {loadStarters, updateChatToggleImage, updateChatTitle, applyModoOptions, 
 import {VERSION} from "./constants/index.js";
 import {VoiceChat} from "./services/voice-chat/model.js";
 import {Chat} from "./services/chat/model.js";
+import {applyLanguage} from "./utils/i18n.js";
 
 class Widget {
   container?: HTMLDivElement;
@@ -35,7 +36,8 @@ class Widget {
       title: options?.title || "",
       userData: options?.userData,
       foregroundColor: options?.foregroundColor,
-      fullScreen: typeof options?.fullScreen === "boolean" ? options?.fullScreen : false
+      fullScreen: typeof options?.fullScreen === "boolean" ? options?.fullScreen : false,
+      language: options?.language || "fa"
     };
     if (options?.autoInit) this.init();
   }
@@ -49,7 +51,9 @@ class Widget {
       primaryColor: this.options?.primaryColor || this.chatbot?.uiConfig?.primaryColor || "#667eea",
       foregroundColor: this.options?.foregroundColor || this.chatbot?.uiConfig?.foregroundColor || "#fff"
     };
+
     if (checkIfHostIsAllowed(this)) {
+      applyLanguage(this.options.language || "fa");
       await loadCss();
       window.getMWidget = () => this;
       createChatContainer(this);

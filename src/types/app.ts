@@ -7,6 +7,7 @@ interface WidgetOptions {
   userData?: Record<string, any>;
   autoInit?: boolean;
   fullScreen: boolean;
+  language?: "fa" | "en";
 }
 interface FetchPaginationRes<T = any> {
   results: T[];

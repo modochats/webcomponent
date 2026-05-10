@@ -37,11 +37,11 @@
     </style>
     <script>
       // Set development environment before loading the component
-      window.ENVIRONMENT = "DEV";
+      // window.ENVIRONMENT = "DEV";
     </script>
     <script src="app.dev.js"></script>
   </head>
-  <body>
+  <body dir="ltr">
     <div class="dev-container">
       <h1>Modo Web Component Development</h1>
       <p>This is your development environment. The component will appear below:</p>
@@ -79,7 +79,8 @@
         theme: "dark",
         autoInit: true,
         title: "پشتیبانی سایت خودنویس",
-        fullScreen: true
+        position: "left"
+        // fullScreen: true
       });
       // Update environment status display
       document.getElementById("env-status").textContent = window.ENVIRONMENT || "Unknown";

@@ -18,7 +18,8 @@ class Chat {
     this.instance = new ChatClient({
       chatbotUuid: widget?.chatbot?.uuid as string,
       userData: {uuid: widget?.customerData.uniqueId as string, phoneNumber: widget?.customerData.phoneNumber},
-      conversationUUid: savedUUid || undefined
+      conversationUUid: savedUUid || undefined,
+      debug: false
     });
 
     this.instance.on(EventType.CONVERSATION_SYSTEM_MESSAGE, ev => {

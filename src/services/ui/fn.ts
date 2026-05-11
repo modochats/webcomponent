@@ -144,7 +144,6 @@ function applyPositionOption(container: HTMLDivElement, position: "left" | "righ
     if (position === "left") {
       widget.style.right = "auto";
       widget.style.left = "32px";
-      widget.style.direction = "ltr";
 
       // Update chat body position for left alignment
       const chatBody = widget.querySelector(".mw-chat-body") as HTMLElement;

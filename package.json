@@ -17,8 +17,9 @@
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist/types"
   },
   "dependencies": {
-    "@modochats/chat-client": "^0.3.0",
+    "@modochats/chat-client": "^0.3.3",
     "@modochats/voice-client": "^0.2.2",
+    "i18next": "^26.0.10",
     "marked": "^16.3.0",
     "ofetch": "^1.5.1",
     "tldts": "^7.0.17"
@@ -27,19 +28,19 @@
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@types/node": "^24.10.1",
-    "concurrently": "^9.2.1",
-    "live-server": "^1.2.2",
-    "rollup": "^4.53.2",
-    "terser": "^5.44.1",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^9.2.6",
     "@semantic-release/npm": "^12.0.0",
-    "semantic-release": "^23.0.0"
+    "@types/node": "^24.10.1",
+    "concurrently": "^9.2.1",
+    "live-server": "^1.2.2",
+    "rollup": "^4.53.2",
+    "semantic-release": "^23.0.0",
+    "terser": "^5.44.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
   },
   "imports": {
     "#src/*": "./dist/src/*",

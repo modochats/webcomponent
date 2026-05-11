@@ -1,3 +1,5 @@
+import {t} from "i18next";
+
 function toggleVoiceChatLayout() {
   const widget = window.getMWidget?.();
   const voiceOverlay = widget?.container?.querySelector(".mw-voice-agent-overlay");
@@ -25,13 +27,13 @@ function initVoiceChatLayout() {
   const logoImg = voiceOverlay?.querySelector(".mw-voice-agent-logo") as HTMLImageElement;
   if (logoImg && widget?.chatbot?.image) {
     logoImg.src = widget.chatbot.image;
-    logoImg.alt = widget.chatbot.name || "چت بات";
+    logoImg.alt = widget.chatbot.name || t("chat.voiceChat.defaultName");
   }
 
   // Set title
   const titleEl = voiceOverlay?.querySelector(".mw-voice-agent-title") as HTMLElement;
   if (titleEl) {
-    titleEl.textContent = widget?.chatbot?.name || "تماس صوتی";
+    titleEl.textContent = widget?.chatbot?.name || t("chat.voiceChat.defaultTitle");
   }
 
   // Call button click handler
@@ -90,7 +92,7 @@ function handleVoiceConnected() {
     statusEl.style.animation = "mw-pulse 1.5s ease-in-out infinite";
   }
 
-  updateVoiceChatStatus("متصل ✓", "#68d391"); // Green
+  updateVoiceChatStatus(t("chat.voiceChat.status.connected"), "#68d391"); // Green
 }
 
 function handleVoiceDisconnected(reason?: string) {
@@ -106,23 +108,23 @@ function handleVoiceDisconnected(reason?: string) {
     statusEl.style.animation = "none";
   }
 
-  const statusText = reason ? `قطع شد: ${reason}` : "قطع شد";
+  const statusText = reason ? `${t("chat.voiceChat.status.disconnectedWithReason")}${reason}` : t("chat.voiceChat.status.disconnected");
   updateVoiceChatStatus(statusText, "#fc8181"); // Red
 }
 
 function handleVoiceConnectionError(message: string) {
-  updateVoiceChatStatus(`خطا: ${message}`, "#fbb040"); // Warning/Orange
+  updateVoiceChatStatus(`${t("chat.voiceChat.status.errorPrefix")}${message}`, "#fbb040"); // Warning/Orange
 
   // Also show error in console with better visibility
   console.error("🔴 Voice Connection Error:", message);
 }
 
 function handleMicrophonePaused() {
-  updateVoiceChatStatus("⏸ میکروفن متوقف شد", "#fbb040"); // Orange
+  updateVoiceChatStatus(t("chat.voiceChat.status.microphonePaused"), "#fbb040"); // Orange
 }
 
 function handleMicrophoneResumed() {
-  updateVoiceChatStatus("🎤 میکروفن فعال", "#68d391"); // Green
+  updateVoiceChatStatus(t("chat.voiceChat.status.microphoneResumed"), "#68d391"); // Green
 }
 
 export {

@@ -53,7 +53,7 @@ class Widget {
     };
 
     if (checkIfHostIsAllowed(this)) {
-      applyLanguage(this.options.language || "fa");
+      await applyLanguage(this.options.language || "fa");
       await loadCss();
       window.getMWidget = () => this;
       createChatContainer(this);

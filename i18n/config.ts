@@ -1,6 +1,6 @@
 import i18next from "i18next";
 
-i18next.init({
+export const i18nextInitPromise = i18next.init({
   lng: "fa", // if you're using a language detector, do not define the lng option
   debug: true,
   resources: {

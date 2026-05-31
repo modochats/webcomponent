@@ -11,7 +11,7 @@
   
   let Chatbot$1 = class Chatbot{name;image;shortDescription;starters=[];voiceChat;createdAt;updatedAt;deletedAt;uuid;allowedHosts=[];id;greetingMessage;uiConfig;constructor(t){this.name=t.name,this.image=t.image,this.shortDescription=t.short_description,this.starters=t.starters,this.voiceChat=t.voice_agent,this.createdAt=t.setting.created_at,this.updatedAt=t.setting.updated_at,this.deletedAt=t.setting.deleted_at,this.uuid=t.setting.unique_id,this.allowedHosts=t.setting.allow_hosts?.split(",")??[],this.id=t.setting.chatbot,this.allowedHosts.push("modochats.com"),this.uiConfig={primaryColor:t.primary_color,foregroundColor:t.foreground_color,theme:t.theme},this.greetingMessage=t.greeting_message;}showTooltip(){const t=window.getMWidget?.(),e=t?.container?.querySelector(".mw-toggle-tooltip"),s=t?.container?.querySelector(".mw-toggle-tooltip-text"),i="true"===localStorage.getItem(`modochats:${t?.publicKey}-has-seen-greeting-message`);e&&s&&this.greetingMessage&&!i&&(e.classList.remove("mw-hidden"),s.textContent=this.greetingMessage);}hideTooltip(){const t=window.getMWidget?.(),e=t?.container?.querySelector(".mw-toggle-tooltip");e&&e.classList.add("mw-hidden");}};
 
-const VERSION="0.51.0";
+const VERSION="0.52.0";
 
 const getEnvironment$1=()=>"undefined"!=typeof window&&window.ENVIRONMENT?window.ENVIRONMENT:"undefined"!=typeof process&&process.env?.NODE_ENV?process.env.NODE_ENV.toUpperCase():"PROD",isDev="DEV"===getEnvironment$1();"PROD"===getEnvironment$1();const BASE_API_URL$1=isDev?"https://dev-api.modochats.com":"https://api.modochats.com",BASE_STORAGE_URL="https://modochats.s3.ir-thr-at1.arvanstorage.ir",NEW_MESSAGE_AUDIO_URL=`${BASE_STORAGE_URL}/new-message.mp3`;
 

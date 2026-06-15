@@ -50,7 +50,7 @@ Alternatively, include the script directly from CDN:
 The widget can be customized with the following options:
 
 | Option            | Type                  | Default     | Description                                    |
-| ----------------- | --------------------- | ----------- | ---------------------------------------------- |
+| ----------------- | --------------------- | ----------- | ---------------------------------------------- | -------------------------------------- |
 | `position`        | `"left" \| "right"`   | `"right"`   | Position of the chat widget on the screen      |
 | `theme`           | `"dark" \| "light"`   | `"dark"`    | Theme mode (dark or light)                     |
 | `primaryColor`    | `string`              | `"#667eea"` | Primary color for the widget                   |
@@ -59,6 +59,7 @@ The widget can be customized with the following options:
 | `userData`        | `Record<string, any>` | `undefined` | Custom user data object                        |
 | `autoInit`        | `boolean`             | `false`     | Whether to automatically initialize the widget |
 | `fullScreen`      | `boolean`             | `false`     | Enable fullscreen mode                         |
+| `language`        | `"fa"                 | "en"`       | `"fa"`                                         | Default language for the widget (i18n) |
 
 ## Quick Start
 
@@ -141,6 +142,7 @@ Include the widget in your HTML:
       const widget = new ModoWidget("your-public-key", {
         position: "right",
         theme: "dark",
+        language: "fa",
         primaryColor: "#667eea",
         title: "Chat with Us",
         foregroundColor: "#ffffff",
@@ -165,6 +167,14 @@ widget.init(); // Manual initialization if autoInit is false
 ```
 
 ## API Methods
+
+**Internationalization (i18n)**
+
+- **Supported languages**: `fa` (Persian), `en` (English).
+- **Default**: `fa`.
+- **Set initial language**: pass the `language` option (`"fa" | "en"`) to the `ModoWidget` constructor.
+- **Translations location**: the built-in translation resources live in [i18n/config.ts](i18n/config.ts#L1-L50). Edit or extend this file to add or override translations.
+- **Runtime language change**: The widget applies the chosen language during initialization. To customize runtime behavior or load additional languages dynamically, initialize or configure `i18next` before creating the widget (see `i18n/config.ts`).
 
 Once initialized, you can interact with the widget instance:
 

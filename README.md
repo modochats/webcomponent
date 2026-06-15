@@ -50,7 +50,7 @@ Alternatively, include the script directly from CDN:
 The widget can be customized with the following options:
 
 | Option            | Type                  | Default     | Description                                    |
-| ----------------- | --------------------- | ----------- | ---------------------------------------------- | -------------------------------------- |
+| ----------------- | --------------------- | ----------- | ---------------------------------------------- |
 | `position`        | `"left" \| "right"`   | `"right"`   | Position of the chat widget on the screen      |
 | `theme`           | `"dark" \| "light"`   | `"dark"`    | Theme mode (dark or light)                     |
 | `primaryColor`    | `string`              | `"#667eea"` | Primary color for the widget                   |
@@ -59,7 +59,7 @@ The widget can be customized with the following options:
 | `userData`        | `Record<string, any>` | `undefined` | Custom user data object                        |
 | `autoInit`        | `boolean`             | `false`     | Whether to automatically initialize the widget |
 | `fullScreen`      | `boolean`             | `false`     | Enable fullscreen mode                         |
-| `language`        | `"fa"                 | "en"`       | `"fa"`                                         | Default language for the widget (i18n) |
+| `language`        | `"fa" \| "en"`        | `"fa"`      | Default language for the widget (i18n)         |
 
 ## Quick Start
 

@@ -8,6 +8,8 @@ interface WidgetOptions {
   autoInit?: boolean;
   fullScreen: boolean;
   language?: "fa" | "en";
+  /** When true (default), prompt for phone number before the first message. */
+  collectPhoneNumber?: boolean;
 }
 interface FetchPaginationRes<T = any> {
   results: T[];

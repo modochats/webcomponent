@@ -60,6 +60,7 @@ The widget can be customized with the following options:
 | `autoInit`        | `boolean`             | `false`     | Whether to automatically initialize the widget |
 | `fullScreen`      | `boolean`             | `false`     | Enable fullscreen mode                         |
 | `language`        | `"fa" \| "en"`        | `"fa"`      | Default language for the widget (i18n)         |
+| `collectPhoneNumber` | `boolean`          | `true`      | Prompt for phone number before the first message |
 
 ## Quick Start
 
@@ -148,7 +149,8 @@ Include the widget in your HTML:
         foregroundColor: "#ffffff",
         userData: {name: "John Doe", email: "john@example.com"},
         autoInit: true,
-        fullScreen: false
+        fullScreen: false,
+        collectPhoneNumber: true
       });
     </script>
   </body>
@@ -164,6 +166,15 @@ Example with minimal options:
 ```javascript
 const widget = new ModoWidget("your-public-key");
 widget.init(); // Manual initialization if autoInit is false
+```
+
+To skip the phone number prompt before the first message:
+
+```javascript
+const widget = new ModoWidget("your-public-key", {
+  collectPhoneNumber: false,
+  autoInit: true
+});
 ```
 
 ## API Methods

@@ -37,7 +37,8 @@ class Widget {
       userData: options?.userData,
       foregroundColor: options?.foregroundColor,
       fullScreen: typeof options?.fullScreen === "boolean" ? options?.fullScreen : false,
-      language: options?.language || "fa"
+      language: options?.language || "fa",
+      collectPhoneNumber: options?.collectPhoneNumber !== false
     };
     if (options?.autoInit) this.init();
   }

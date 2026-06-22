@@ -26,6 +26,9 @@ const sendMessage = async (message: string) => {
 
 const checkIfUserHasPhoneNumber = () => {
   const widget = window.getMWidget?.();
+  if (widget?.options.collectPhoneNumber === false) {
+    return true;
+  }
   if (widget?.customerData?.hasSubmittedPhoneForm()) {
     // User has already submitted the phone number form (whether empty or with phone number)
     return true;

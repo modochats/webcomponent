@@ -10,6 +10,8 @@ interface WidgetOptions {
   language?: "fa" | "en";
   /** When true (default), prompt for phone number before the first message. */
   collectPhoneNumber?: boolean;
+  /** When true, hide the "Made with Modochats" footer branding. */
+  whiteLabel?: boolean;
 }
 interface FetchPaginationRes<T = any> {
   results: T[];

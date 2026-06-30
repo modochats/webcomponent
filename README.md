@@ -61,6 +61,7 @@ The widget can be customized with the following options:
 | `fullScreen`      | `boolean`             | `false`     | Enable fullscreen mode                         |
 | `language`        | `"fa" \| "en"`        | `"fa"`      | Default language for the widget (i18n)         |
 | `collectPhoneNumber` | `boolean`          | `true`      | Prompt for phone number before the first message |
+| `whiteLabel`        | `boolean`             | `false`     | Hide the "Made with Modochats" footer branding   |
 
 ## Quick Start
 

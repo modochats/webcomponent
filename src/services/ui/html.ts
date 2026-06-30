@@ -113,11 +113,15 @@ const createChatContainer = (widget: Widget) => {
         </div>
       </div>
 
-      <!-- Chat Footer -->
+      ${
+        widget.options.whiteLabel
+          ? ""
+          : `<!-- Chat Footer -->
       <div class="mw-chat-footer">
         <span class="mw-footer-text">${t("chat.footer.text")}</span>
         <a href="" class="mw-footer-link" target="_blank" rel="noopener noreferrer" title="">${t("chat.footer.link")}</a>
-      </div>
+      </div>`
+      }
 
       <!-- Voice Agent Overlay -->
       <div class="mw-voice-agent-overlay mw-hidden">

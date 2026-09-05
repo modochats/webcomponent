@@ -2149,7 +2149,10 @@ class Translator extends EventEmitter$2 {
     const useOptionsReplaceForData = options.replace && !isString(options.replace);
     let data = useOptionsReplaceForData ? options.replace : options;
     if (useOptionsReplaceForData && typeof options.count !== 'undefined') {
-      data.count = options.count;
+      data = {
+        ...data,
+        count: options.count
+      };
     }
     if (this.options.interpolation.defaultVariables) {
       data = {
@@ -2183,6 +2186,10 @@ class LanguageUtil {
     this.options = options;
     this.supportedLngs = this.options.supportedLngs || false;
     this.logger = baseLogger.create('languageUtils');
+    this.resolveHierarchyCache = {};
+  }
+  clearCache() {
+    this.resolveHierarchyCache = {};
   }
   getScriptPartFromCode(code) {
     code = getCleanedCode(code);
@@ -2263,6 +2270,25 @@ class LanguageUtil {
     return found || [];
   }
   toResolveHierarchy(code, fallbackCode) {
+    const fallbackLng = this.options.fallbackLng;
+    const fallbackLngKey = Array.isArray(fallbackLng) ? fallbackLng.join('|') : fallbackLng;
+    if (fallbackLngKey !== this._cachedFallbackLng) {
+      this.resolveHierarchyCache = {};
+      this._cachedFallbackLng = fallbackLngKey;
+    }
+    const hasCacheableFallback = fallbackCode === undefined || fallbackCode === false || isString(fallbackCode);
+    const usesUncacheableOptionsFallback = fallbackCode === undefined && typeof this.options.fallbackLng === 'function';
+    const cacheable = isString(code) && hasCacheableFallback && !usesUncacheableOptionsFallback;
+    let cacheKey = null;
+    if (cacheable) {
+      let fallbackCacheKey;
+      if (fallbackCode === undefined) fallbackCacheKey = 'undefined';else if (fallbackCode === false) fallbackCacheKey = 'boolean:false';else fallbackCacheKey = `string:${fallbackCode}`;
+      cacheKey = `${code.length}:${code}|${fallbackCacheKey}`;
+    }
+    if (cacheKey !== null) {
+      const cached = this.resolveHierarchyCache[cacheKey];
+      if (cached !== undefined) return cached.slice();
+    }
     const fallbackCodes = this.getFallbackCodes((fallbackCode === false ? [] : fallbackCode) || this.options.fallbackLng || [], code);
     const codes = [];
     const addCode = c => {
@@ -2283,6 +2309,10 @@ class LanguageUtil {
     fallbackCodes.forEach(fc => {
       if (!codes.includes(fc)) addCode(this.formatLanguageCode(fc));
     });
+    if (cacheKey !== null) {
+      this.resolveHierarchyCache[cacheKey] = codes;
+      return codes.slice();
+    }
     return codes;
   }
 }
@@ -2462,10 +2492,10 @@ class Interpolator {
     const skipOnVariables = options?.interpolation?.skipOnVariables !== undefined ? options.interpolation.skipOnVariables : this.options.interpolation.skipOnVariables;
     const todos = [{
       regex: this.regexpUnescape,
-      safeValue: val => regexSafe(val)
+      safeValue: val => val
     }, {
       regex: this.regexp,
-      safeValue: val => this.escapeValue ? regexSafe(this.escape(val)) : regexSafe(val)
+      safeValue: val => this.escapeValue ? this.escape(val) : val
     }];
     todos.forEach(todo => {
       replaces = 0;
@@ -2489,9 +2519,9 @@ class Interpolator {
           value = makeString(value);
         }
         const safeValue = todo.safeValue(value);
-        str = str.replace(match[0], safeValue);
+        str = str.replace(match[0], regexSafe(safeValue));
         if (skipOnVariables) {
-          todo.regex.lastIndex += value.length;
+          todo.regex.lastIndex += safeValue.length;
           todo.regex.lastIndex -= match[0].length;
         } else {
           todo.regex.lastIndex = 0;
@@ -2541,7 +2571,7 @@ class Interpolator {
       clonedOptions = clonedOptions.replace && !isString(clonedOptions.replace) ? clonedOptions.replace : clonedOptions;
       clonedOptions.applyPostProcessor = false;
       delete clonedOptions.defaultValue;
-      const keyEndIndex = /{.*}/.test(match[1]) ? match[1].lastIndexOf('}') + 1 : match[1].indexOf(this.formatSeparator);
+      const keyEndIndex = /{.*}/s.test(match[1]) ? match[1].lastIndexOf('}') + 1 : match[1].indexOf(this.formatSeparator);
       if (keyEndIndex !== -1) {
         formatters = match[1].slice(keyEndIndex).split(this.formatSeparator).map(elem => elem.trim()).filter(Boolean);
         match[1] = match[1].slice(0, keyEndIndex);
@@ -2559,7 +2589,7 @@ class Interpolator {
           interpolationkey: match[1].trim()
         }), value.trim());
       }
-      str = str.replace(match[0], value);
+      str = str.replace(match[0], regexSafe(makeString(value)));
       this.regexp.lastIndex = 0;
     }
     return str;

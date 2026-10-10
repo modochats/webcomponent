@@ -1565,6 +1565,7 @@ let EventEmitter$2 = class EventEmitter {
   }
 };
 
+const nonEmptyBundles = new WeakSet();
 class ResourceStore extends EventEmitter$2 {
   constructor(data, options = {
     ns: ['translation'],
@@ -1688,7 +1689,13 @@ class ResourceStore extends EventEmitter$2 {
   hasLanguageSomeTranslations(lng) {
     const data = this.getDataByLanguage(lng);
     const n = data && Object.keys(data) || [];
-    return !!n.find(v => data[v] && Object.keys(data[v]).length > 0);
+    return !!n.find(v => {
+      const bundle = data[v];
+      if (nonEmptyBundles.has(bundle)) return true;
+      if (!bundle || Object.keys(bundle).length === 0) return false;
+      if (typeof bundle === 'object') nonEmptyBundles.add(bundle);
+      return true;
+    });
   }
   toJSON() {
     return this.data;
